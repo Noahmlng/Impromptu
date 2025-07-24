@@ -58,3 +58,11 @@ Thumbs.db
 # Temporary test files
 test_profiles/
 temp_*.json 
+
+# --- 前端相关 ---
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/pnpm-lock.yaml
+frontend/yarn.lock
+frontend/package-lock.json 
