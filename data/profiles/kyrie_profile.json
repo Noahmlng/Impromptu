@@ -1,0 +1,79 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "傅亿航Kyrie",
+      "nickname": "Kyrie",
+      "greeting": "Bonjour"
+    },
+    "personal": {
+      "pronouns": "he/him",
+      "location": {
+        "country": "中国",
+        "province": "江苏省",
+        "city": "苏州市",
+        "ip_location": "江苏"
+      }
+    },
+    "education": {
+      "institution": "UPenn",
+      "institution_full_name": "University of Pennsylvania",
+      "degree_level": "本科",
+      "majors": [
+        "PPE",
+        "CS"
+      ],
+      "major_full_names": [
+        "Philosophy, Politics & Economics",
+        "Computer Science"
+      ],
+      "status": "undergraduate"
+    },
+    "social_media": {
+      "xiaohongshu": {
+        "platform": "小红书",
+        "display_name": "🎆",
+        "profile_url": "https://www.xiaohongshu.com/user/profile/600b9c940000000001008b9f?xsec_token=YBX9VN2Odyf2H6W9WXwTVR3X1iBaqokW1MOm95NrGCTkU=&xsec_source=app_",
+        "xiaohongshu_id": "4261650054",
+        "location": "IP属地：江苏",
+        "engagement_stats": {
+          "followers": "10+粉丝",
+          "following": "10+关注",
+          "likes_and_collections": "10+获赞与收藏"
+        },
+        "content_status": {
+          "posts": "TA 还没有发布任何内容哦",
+          "collections_visibility": "该用户已设置收藏内容不可见"
+        }
+      },
+      "instagram": {
+        "platform": "Instagram",
+        "username": "kyrie_jan1st"
+      }
+    },
+    "academic_interests": [
+      "Philosophy",
+      "Politics",
+      "Economics",
+      "Computer Science"
+    ],
+    "profile_characteristics": {
+      "content_creation_status": "inactive",
+      "privacy_settings": "collections_private",
+      "engagement_level": "low_activity"
+    }
+  },
+  "user_request": {
+    "request_type": "找队友",
+    "description": "作为UPenn PPE+CS双专业本科生，希望寻找志同道合的伙伴一起探索AI创业机会。寻找有技术背景或产品思维的同龄人，最好也有跨学科背景，能够从哲学、政治、经济学等多维度思考技术产品的社会影响。希望合作伙伴具有国际化视野，愿意一起在AI、Web3或其他前沿技术领域创新探索。目标是在大学期间或毕业后启动有意义的项目。"
+  },
+  "metadata": {
+    "profile_type": "mimic_3",
+    "created_date": "2024",
+    "data_sources": [
+      "xiaohongshu",
+      "personal_bio"
+    ],
+    "profile_completeness": "basic",
+    "notes": "Limited public content available, appears to be early-stage social media presence"
+  }
+} 

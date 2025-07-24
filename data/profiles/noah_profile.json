@@ -1,0 +1,112 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "泽铭 Noah",
+      "nickname": "Noah",
+      "greeting": "Bonjour"
+    },
+    "professional": {
+      "current_role": "General AI Agent 创业中",
+      "responsibilities": [
+        "产品",
+        "Agent开发",
+        "PMF"
+      ],
+      "previous_experience": [
+        "右脑",
+        "字节",
+        "奇绩"
+      ],
+      "industry": "AI/Technology Startup"
+    },
+    "projects": {
+      "independent_development": {
+        "name": "Livion",
+        "url": "https://www.livion.dev",
+        "description": "就是比 Habitica 好玩！",
+        "type": "Independent Development Project"
+      }
+    },
+    "social_media": {
+      "jike": {
+        "platform": "即刻",
+        "username": "小铭同学_"
+      },
+      "xiaohongshu": {
+        "platform": "小红书",
+        "profile_name": "Noah 的 AI产品迭代笔记",
+        "url": "https://www.xiaohongshu.com/user/profile/6465d7750000000010029673?xsec_token=YB0dLHm8qKEeuhA20giND3TyT6zPbl7swQINHleI0ZljI=&xsec_source=app_",
+        "xiaohongshu_id": "9741855201",
+        "location": "IP属地：浙江"
+      },
+      "github": {
+        "platform": "GitHub",
+        "username": "Noahmlng"
+      }
+    },
+    "personality": {
+      "mbti_type": "ISTJ",
+      "interests": [
+        "阅读",
+        "产品开发",
+        "AI技术",
+        "创业"
+      ],
+      "philosophy": "相信坦诚交流的力量，期待更多的惊喜相识",
+      "reading_status": "开始阅读，欢迎互相荐书！"
+    },
+    "quotes": {
+      "favorite_quote": "おれの财宝か?欲しけりゃくれてやる。探せ!この世のすべてをそこに置いてきた。",
+      "quote_author": "Gol D. Roger"
+    },
+    "xiaohongshu_profile": {
+      "bio": "AI 初创的早期成员，负责产品 ISTJ型产品",
+      "engagement_stats": {
+        "followers": "10+粉丝",
+        "following": "10+关注",
+        "likes_and_collections": "1千+获赞与收藏"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "xiaohongshu",
+          "title": "做了一年 AI 产品之后踩的坑",
+          "content": "上周我去参加虎嗅 FM 创新节，我被大家对这波 ai 创业的热情真实的冲击到了，零下 3° 的天🥶，遥远的 798，再加上下午馆迟迟排不进去，站都站不下的场馆，大家实在太想知道 AI 接下来到底怎么走，怎么能赚钱了。\n\n我也没有找到答案，但做了一年了，用户量也破百万，还是有一些自己的心得和做法改变想要沉淀下来。要做的事情还很多，想要多交流，多学习。（听说今年秋招还是很困难，估计不少同学在校招的时候都会开始考虑 AI 初创了，有兴趣也可以关注下我们！摇旗呐喊(ง•̀_•́)ง 私聊私聊",
+          "tags": [
+            "#创业",
+            "#创业坦白局",
+            "#AI产品经理",
+            "#校招"
+          ],
+          "metrics": {
+            "user_base": "百万+",
+            "experience_duration": "一年"
+          }
+        }
+      ]
+    },
+    "contact_preferences": {
+      "open_to_communication": true,
+      "recruitment_status": "招聘中",
+      "collaboration_interests": [
+        "AI创业",
+        "产品交流",
+        "学习分享"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找队友",
+    "description": "正在做AI Agent创业，寻找技术合伙人或产品合伙人。希望找到对AI技术有深度理解，同时具备产品思维的伙伴。背景最好是有技术背景（后端/AI/前端均可）或产品经验，认同用户第一的产品理念。目标是一起打造下一代AI产品，实现PMF。理想的合作伙伴应该有创业激情，执行力强，愿意承担早期创业的不确定性。"
+  },
+  "metadata": {
+    "profile_type": "mimic_3",
+    "created_date": "2024",
+    "data_sources": [
+      "xiaohongshu",
+      "livion.dev",
+      "personal_bio"
+    ]
+  }
+} 

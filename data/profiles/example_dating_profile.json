@@ -1,0 +1,64 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "小雅 Emma",
+      "nickname": "Emma",
+      "greeting": "Hello"
+    },
+    "professional": {
+      "current_role": "产品设计师",
+      "responsibilities": [
+        "UI/UX设计",
+        "用户研究",
+        "产品策略"
+      ],
+      "previous_experience": [
+        "腾讯",
+        "阿里巴巴"
+      ],
+      "industry": "互联网/设计"
+    },
+    "personality": {
+      "mbti_type": "ENFP",
+      "interests": [
+        "艺术",
+        "旅行",
+        "美食",
+        "摄影",
+        "瑜伽"
+      ],
+      "philosophy": "热爱生活，相信每一天都是新的开始",
+      "hobbies": [
+        "画画",
+        "做饭",
+        "跑步"
+      ]
+    },
+    "lifestyle": {
+      "location": "上海",
+      "living_situation": "独居",
+      "pets": "养了一只猫咪",
+      "exercise_habits": "每周瑜伽3次，周末跑步",
+      "social_life": "喜欢和朋友聚会，也享受独处时光"
+    },
+    "contact_preferences": {
+      "open_to_communication": true,
+      "collaboration_interests": [
+        "恋爱交友",
+        "艺术交流",
+        "美食分享"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找对象",
+    "description": "希望找到一个成熟稳重、有责任心的男生作为人生伴侣。理想的另一半应该是25-35岁，有稳定的工作和收入，性格温和幽默，三观正。最好也喜欢艺术和旅行，能够理解我的工作和兴趣爱好。希望我们能够互相支持，一起成长，建立一段认真的长期关系。地理位置最好在上海或者愿意来上海发展。"
+  },
+  "metadata": {
+    "profile_type": "dating",
+    "created_date": "2024",
+    "data_sources": [
+      "personal_info"
+    ]
+  }
+} 

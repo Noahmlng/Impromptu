@@ -1,0 +1,167 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "郭佳 Alan",
+      "nickname": "Alan",
+      "full_name": "郭佳"
+    },
+    "personal": {
+      "title": "斜杠斜到离谱",
+      "description": "我个人比较跨界下，自我介绍下 数学+硅谷+创业+VC+教育/心理+字节=>再出发中",
+      "generation": {
+        "actual": "几0后",
+        "self_identified": "自认为10后"
+      },
+      "keywords": [
+        "又躺又卷",
+        "可盐可甜",
+        "思考宇宙问题的二哈"
+      ],
+      "life_motto": "温柔而不懈怠的挑战自己，坚定而有爱的创造生活"
+    },
+    "personality": {
+      "mbti_type": "ENFP",
+      "characteristics": [
+        "跨界",
+        "多元化思维",
+        "创新探索",
+        "温柔坚定"
+      ]
+    },
+    "education": {
+      "institution": "Stanford University",
+      "degree_level": "本科",
+      "majors": [
+        "数学",
+        "经济学"
+      ],
+      "location": "Silicon Valley"
+    },
+    "career_journey": {
+      "early_career": {
+        "period": "Stanford后-2013",
+        "role": "硅谷SaaS创业",
+        "achievements": [
+          "项目进入YC (Y Combinator)"
+        ],
+        "location": "Silicon Valley"
+      },
+      "vc_period": {
+        "period": "2013-2015",
+        "role": "VC行业",
+        "description": "回国在VC行业落脚",
+        "location": "中国"
+      },
+      "education_period": {
+        "period": "2015-2021",
+        "role": "教育行业从业者",
+        "teaching_positions": [
+          {
+            "institution": "北大附中",
+            "courses": [
+              "人工智能入门",
+              "认知科学与脑科学"
+            ]
+          }
+        ],
+        "community_education": [
+          {
+            "locations": ["顺义", "海淀"],
+            "focus": "高质量社区",
+            "programs": [
+              "PBL教育课程",
+              "STEM教育课程"
+            ]
+          }
+        ],
+        "specializations": [
+          "心理学探索",
+          "教练技术",
+          "家庭教育",
+          "赋能孩子",
+          "赋能家庭",
+          "帮助父母认识视野和性格局限性对孩子的影响"
+        ]
+      },
+      "tech_return": {
+        "period": "2021-现在",
+        "company": "TikTok",
+        "department": "电商",
+        "role": "商家生态运营",
+        "locations": ["上海", "东南亚"],
+        "work_pattern": "往返于上海与东南亚之间"
+      },
+      "current_status": {
+        "status": "gap探索新方向中",
+        "focus_areas": [
+          "AI",
+          "个人成长",
+          "全球化",
+          "海外消费"
+        ],
+        "goal": "融合多领域观察做点事情"
+      }
+    },
+    "expertise_areas": [
+      "数学",
+      "经济学",
+      "SaaS创业",
+      "风险投资",
+      "人工智能",
+      "认知科学",
+      "脑科学",
+      "PBL教育",
+      "STEM教育",
+      "心理学",
+      "家庭教育",
+      "电商运营",
+      "商家生态",
+      "全球化业务",
+      "海外消费市场"
+    ],
+    "geographic_experience": [
+      "Silicon Valley",
+      "中国大陆",
+      "上海",
+      "东南亚"
+    ],
+    "current_interests": {
+      "professional": [
+        "AI技术应用",
+        "个人成长赋能",
+        "全球化趋势",
+        "海外消费模式"
+      ],
+      "integration_focus": "多领域交叉创新"
+    },
+    "career_philosophy": {
+      "approach": "跨界融合",
+      "values": [
+        "温柔而坚定",
+        "挑战自我",
+        "创造生活",
+        "赋能他人"
+      ]
+    }
+  },
+  "metadata": {
+    "profile_type": "mimic_3",
+    "created_date": "2024",
+    "reference": "20241030 706方荣/general广泛人群",
+    "data_sources": [
+      "personal_bio",
+      "career_history"
+    ],
+    "profile_completeness": "comprehensive",
+    "unique_characteristics": [
+      "极度跨界背景",
+      "教育与科技双重经验",
+      "国际化视野",
+      "多代际认知"
+    ]
+  },
+  "user_request": {
+    "request_type": "找队友",
+    "description": "凭借数学+硅谷+创业+VC+教育/心理+字节的多元化背景，寻找能够欣赏并互补我跨界能力的合作伙伴。希望找到有深度思考能力的伙伴，能够在AI、教育科技、或投资领域一起创新。理想的合作伙伴应该有独特的专业背景，愿意跨界探索，认同温柔而坚定的创业理念。目标是利用各自的独特优势，创造有社会价值的产品或服务，特别关注教育和心理健康技术的创新应用。"
+  }
+} 

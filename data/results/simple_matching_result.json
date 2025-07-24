@@ -1,0 +1,43 @@
+{
+  "participants": {
+    "person_a": "泽铭 Noah",
+    "person_b": "郭佳 Alan"
+  },
+  "matching_analysis": {
+    "overall_match": {
+      "score": 3.71,
+      "description": "总体匹配度较低",
+      "details": "共同标签12个，诉求类型匹配，向量相似度0.00"
+    },
+    "personality_match": {
+      "score": 5.0,
+      "description": "性格中等匹配",
+      "details": "性格特征差异较大，但可能形成互补"
+    },
+    "interests_match": {
+      "score": 5.0,
+      "description": "兴趣中等匹配",
+      "details": "兴趣爱好不同，但可以互相学习"
+    },
+    "career_match": {
+      "score": 1.09,
+      "description": "职业差异较大",
+      "details": "职业相关：移动开发, 全栈开发, 有管理经验"
+    },
+    "values_match": {
+      "score": 2.0,
+      "description": "价值观匹配度较低",
+      "details": "价值观可能存在差异，需要进一步了解"
+    },
+    "request_match": {
+      "score": 1.16,
+      "description": "诉求差异较大",
+      "details": "诉求相似度0.12，都在寻找合作伙伴"
+    },
+    "complementary_match": {
+      "score": 8.0,
+      "description": "互补性高度匹配",
+      "details": "技能和经验背景存在互补性，可能形成良好的合作关系"
+    }
+  }
+}

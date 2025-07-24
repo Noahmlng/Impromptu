@@ -1,0 +1,81 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "志强 David",
+      "nickname": "David",
+      "greeting": "你好"
+    },
+    "professional": {
+      "current_role": "全栈工程师",
+      "responsibilities": [
+        "后端开发",
+        "前端开发",
+        "系统架构"
+      ],
+      "previous_experience": [
+        "美团",
+        "滴滴",
+        "独立开发者"
+      ],
+      "industry": "互联网技术",
+      "skills": [
+        "Python",
+        "React",
+        "Node.js",
+        "AWS",
+        "机器学习"
+      ]
+    },
+    "personality": {
+      "mbti_type": "INTJ",
+      "interests": [
+        "编程",
+        "AI技术",
+        "创业",
+        "读书",
+        "投资"
+      ],
+      "philosophy": "技术改变世界，创新驱动未来",
+      "work_style": "注重效率，追求极致"
+    },
+    "projects": {
+      "side_projects": [
+        {
+          "name": "AI代码助手",
+          "description": "基于GPT的智能编程助手",
+          "status": "已上线"
+        },
+        {
+          "name": "投资组合管理工具",
+          "description": "个人投资决策辅助工具",
+          "status": "开发中"
+        }
+      ]
+    },
+    "lifestyle": {
+      "location": "北京",
+      "living_situation": "独居",
+      "work_preference": "远程+线下结合",
+      "time_management": "高效工作，专注产出"
+    },
+    "contact_preferences": {
+      "open_to_communication": true,
+      "collaboration_interests": [
+        "AI创业",
+        "技术合作",
+        "产品开发"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找队友",
+    "description": "寻找AI创业合伙人，希望找到有产品思维的技术合伙人或者有技术背景的产品经理。我有5年全栈开发经验和AI技术背景，希望合伙人能够互补我的能力。理想的合作伙伴应该有创业经验或强烈的创业意愿，对AI行业有深度理解，能够承担产品规划、市场分析或团队管理的职责。希望一起打造有社会价值的AI产品，目标是在2年内实现盈利和规模化。"
+  },
+  "metadata": {
+    "profile_type": "partnership",
+    "created_date": "2024",
+    "data_sources": [
+      "personal_info"
+    ]
+  }
+} 

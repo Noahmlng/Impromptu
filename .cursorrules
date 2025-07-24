@@ -1,0 +1,38 @@
+# Social Matching Algorithm Development Standards
+
+## Core Principles
+- Keep code simple and decoupled, avoid over-engineering
+- Focus on core functionality, minimal dependencies
+- Provide clean backend communication interface
+- No unnecessary tests, docs, or debug prints
+
+## Code Structure
+- `config.py`: All configuration classes and functions
+- `compatibility_analyzer.py`: Core algorithm implementation  
+- `data/profiles/`: User profile storage
+- `data/results/`: Analysis results
+- `prompts/`: YAML prompt templates
+- `tests/`: Minimal essential tests
+- `main.py`: Entry point
+- Use `@dataclass` for data structures
+- Single responsibility per class/function  
+
+## What NOT to Include
+- Complex test frameworks or extensive test files
+- Documentation files (unless explicitly requested)
+- Excessive logging or debug output
+- Complex design patterns or inheritance hierarchies
+- Unnecessary dependencies
+
+## API Design
+- Simple, direct public interfaces
+- Support both single and batch analysis
+- Return structured analysis results
+- Clear method naming and intuitive parameters
+
+## Project-Specific Rules
+- Multi-dimensional compatibility scoring
+- Bidirectional interest calculation
+- YAML-based prompt templates for easy customization
+- Robust API retry mechanisms
+- JSON-based user profiles and results
