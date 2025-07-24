@@ -1,0 +1,119 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "王俊杰 Jason",
+      "nickname": "Jason",
+      "greeting": "运动改变人生！"
+    },
+    "professional": {
+      "current_role": "健身教练/运动康复师",
+      "responsibilities": [
+        "私人健身指导",
+        "运动康复治疗",
+        "健身课程设计",
+        "运动营养咨询"
+      ],
+      "previous_experience": [
+        "专业篮球运动员",
+        "体育大学毕业",
+        "健身房教练主管"
+      ],
+      "industry": "体育健身"
+    },
+    "personal": {
+      "age_range": "28-32岁",
+      "location": "西安",
+      "living_situation": "独居",
+      "pets": "养了一只哈士奇"
+    },
+    "personality": {
+      "mbti_type": "ESFP",
+      "personality_traits": [
+        "外向开朗",
+        "幽默风趣",
+        "冒险精神",
+        "温和体贴"
+      ],
+      "interests": [
+        "运动健身",
+        "篮球",
+        "户外运动",
+        "音乐",
+        "美食"
+      ],
+      "lifestyle": [
+        "早睡早起",
+        "社交型",
+        "规律作息",
+        "健康饮食"
+      ],
+      "values": [
+        "个人成长",
+        "团队合作",
+        "诚实守信",
+        "追求刺激"
+      ]
+    },
+    "social_media": {
+      "douyin": {
+        "platform": "抖音",
+        "username": "Jason教练",
+        "description": "专业健身指导 | 运动改变生活",
+        "followers": "15万粉丝"
+      },
+      "keep": {
+        "platform": "Keep",
+        "username": "Jason_Fitness",
+        "description": "国家级健身教练，运动康复专家"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "douyin",
+          "title": "久坐族必看！5个动作缓解腰背疼痛",
+          "content": "很多朋友因为工作需要长期坐着，腰背总是不舒服。今天教大家几个简单的拉伸动作，在办公室就能做！记住：久坐1小时一定要起来活动5分钟💪 作为曾经的职业运动员，我深知运动对健康的重要性。现在做教练，最开心的就是看到学员们身体越来越好，生活质量提高。运动不只是为了好身材，更是为了更好的生活～期待遇到同样热爱运动的她❤️",
+          "tags": ["#健身", "#久坐族", "#腰背疼痛", "#运动康复"],
+          "engagement": "25万播放 8.5千赞 1.2千评论"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "你每天的运动量有多大？",
+        "answer": "作为教练，我每天至少要运动2-3小时，包括力量训练、有氧运动和拉伸。但我更享受的是和学员一起运动的过程，看到他们进步比我自己训练更有成就感。"
+      },
+      {
+        "question": "你希望另一半也热爱运动吗？",
+        "answer": "不一定要是运动员水平，但希望她能理解运动的价值，愿意和我一起保持健康的生活方式。我可以慢慢带她入门，一起享受运动的快乐。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "relationship_goals": [
+        "寻找真爱",
+        "长期关系",
+        "共同成长",
+        "浪漫恋爱"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找对象",
+    "description": "希望找到一个积极阳光、热爱生活的女生。年龄25-30岁，地域不限，愿意为对的人调整。不要求她一定要很会运动，但希望她能接受健康的生活方式，我们可以一起运动、一起探索户外。我会很耐心地陪伴她，希望我们能互相鼓励，一起成长。重要的是性格合得来，能够一起笑、一起闹，过简单快乐的生活。"
+  },
+  "metadata": {
+    "profile_type": "dating",
+    "created_date": "2024",
+    "tags": {
+      "age": "28-32岁",
+      "profession": "教练",
+      "personality": ["外向开朗", "幽默风趣", "冒险精神", "温和体贴"],
+      "interests": ["运动健身", "音乐", "美食", "旅行"],
+      "lifestyle": ["早睡早起", "社交型", "规律作息", "健康饮食"],
+      "values": ["个人成长", "团队合作", "诚实守信", "追求刺激"],
+      "relationship_goals": ["寻找真爱", "长期关系", "共同成长", "浪漫恋爱"],
+      "location": "西安"
+    }
+  }
+} 

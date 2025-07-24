@@ -1,0 +1,118 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "张明轩 Michael",
+      "nickname": "Michael",
+      "greeting": "理性投资，感性生活"
+    },
+    "professional": {
+      "current_role": "投资银行副总裁",
+      "responsibilities": [
+        "企业并购咨询",
+        "IPO项目管理",
+        "财务模型分析",
+        "客户关系维护"
+      ],
+      "previous_experience": [
+        "高盛分析师",
+        "中金公司",
+        "清华大学金融硕士"
+      ],
+      "industry": "金融投资"
+    },
+    "personal": {
+      "age_range": "28-32岁",
+      "location": "上海",
+      "living_situation": "独居",
+      "pets": "无宠物"
+    },
+    "personality": {
+      "mbti_type": "ESTJ",
+      "personality_traits": [
+        "外向开朗",
+        "理性冷静",
+        "稳重踏实",
+        "完美主义"
+      ],
+      "interests": [
+        "投资理财",
+        "高尔夫",
+        "红酒",
+        "旅行",
+        "读书"
+      ],
+      "lifestyle": [
+        "早睡早起",
+        "社交型",
+        "计划性强",
+        "规律作息"
+      ],
+      "values": [
+        "事业优先",
+        "诚实守信",
+        "安全稳定",
+        "物质追求"
+      ]
+    },
+    "social_media": {
+      "linkedin": {
+        "platform": "LinkedIn",
+        "username": "michael-zhang-ib",
+        "bio": "Investment Banking VP | M&A Expert | CFA Charterholder"
+      },
+      "zhihu": {
+        "platform": "知乎",
+        "username": "Michael的投资笔记",
+        "description": "分享投资理财与金融市场分析"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "zhihu",
+          "title": "2024年投资市场回顾：给普通投资者的建议",
+          "content": "今年金融市场经历了不少波动，很多朋友问我个人投资应该怎么做。作为一个在投行工作多年的从业者，我想说几个原则：1）资产配置比选股更重要，不要把鸡蛋放在一个篮子里 2）长期投资胜过短期投机，市场短期是投票机，长期是称重机 3）了解自己的风险承受能力，投资要在自己的舒适圈内。最近也在思考如何平衡工作和生活，金融行业压力大，但生活质量也很重要。",
+          "tags": ["#投资理财", "#资产配置", "#金融市场", "#投行"],
+          "engagement": "2.8万赞 1.2千评论"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "你工作压力很大，如何放松？",
+        "answer": "工作确实很忙，但我会安排时间运动和社交。周末喜欢打高尔夫，偶尔和朋友品品红酒。我觉得高质量的休息比长时间的休息更重要。"
+      },
+      {
+        "question": "你希望找什么样的另一半？",
+        "answer": "希望她有自己的事业和追求，能够理解金融行业的工作特点。我们可以互相支持，一起规划未来，包括财务规划和人生规划。重要的是三观相合，能够一起成长。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "relationship_goals": [
+        "寻找真爱",
+        "长期关系",
+        "结婚生子",
+        "共同成长"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找对象",
+    "description": "希望找到一个聪明独立、有自己事业的女性。年龄25-32岁，最好在上海或一线城市。能够理解金融行业的工作节奏，有一定的经济基础和理财观念。我们可以一起规划未来，包括投资、置业、家庭等。希望她有自己的兴趣爱好，我们可以互相学习，共同提升生活品质。重视家庭但也尊重彼此的事业发展。"
+  },
+  "metadata": {
+    "profile_type": "dating",
+    "created_date": "2024",
+    "tags": {
+      "age": "28-32岁",
+      "profession": "金融分析师",
+      "personality": ["外向开朗", "理性冷静", "稳重踏实", "完美主义"],
+      "interests": ["投资理财", "运动健身", "旅行", "读书"],
+      "lifestyle": ["早睡早起", "社交型", "计划性强", "规律作息"],
+      "values": ["事业优先", "诚实守信", "安全稳定", "物质追求"],
+      "relationship_goals": ["寻找真爱", "长期关系", "结婚生子", "共同成长"],
+      "location": "上海"
+    }
+  }
+} 

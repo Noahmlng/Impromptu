@@ -1,0 +1,114 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "陈浩 Alex",
+      "nickname": "Alex",
+      "greeting": "Hi there!"
+    },
+    "professional": {
+      "current_role": "后端开发工程师",
+      "responsibilities": [
+        "服务器架构设计",
+        "API开发",
+        "数据库优化"
+      ],
+      "previous_experience": [
+        "字节跳动",
+        "美团"
+      ],
+      "industry": "互联网/技术"
+    },
+    "personal": {
+      "age_range": "23-27岁",
+      "location": "深圳",
+      "living_situation": "合租",
+      "pets": "无宠物"
+    },
+    "personality": {
+      "mbti_type": "INTJ",
+      "personality_traits": [
+        "内向安静",
+        "逻辑思维",
+        "理性冷静",
+        "完美主义"
+      ],
+      "interests": [
+        "科技",
+        "游戏",
+        "读书",
+        "运动健身"
+      ],
+      "lifestyle": [
+        "早睡早起",
+        "规律作息",
+        "健康饮食",
+        "计划性强"
+      ],
+      "values": [
+        "诚实守信",
+        "个人成长",
+        "创新进取",
+        "事业优先"
+      ]
+    },
+    "social_media": {
+      "github": {
+        "platform": "GitHub",
+        "username": "alexchen_dev",
+        "bio": "Full-stack developer passionate about clean code and system design"
+      },
+      "zhihu": {
+        "platform": "知乎",
+        "username": "代码架构师Alex",
+        "description": "分享后端技术与职场成长心得"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "zhihu",
+          "title": "从字节跳槽到美团的这一年，我学到了什么",
+          "content": "作为一个技术人，跳槽不仅仅是为了涨薪，更是为了技术成长。这一年在美团，接触到了更大规模的分布式系统，也学会了如何在业务快速发展中保持代码质量。分享几个心得：1) 技术选型要考虑团队能力 2) 文档比代码注释更重要 3) Code Review是最好的学习方式。最近在研究Go语言的并发模型，感觉又找到了编程的乐趣。",
+          "tags": ["#程序员", "#职场成长", "#技术分享", "#后端开发"],
+          "engagement": "156赞 42评论"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "你理想的周末是怎样的？",
+        "answer": "理想的周末一半时间用来学习新技术，刷LeetCode或者研究开源项目，一半时间用来运动放松，去健身房或者户外跑步。晚上可能会打打游戏放松一下。"
+      },
+      {
+        "question": "你最看重伴侣的什么品质？",
+        "answer": "希望她也是个有独立思考能力的人，不一定要懂技术，但要有自己的兴趣爱好和追求。性格上希望能互补，她可以更外向一些，带我体验更多生活的乐趣。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "relationship_goals": [
+        "寻找真爱",
+        "长期关系",
+        "结婚生子"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找对象",
+    "description": "希望找到一个理解技术人生活节奏的女生。年龄23-28岁，最好也在深圳或愿意来深圳。性格上希望比我外向一些，能够互补。不要求对方也是程序员，但希望能理解我对技术的热爱，支持我的职业发展。希望建立认真的长期关系，有共同的人生规划。"
+  },
+  "metadata": {
+    "profile_type": "dating",
+    "created_date": "2024",
+    "tags": {
+      "age": "23-27岁",
+      "profession": "程序员",
+      "personality": ["内向安静", "逻辑思维", "理性冷静", "完美主义"],
+      "interests": ["科技", "游戏", "读书", "运动健身"],
+      "lifestyle": ["早睡早起", "规律作息", "健康饮食", "计划性强"],
+      "values": ["诚实守信", "个人成长", "创新进取", "事业优先"],
+      "relationship_goals": ["寻找真爱", "长期关系", "结婚生子"],
+      "location": "深圳"
+    }
+  }
+} 

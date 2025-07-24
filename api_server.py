@@ -14,11 +14,29 @@ import tempfile
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
-from tag_compatibility_analyzer import EnhancedCompatibilityAnalyzer
+import sys
+import importlib.util
+
+# 导入tag_compatibility_analyzer模块
+spec = importlib.util.spec_from_file_location(
+    "tag_compatibility_analyzer", 
+    os.path.join(os.path.dirname(__file__), "tests", "tag_compatibility_analyzer.py")
+)
+tag_analyzer_module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(tag_analyzer_module)
+EnhancedCompatibilityAnalyzer = tag_analyzer_module.EnhancedCompatibilityAnalyzer
+from supabase import create_client, Client
 import traceback
 
 app = Flask(__name__)
 CORS(app)  # 允许跨域请求
+
+# Supabase 配置
+SUPABASE_URL = 'https://anxbbsrnjgmotxzysqwf.supabase.co'
+SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFueGJic3Juamdtb3R4enlzcXdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MDY0OTIsImV4cCI6MjA2NTk4MjQ5Mn0.a0t-pgH-Z2Fbs6JuMNWX8_kpqkQsBag3-COAUZVF6-0'
+
+# 初始化 Supabase 客户端
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # 全局分析器实例
 analyzer = None
@@ -47,6 +65,215 @@ def health_check():
         "message": "用户匹配系统 API 运行正常",
         "version": "1.0.0"
     })
+
+@app.route('/api/database/users', methods=['GET'])
+def get_all_users():
+    """获取所有用户信息（包含元数据）"""
+    try:
+        # 获取用户基本信息
+        profiles_response = supabase.table('profiles').select('id, username').execute()
+        if not profiles_response.data:
+            return jsonify({
+                "success": True,
+                "data": [],
+                "message": "未找到用户数据"
+            })
+        
+        # 获取用户元数据
+        metadata_response = supabase.table('user_metadata').select('*').execute()
+        metadata_dict = {item['id']: item for item in metadata_response.data} if metadata_response.data else {}
+        
+        # 获取用户标签关系
+        user_tags_response = supabase.table('user_tags').select('user_id, tag_id, weight').execute()
+        user_tags_dict = {}
+        if user_tags_response.data:
+            for ut in user_tags_response.data:
+                if ut['user_id'] not in user_tags_dict:
+                    user_tags_dict[ut['user_id']] = []
+                user_tags_dict[ut['user_id']].append({
+                    'tag_id': ut['tag_id'],
+                    'weight': ut['weight']
+                })
+        
+        # 获取所有标签信息
+        tags_response = supabase.table('tags').select('id, name, category').execute()
+        tags_dict = {tag['id']: tag for tag in tags_response.data} if tags_response.data else {}
+        
+        # 合并数据
+        users = []
+        for profile in profiles_response.data:
+            user_id = profile['id']
+            metadata = metadata_dict.get(user_id, {})
+            
+            # 获取用户标签
+            user_tag_relations = user_tags_dict.get(user_id, [])
+            user_tags = []
+            for rel in user_tag_relations:
+                tag_info = tags_dict.get(rel['tag_id'])
+                if tag_info:
+                    user_tags.append({
+                        'name': tag_info['name'],
+                        'category': tag_info['category'],
+                        'weight': rel['weight']
+                    })
+            
+            user_data = {
+                'id': profile['id'],
+                'username': profile['username'],
+                'age': metadata.get('age'),
+                'gender': metadata.get('gender'),
+                'location_city': metadata.get('location_city'),
+                'location_state': metadata.get('location_state'),
+                'bio': metadata.get('bio'),
+                'occupation': metadata.get('occupation'),
+                'looking_for': metadata.get('looking_for', []),
+                'profile_photo_url': metadata.get('profile_photo_url'),
+                'social_links': metadata.get('social_links', {}),
+                'preferences': metadata.get('preferences', {}),
+                'is_profile_complete': metadata.get('is_profile_complete', False),
+                'visibility': metadata.get('visibility', 'public'),
+                'tags': user_tags
+            }
+            users.append(user_data)
+        
+        return jsonify({
+            "success": True,
+            "data": users,
+            "total": len(users)
+        })
+        
+    except Exception as e:
+        print(f"获取用户数据出错: {e}")
+        traceback.print_exc()
+        return jsonify({
+            "error": "获取用户数据失败",
+            "message": str(e)
+        }), 500
+
+@app.route('/api/database/users/<user_id>', methods=['GET'])
+def get_user_by_id(user_id):
+    """获取指定用户信息"""
+    try:
+        # 获取用户基本信息
+        profile_response = supabase.table('profiles').select('id, username').eq('id', user_id).execute()
+        if not profile_response.data:
+            return jsonify({
+                "error": "用户不存在",
+                "message": f"未找到ID为 {user_id} 的用户"
+            }), 404
+        
+        profile = profile_response.data[0]
+        
+        # 获取用户元数据
+        metadata_response = supabase.table('user_metadata').select('*').eq('id', user_id).execute()
+        metadata = metadata_response.data[0] if metadata_response.data else {}
+        
+        # 获取用户标签
+        user_tags_response = supabase.table('user_tags').select('tag_id, weight').eq('user_id', user_id).execute()
+        user_tags = []
+        
+        if user_tags_response.data:
+            tag_ids = [ut['tag_id'] for ut in user_tags_response.data]
+            tags_response = supabase.table('tags').select('id, name, category').in_('id', tag_ids).execute()
+            tags_dict = {tag['id']: tag for tag in tags_response.data} if tags_response.data else {}
+            
+            for ut in user_tags_response.data:
+                tag_info = tags_dict.get(ut['tag_id'])
+                if tag_info:
+                    user_tags.append({
+                        'name': tag_info['name'],
+                        'category': tag_info['category'],
+                        'weight': ut['weight']
+                    })
+        
+        user_data = {
+            'id': profile['id'],
+            'username': profile['username'],
+            'age': metadata.get('age'),
+            'gender': metadata.get('gender'),
+            'location_city': metadata.get('location_city'),
+            'location_state': metadata.get('location_state'),
+            'bio': metadata.get('bio'),
+            'occupation': metadata.get('occupation'),
+            'looking_for': metadata.get('looking_for', []),
+            'profile_photo_url': metadata.get('profile_photo_url'),
+            'social_links': metadata.get('social_links', {}),
+            'preferences': metadata.get('preferences', {}),
+            'is_profile_complete': metadata.get('is_profile_complete', False),
+            'visibility': metadata.get('visibility', 'public'),
+            'tags': user_tags
+        }
+        
+        return jsonify({
+            "success": True,
+            "data": user_data
+        })
+        
+    except Exception as e:
+        print(f"获取用户数据出错: {e}")
+        traceback.print_exc()
+        return jsonify({
+            "error": "获取用户数据失败",
+            "message": str(e)
+        }), 500
+
+@app.route('/api/database/tags', methods=['GET'])
+def get_database_tags():
+    """从数据库获取标签信息"""
+    try:
+        response = supabase.table('tags').select('*').eq('is_active', True).execute()
+        
+        tags = response.data if response.data else []
+        
+        # 按类别分组
+        tags_by_category = {}
+        for tag in tags:
+            category = tag['category']
+            if category not in tags_by_category:
+                tags_by_category[category] = []
+            tags_by_category[category].append(tag)
+        
+        return jsonify({
+            "success": True,
+            "data": {
+                "total_tags": len(tags),
+                "tags_by_category": tags_by_category,
+                "all_tags": tags
+            }
+        })
+        
+    except Exception as e:
+        print(f"获取标签数据出错: {e}")
+        return jsonify({
+            "error": "获取标签数据失败",
+            "message": str(e)
+        }), 500
+
+@app.route('/api/database/test', methods=['GET'])
+def test_database_connection():
+    """测试数据库连接"""
+    try:
+        # 测试基本查询
+        profiles_count = supabase.table('profiles').select('id', count='exact').execute()
+        metadata_count = supabase.table('user_metadata').select('id', count='exact').execute()
+        tags_count = supabase.table('tags').select('id', count='exact').execute()
+        
+        return jsonify({
+            "success": True,
+            "message": "数据库连接正常",
+            "stats": {
+                "profiles_count": profiles_count.count if hasattr(profiles_count, 'count') else len(profiles_count.data or []),
+                "metadata_count": metadata_count.count if hasattr(metadata_count, 'count') else len(metadata_count.data or []),
+                "tags_count": tags_count.count if hasattr(tags_count, 'count') else len(tags_count.data or [])
+            }
+        })
+        
+    except Exception as e:
+        print(f"数据库连接测试失败: {e}")
+        return jsonify({
+            "error": "数据库连接失败",
+            "message": str(e)
+        }), 500
 
 @app.route('/api/match/simple', methods=['POST'])
 def match_users_simple():
@@ -363,6 +590,22 @@ def api_documentation():
                 "description": "健康检查",
                 "response": "系统状态信息"
             },
+            "GET /api/database/users": {
+                "description": "获取所有用户信息（从数据库）",
+                "output": "完整用户列表，包含元数据和标签"
+            },
+            "GET /api/database/users/<user_id>": {
+                "description": "获取指定用户信息（从数据库）",
+                "output": "单个用户的完整信息"
+            },
+            "GET /api/database/tags": {
+                "description": "获取所有标签信息（从数据库）",
+                "output": "标签列表，按类别分组"
+            },
+            "GET /api/database/test": {
+                "description": "测试数据库连接",
+                "output": "数据库连接状态和统计信息"
+            },
             "POST /api/match/simple": {
                 "description": "简洁匹配分析",
                 "input": "两个用户档案的JSON对象",
@@ -439,13 +682,13 @@ if __name__ == '__main__':
     print("🚀 启动用户匹配系统 API 服务器")
     print("📊 基于 LDA 主题建模 + Faiss 向量相似度计算")
     print("=" * 50)
-    print("🌐 API 文档: http://localhost:5000/api/docs")
-    print("🎯 演示接口: http://localhost:5000/api/demo")
-    print("❤️ 健康检查: http://localhost:5000/health")
+    print("🌐 API 文档: http://localhost:5001/api/docs")
+    print("🎯 演示接口: http://localhost:5001/api/demo")
+    print("❤️ 健康检查: http://localhost:5001/health")
     print("=" * 50)
     
     # 初始化分析器
     init_analyzer()
     
     # 启动服务器
-    app.run(host='0.0.0.0', port=5000, debug=True) 
+    app.run(host='0.0.0.0', port=5002, debug=True) 

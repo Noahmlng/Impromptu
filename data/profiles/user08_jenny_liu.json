@@ -1,0 +1,117 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "刘婧怡 Jenny",
+      "nickname": "Jenny",
+      "greeting": "教育改变世界"
+    },
+    "professional": {
+      "current_role": "小学语文教师/教育创新者",
+      "responsibilities": [
+        "语文教学",
+        "课程设计",
+        "教育研究",
+        "家长沟通"
+      ],
+      "previous_experience": [
+        "师范大学毕业",
+        "教育培训机构",
+        "公立学校5年经验"
+      ],
+      "industry": "教育/培训"
+    },
+    "personal": {
+      "age_range": "23-27岁",
+      "location": "广州",
+      "living_situation": "与室友合租",
+      "pets": "养了一只兔子"
+    },
+    "personality": {
+      "mbti_type": "ENFJ",
+      "personality_traits": [
+        "外向开朗",
+        "温和体贴",
+        "独立自主",
+        "创意思维"
+      ],
+      "interests": [
+        "教育",
+        "阅读",
+        "手工",
+        "旅行",
+        "音乐"
+      ],
+      "lifestyle": [
+        "早睡早起",
+        "社交型",
+        "规律作息",
+        "健康饮食"
+      ],
+      "values": [
+        "社会责任",
+        "个人成长",
+        "诚实守信",
+        "包容开放"
+      ]
+    },
+    "social_media": {
+      "douyin": {
+        "platform": "抖音",
+        "username": "Jenny老师的课堂",
+        "description": "分享创意教学方法与教育心得",
+        "followers": "6.8万粉丝"
+      },
+      "xiaohongshu": {
+        "platform": "小红书",
+        "username": "小学老师Jenny",
+        "description": "教育干货与生活分享"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "douyin",
+          "title": "如何让孩子爱上写作？｜5个实用小技巧",
+          "content": "很多家长都头疼孩子不爱写作文，其实写作是可以培养的！分享几个我在课堂上用过的方法：1）从日记开始，记录生活小事 2）用思维导图整理想法 3）多读好文章，积累素材 4）鼓励比批评更重要 5）让孩子写自己感兴趣的话题。最近在研究如何用科技工具辅助教学，比如AI写作助手，但我觉得人文关怀是技术无法替代的💕",
+          "tags": ["#小学教育", "#写作教学", "#教育方法", "#家庭教育"],
+          "engagement": "12.5万播放 3.2千赞 856评论"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "你最想开发什么样的教育项目？",
+        "answer": "我特别想做一个结合传统文化和现代科技的语文教育项目。让孩子们通过互动的方式学习古诗词、传统故事，既有趣又有教育意义。"
+      },
+      {
+        "question": "你理想的合作伙伴需要什么特质？",
+        "answer": "希望是真心关心教育的人，可以是技术开发者、产品设计师，或者其他教育工作者。最重要的是要有耐心和爱心，愿意为了孩子的成长而努力。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "collaboration_interests": [
+        "教育科技项目",
+        "课程开发",
+        "在线教育"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找队友",
+    "description": "寻找教育科技领域的合作伙伴，希望一起开发有意义的教育产品。可以是程序员、产品经理、或者其他教育工作者。目标是用科技让教育更有趣、更有效，特别关注小学阶段的语文教育和素质教育。理想的合作伙伴应该有教育情怀，愿意深入了解孩子的学习需求。可以在广州本地合作，也接受远程协作。希望能做出真正帮助孩子成长的产品。"
+  },
+  "metadata": {
+    "profile_type": "teamwork",
+    "created_date": "2024",
+    "tags": {
+      "skills": ["教育", "课程设计", "内容创作"],
+      "industry": "教育科技",
+      "project_type": ["教育项目", "学习项目"],
+      "collaboration_style": ["面对面合作", "高频沟通", "支持型"],
+      "experience_level": "有一些经验",
+      "availability": "晚间时间",
+      "goals": ["创造价值", "技能提升", "社会责任"]
+    }
+  }
+} 

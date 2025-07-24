@@ -1,0 +1,115 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "李凯文 Kevin",
+      "nickname": "Kevin",
+      "greeting": "创业路上，期待相遇"
+    },
+    "professional": {
+      "current_role": "科技公司CEO/创始人",
+      "responsibilities": [
+        "公司战略规划",
+        "融资管理",
+        "团队建设",
+        "产品方向"
+      ],
+      "previous_experience": [
+        "阿里巴巴产品经理",
+        "麦肯锡咨询师"
+      ],
+      "industry": "企业服务/SaaS"
+    },
+    "personal": {
+      "age_range": "33-37岁",
+      "location": "北京",
+      "living_situation": "独居",
+      "pets": "无宠物"
+    },
+    "personality": {
+      "mbti_type": "ENTJ",
+      "personality_traits": [
+        "外向开朗",
+        "理性冷静",
+        "独立自主",
+        "冒险精神"
+      ],
+      "interests": [
+        "投资理财",
+        "读书",
+        "运动健身",
+        "旅行"
+      ],
+      "lifestyle": [
+        "早睡早起",
+        "社交型",
+        "计划性强",
+        "规律作息"
+      ],
+      "values": [
+        "事业优先",
+        "创新进取",
+        "团队合作",
+        "物质追求"
+      ]
+    },
+    "social_media": {
+      "linkedin": {
+        "platform": "LinkedIn",
+        "username": "kevin-li-ceo",
+        "bio": "CEO & Founder | Building the future of enterprise software"
+      },
+      "wechat_channels": {
+        "platform": "微信视频号",
+        "username": "Kevin的创业笔记",
+        "description": "分享创业心得与商业思考"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "wechat_channels",
+          "title": "从0到1建立销售团队的5个关键节点",
+          "content": "很多技术创始人都会遇到这个问题：产品做出来了，但不知道怎么卖。这两年带团队从3个人到30个人，在销售团队建设上踩了不少坑，也总结了一些经验。最核心的是要先明确你的ICP（理想客户画像），然后围绕这个画像去设计销售流程。另外，早期一定要创始人亲自下场做销售，这样才能真正理解客户需求。现在公司ARR已经破千万，团队也在快速扩张中。",
+          "tags": ["#创业", "#销售管理", "#B2B", "#SaaS"],
+          "engagement": "2.1万播放 456赞"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "工作这么忙，你如何平衡事业和感情？",
+        "answer": "确实创业很忙，但我认为人生不应该只有事业。我希望找到一个能理解创业者生活的伴侣，她有自己的事业和追求，我们可以互相支持，共同成长。"
+      },
+      {
+        "question": "你对未来的家庭生活有什么规划？",
+        "answer": "希望能在35岁前稳定下来，组建家庭。我相信好的感情关系能让人更有动力，也更有责任感。当然，选择权在女方，我会尊重她的想法。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "relationship_goals": [
+        "寻找真爱",
+        "结婚生子",
+        "生活伴侣"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找对象",
+    "description": "希望找到一个独立自强、有自己事业追求的女性。年龄28-35岁，最好在北京或一线城市。能够理解创业者的工作强度和不确定性，同时也有自己的兴趣爱好和社交圈子。我们可以互相支持彼此的梦想，一起规划未来的生活。希望她聪明有趣，能在生活和工作上都给我启发。地理位置灵活，愿意为了对的人调整生活安排。"
+  },
+  "metadata": {
+    "profile_type": "dating",
+    "created_date": "2024",
+    "tags": {
+      "age": "33-37岁",
+      "profession": "创业者",
+      "personality": ["外向开朗", "理性冷静", "独立自主", "冒险精神"],
+      "interests": ["投资理财", "读书", "运动健身", "旅行"],
+      "lifestyle": ["早睡早起", "社交型", "计划性强", "规律作息"],
+      "values": ["事业优先", "创新进取", "团队合作", "物质追求"],
+      "relationship_goals": ["寻找真爱", "结婚生子", "生活伴侣"],
+      "location": "北京"
+    }
+  }
+} 

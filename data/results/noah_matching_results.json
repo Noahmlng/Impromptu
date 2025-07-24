@@ -1,6 +1,6 @@
 {
   "matcher": "Noah (泽铭)",
-  "request": "寻找有前端开发经验的技术合伙人",
+  "request": "前端开发经验的技术合伙人",
   "timestamp": null,
   "results": [
     {
@@ -10,9 +10,9 @@
       },
       "matching_analysis": {
         "overall_match": {
-          "score": 5.14,
-          "description": "总体中等匹配",
-          "details": "共同标签45个，诉求类型匹配，向量相似度0.84"
+          "score": 6.19,
+          "description": "总体良好匹配",
+          "details": "共同标签73个，诉求类型匹配，向量相似度1.00"
         },
         "personality_match": {
           "score": 5.0,
@@ -25,23 +25,152 @@
           "details": "兴趣爱好不同，但可以互相学习"
         },
         "career_match": {
-          "score": 3.08,
-          "description": "职业匹配度较低",
-          "details": "职业相关：移动开发, APP开发, 国际经验"
+          "score": 9.16,
+          "description": "职业高度匹配",
+          "details": "职业相关：跨界经验, 敏捷开发, 全能开发"
         },
         "values_match": {
-          "score": 2.79,
-          "description": "价值观匹配度较低",
-          "details": "共同价值观：长期合作, 学习成长, 创造价值"
+          "score": 5.0,
+          "description": "价值观中等匹配",
+          "details": "共同价值观：面对面合作, 学习成长"
         },
         "request_match": {
-          "score": 8.96,
+          "score": 10.0,
           "description": "诉求高度匹配",
-          "details": "诉求相似度0.90，都在寻找合作伙伴"
+          "details": "诉求相似度1.00，都在寻找合作伙伴"
         },
         "complementary_match": {
-          "score": 6.0,
-          "description": "互补性良好匹配",
+          "score": 3.0,
+          "description": "互补性匹配度较低",
+          "details": "技能和经验背景存在互补性，可能形成良好的合作关系"
+        }
+      }
+    },
+    {
+      "participants": {
+        "person_a": "泽铭 Noah",
+        "person_b": "王雅婷 Sophia"
+      },
+      "matching_analysis": {
+        "overall_match": {
+          "score": 5.69,
+          "description": "总体中等匹配",
+          "details": "共同标签73个，诉求类型匹配，向量相似度0.99"
+        },
+        "personality_match": {
+          "score": 5.0,
+          "description": "性格中等匹配",
+          "details": "性格特征差异较大，但可能形成互补"
+        },
+        "interests_match": {
+          "score": 2.0,
+          "description": "兴趣匹配度较低",
+          "details": "兴趣爱好不同，但可以互相学习"
+        },
+        "career_match": {
+          "score": 9.16,
+          "description": "职业高度匹配",
+          "details": "职业相关：跨界经验, 敏捷开发, 全能开发"
+        },
+        "values_match": {
+          "score": 5.0,
+          "description": "价值观中等匹配",
+          "details": "共同价值观：面对面合作, 学习成长"
+        },
+        "request_match": {
+          "score": 10.0,
+          "description": "诉求高度匹配",
+          "details": "诉求相似度1.00，都在寻找合作伙伴"
+        },
+        "complementary_match": {
+          "score": 3.0,
+          "description": "互补性匹配度较低",
+          "details": "技能和经验背景存在互补性，可能形成良好的合作关系"
+        }
+      }
+    },
+    {
+      "participants": {
+        "person_a": "泽铭 Noah",
+        "person_b": "周爱丽 Alice"
+      },
+      "matching_analysis": {
+        "overall_match": {
+          "score": 5.69,
+          "description": "总体中等匹配",
+          "details": "共同标签73个，诉求类型匹配，向量相似度1.00"
+        },
+        "personality_match": {
+          "score": 5.0,
+          "description": "性格中等匹配",
+          "details": "性格特征差异较大，但可能形成互补"
+        },
+        "interests_match": {
+          "score": 2.0,
+          "description": "兴趣匹配度较低",
+          "details": "兴趣爱好不同，但可以互相学习"
+        },
+        "career_match": {
+          "score": 9.16,
+          "description": "职业高度匹配",
+          "details": "职业相关：跨界经验, 敏捷开发, 全能开发"
+        },
+        "values_match": {
+          "score": 5.0,
+          "description": "价值观中等匹配",
+          "details": "共同价值观：面对面合作, 学习成长"
+        },
+        "request_match": {
+          "score": 10.0,
+          "description": "诉求高度匹配",
+          "details": "诉求相似度1.00，都在寻找合作伙伴"
+        },
+        "complementary_match": {
+          "score": 3.0,
+          "description": "互补性匹配度较低",
+          "details": "技能和经验背景存在互补性，可能形成良好的合作关系"
+        }
+      }
+    },
+    {
+      "participants": {
+        "person_a": "泽铭 Noah",
+        "person_b": "刘婧怡 Jenny"
+      },
+      "matching_analysis": {
+        "overall_match": {
+          "score": 5.69,
+          "description": "总体中等匹配",
+          "details": "共同标签73个，诉求类型匹配，向量相似度0.99"
+        },
+        "personality_match": {
+          "score": 5.0,
+          "description": "性格中等匹配",
+          "details": "性格特征差异较大，但可能形成互补"
+        },
+        "interests_match": {
+          "score": 2.0,
+          "description": "兴趣匹配度较低",
+          "details": "兴趣爱好不同，但可以互相学习"
+        },
+        "career_match": {
+          "score": 9.16,
+          "description": "职业高度匹配",
+          "details": "职业相关：跨界经验, 敏捷开发, 全能开发"
+        },
+        "values_match": {
+          "score": 5.0,
+          "description": "价值观中等匹配",
+          "details": "共同价值观：面对面合作, 学习成长"
+        },
+        "request_match": {
+          "score": 10.0,
+          "description": "诉求高度匹配",
+          "details": "诉求相似度1.00，都在寻找合作伙伴"
+        },
+        "complementary_match": {
+          "score": 3.0,
+          "description": "互补性匹配度较低",
           "details": "技能和经验背景存在互补性，可能形成良好的合作关系"
         }
       }
@@ -53,9 +182,9 @@
       },
       "matching_analysis": {
         "overall_match": {
-          "score": 5.14,
-          "description": "总体中等匹配",
-          "details": "共同标签45个，诉求类型匹配，向量相似度0.84"
+          "score": 2.88,
+          "description": "总体匹配度较低",
+          "details": "共同标签4个，诉求类型匹配，向量相似度0.00"
         },
         "personality_match": {
           "score": 5.0,
@@ -68,23 +197,109 @@
           "details": "兴趣爱好不同，但可以互相学习"
         },
         "career_match": {
-          "score": 3.08,
+          "score": 2.0,
           "description": "职业匹配度较低",
-          "details": "职业相关：移动开发, APP开发, 国际经验"
+          "details": "职业相关：跨界经验"
         },
         "values_match": {
-          "score": 2.79,
+          "score": 2.0,
           "description": "价值观匹配度较低",
-          "details": "共同价值观：长期合作, 学习成长, 创造价值"
+          "details": "价值观可能存在差异，需要进一步了解"
         },
         "request_match": {
-          "score": 8.95,
-          "description": "诉求高度匹配",
-          "details": "诉求相似度0.89，都在寻找合作伙伴"
+          "score": 0.28,
+          "description": "诉求差异较大",
+          "details": "诉求相似度0.03，都在寻找合作伙伴"
         },
         "complementary_match": {
-          "score": 6.0,
-          "description": "互补性良好匹配",
+          "score": 3.0,
+          "description": "互补性匹配度较低",
+          "details": "技能和经验背景存在互补性，可能形成良好的合作关系"
+        }
+      }
+    },
+    {
+      "participants": {
+        "person_a": "泽铭 Noah",
+        "person_b": "张月 Luna"
+      },
+      "matching_analysis": {
+        "overall_match": {
+          "score": 2.86,
+          "description": "总体匹配度较低",
+          "details": "共同标签3个，诉求类型匹配，向量相似度0.00"
+        },
+        "personality_match": {
+          "score": 5.0,
+          "description": "性格中等匹配",
+          "details": "性格特征差异较大，但可能形成互补"
+        },
+        "interests_match": {
+          "score": 2.0,
+          "description": "兴趣匹配度较低",
+          "details": "兴趣爱好不同，但可以互相学习"
+        },
+        "career_match": {
+          "score": 2.0,
+          "description": "职业匹配度较低",
+          "details": "职业背景不同，具有互补潜力"
+        },
+        "values_match": {
+          "score": 5.0,
+          "description": "价值观中等匹配",
+          "details": "价值观可能存在差异，需要进一步了解"
+        },
+        "request_match": {
+          "score": 0.16,
+          "description": "诉求差异较大",
+          "details": "诉求相似度0.02，都在寻找合作伙伴"
+        },
+        "complementary_match": {
+          "score": 3.0,
+          "description": "互补性匹配度较低",
+          "details": "技能和经验背景存在互补性，可能形成良好的合作关系"
+        }
+      }
+    },
+    {
+      "participants": {
+        "person_a": "泽铭 Noah",
+        "person_b": "陈虹 Iris"
+      },
+      "matching_analysis": {
+        "overall_match": {
+          "score": 2.74,
+          "description": "总体匹配度较低",
+          "details": "共同标签70个，诉求类型匹配，向量相似度0.00"
+        },
+        "personality_match": {
+          "score": 5.0,
+          "description": "性格中等匹配",
+          "details": "性格特征差异较大，但可能形成互补"
+        },
+        "interests_match": {
+          "score": 5.0,
+          "description": "兴趣中等匹配",
+          "details": "兴趣爱好不同，但可以互相学习"
+        },
+        "career_match": {
+          "score": 1.14,
+          "description": "职业差异较大",
+          "details": "职业相关：跨界经验, 敏捷开发, 全能开发"
+        },
+        "values_match": {
+          "score": 2.0,
+          "description": "价值观匹配度较低",
+          "details": "共同价值观：面对面合作, 学习成长"
+        },
+        "request_match": {
+          "score": 0.27,
+          "description": "诉求差异较大",
+          "details": "诉求相似度0.03，都在寻找合作伙伴"
+        },
+        "complementary_match": {
+          "score": 3.0,
+          "description": "互补性匹配度较低",
           "details": "技能和经验背景存在互补性，可能形成良好的合作关系"
         }
       }
@@ -96,9 +311,9 @@
       },
       "matching_analysis": {
         "overall_match": {
-          "score": 4.96,
-          "description": "总体中等匹配",
-          "details": "共同标签45个，诉求类型匹配，向量相似度0.99"
+          "score": 2.6,
+          "description": "总体匹配度较低",
+          "details": "共同标签73个，诉求类型匹配，向量相似度0.00"
         },
         "personality_match": {
           "score": 5.0,
@@ -106,28 +321,71 @@
           "details": "性格特征差异较大，但可能形成互补"
         },
         "interests_match": {
-          "score": 5.0,
-          "description": "兴趣中等匹配",
+          "score": 2.0,
+          "description": "兴趣匹配度较低",
           "details": "兴趣爱好不同，但可以互相学习"
         },
         "career_match": {
-          "score": 2.27,
+          "score": 3.45,
           "description": "职业匹配度较低",
-          "details": "职业相关：移动开发, APP开发, 国际经验"
+          "details": "职业相关：跨界经验, 敏捷开发, 全能开发"
         },
         "values_match": {
-          "score": 1.68,
-          "description": "价值观差异较大",
-          "details": "共同价值观：长期合作, 学习成长, 创造价值"
+          "score": 2.0,
+          "description": "价值观匹配度较低",
+          "details": "共同价值观：面对面合作, 学习成长"
         },
         "request_match": {
-          "score": 9.78,
-          "description": "诉求高度匹配",
-          "details": "诉求相似度0.98，都在寻找合作伙伴"
+          "score": 0.16,
+          "description": "诉求差异较大",
+          "details": "诉求相似度0.02，都在寻找合作伙伴"
         },
         "complementary_match": {
-          "score": 6.0,
-          "description": "互补性良好匹配",
+          "score": 3.0,
+          "description": "互补性匹配度较低",
+          "details": "技能和经验背景存在互补性，可能形成良好的合作关系"
+        }
+      }
+    },
+    {
+      "participants": {
+        "person_a": "泽铭 Noah",
+        "person_b": "吴大伟 David"
+      },
+      "matching_analysis": {
+        "overall_match": {
+          "score": 2.33,
+          "description": "总体匹配度较低",
+          "details": "共同标签0个，诉求类型匹配，向量相似度0.00"
+        },
+        "personality_match": {
+          "score": 2.0,
+          "description": "性格匹配度较低",
+          "details": "性格特征差异较大，但可能形成互补"
+        },
+        "interests_match": {
+          "score": 2.0,
+          "description": "兴趣匹配度较低",
+          "details": "兴趣爱好不同，但可以互相学习"
+        },
+        "career_match": {
+          "score": 2.0,
+          "description": "职业匹配度较低",
+          "details": "职业背景不同，具有互补潜力"
+        },
+        "values_match": {
+          "score": 5.0,
+          "description": "价值观中等匹配",
+          "details": "价值观可能存在差异，需要进一步了解"
+        },
+        "request_match": {
+          "score": 0.0,
+          "description": "诉求差异较大",
+          "details": "诉求相似度0.00，都在寻找合作伙伴"
+        },
+        "complementary_match": {
+          "score": 3.0,
+          "description": "互补性匹配度较低",
           "details": "技能和经验背景存在互补性，可能形成良好的合作关系"
         }
       }
@@ -136,6 +394,178 @@
       "participants": {
         "person_a": "泽铭 Noah",
         "person_b": "小雅 Emma"
+      },
+      "matching_analysis": {
+        "overall_match": {
+          "score": 2.33,
+          "description": "总体匹配度较低",
+          "details": "共同标签0个，诉求类型匹配，向量相似度0.00"
+        },
+        "personality_match": {
+          "score": 2.0,
+          "description": "性格匹配度较低",
+          "details": "性格特征差异较大，但可能形成互补"
+        },
+        "interests_match": {
+          "score": 2.0,
+          "description": "兴趣匹配度较低",
+          "details": "兴趣爱好不同，但可以互相学习"
+        },
+        "career_match": {
+          "score": 2.0,
+          "description": "职业匹配度较低",
+          "details": "职业背景不同，具有互补潜力"
+        },
+        "values_match": {
+          "score": 5.0,
+          "description": "价值观中等匹配",
+          "details": "价值观可能存在差异，需要进一步了解"
+        },
+        "request_match": {
+          "score": 0.0,
+          "description": "诉求差异较大",
+          "details": "诉求相似度0.00，都在寻找合作伙伴"
+        },
+        "complementary_match": {
+          "score": 3.0,
+          "description": "互补性匹配度较低",
+          "details": "技能和经验背景存在互补性，可能形成良好的合作关系"
+        }
+      }
+    },
+    {
+      "participants": {
+        "person_a": "泽铭 Noah",
+        "person_b": "王俊杰 Jason"
+      },
+      "matching_analysis": {
+        "overall_match": {
+          "score": 2.33,
+          "description": "总体匹配度较低",
+          "details": "共同标签0个，诉求类型匹配，向量相似度0.00"
+        },
+        "personality_match": {
+          "score": 2.0,
+          "description": "性格匹配度较低",
+          "details": "性格特征差异较大，但可能形成互补"
+        },
+        "interests_match": {
+          "score": 2.0,
+          "description": "兴趣匹配度较低",
+          "details": "兴趣爱好不同，但可以互相学习"
+        },
+        "career_match": {
+          "score": 2.0,
+          "description": "职业匹配度较低",
+          "details": "职业背景不同，具有互补潜力"
+        },
+        "values_match": {
+          "score": 5.0,
+          "description": "价值观中等匹配",
+          "details": "价值观可能存在差异，需要进一步了解"
+        },
+        "request_match": {
+          "score": 0.0,
+          "description": "诉求差异较大",
+          "details": "诉求相似度0.00，都在寻找合作伙伴"
+        },
+        "complementary_match": {
+          "score": 3.0,
+          "description": "互补性匹配度较低",
+          "details": "技能和经验背景存在互补性，可能形成良好的合作关系"
+        }
+      }
+    },
+    {
+      "participants": {
+        "person_a": "泽铭 Noah",
+        "person_b": "陈浩 Alex"
+      },
+      "matching_analysis": {
+        "overall_match": {
+          "score": 1.83,
+          "description": "总体差异较大",
+          "details": "共同标签0个，诉求类型匹配，向量相似度0.00"
+        },
+        "personality_match": {
+          "score": 2.0,
+          "description": "性格匹配度较低",
+          "details": "性格特征差异较大，但可能形成互补"
+        },
+        "interests_match": {
+          "score": 2.0,
+          "description": "兴趣匹配度较低",
+          "details": "兴趣爱好不同，但可以互相学习"
+        },
+        "career_match": {
+          "score": 2.0,
+          "description": "职业匹配度较低",
+          "details": "职业背景不同，具有互补潜力"
+        },
+        "values_match": {
+          "score": 2.0,
+          "description": "价值观匹配度较低",
+          "details": "价值观可能存在差异，需要进一步了解"
+        },
+        "request_match": {
+          "score": 0.0,
+          "description": "诉求差异较大",
+          "details": "诉求相似度0.00，都在寻找合作伙伴"
+        },
+        "complementary_match": {
+          "score": 3.0,
+          "description": "互补性匹配度较低",
+          "details": "技能和经验背景存在互补性，可能形成良好的合作关系"
+        }
+      }
+    },
+    {
+      "participants": {
+        "person_a": "泽铭 Noah",
+        "person_b": "张明轩 Michael"
+      },
+      "matching_analysis": {
+        "overall_match": {
+          "score": 1.83,
+          "description": "总体差异较大",
+          "details": "共同标签0个，诉求类型匹配，向量相似度0.00"
+        },
+        "personality_match": {
+          "score": 2.0,
+          "description": "性格匹配度较低",
+          "details": "性格特征差异较大，但可能形成互补"
+        },
+        "interests_match": {
+          "score": 2.0,
+          "description": "兴趣匹配度较低",
+          "details": "兴趣爱好不同，但可以互相学习"
+        },
+        "career_match": {
+          "score": 2.0,
+          "description": "职业匹配度较低",
+          "details": "职业背景不同，具有互补潜力"
+        },
+        "values_match": {
+          "score": 2.0,
+          "description": "价值观匹配度较低",
+          "details": "价值观可能存在差异，需要进一步了解"
+        },
+        "request_match": {
+          "score": 0.0,
+          "description": "诉求差异较大",
+          "details": "诉求相似度0.00，都在寻找合作伙伴"
+        },
+        "complementary_match": {
+          "score": 3.0,
+          "description": "互补性匹配度较低",
+          "details": "技能和经验背景存在互补性，可能形成良好的合作关系"
+        }
+      }
+    },
+    {
+      "participants": {
+        "person_a": "泽铭 Noah",
+        "person_b": "李凯文 Kevin"
       },
       "matching_analysis": {
         "overall_match": {

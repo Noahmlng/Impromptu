@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社交匹配系统 - Social Matching Platform</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>🤝 社交匹配平台</h1>
+                <div class="user-info" id="userInfo">
+                    <span class="user-status">正在登录...</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Login Section -->
+            <div id="loginSection" class="login-section">
+                <div class="login-card">
+                    <h2>欢迎使用社交匹配系统</h2>
+                    <p>正在以 Alex Chen 身份登录...</p>
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+
+            <!-- App Section -->
+            <div id="appSection" class="app-section" style="display: none;">
+                <!-- Navigation Tabs -->
+                <div class="nav-tabs">
+                    <button class="tab-button active" data-mode="找对象">
+                        💕 找对象
+                    </button>
+                    <button class="tab-button" data-mode="找队友">
+                        🤝 找队友
+                    </button>
+                </div>
+
+                <!-- Search Section -->
+                <div class="search-section">
+                    <div class="search-card">
+                        <h3 id="searchTitle">寻找理想的另一半</h3>
+                        <div class="search-form">
+                            <label for="queryInput">描述你的需求和期望：</label>
+                            <textarea 
+                                id="queryInput" 
+                                placeholder="例如：希望找到一个理解技术人生活节奏的女生，年龄23-28岁，最好也在深圳..."
+                                rows="4"
+                            ></textarea>
+                            <button id="searchBtn" class="search-btn">
+                                🔍 开始匹配
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div class="results-section">
+                    <div class="results-header">
+                        <h3>匹配结果</h3>
+                        <div class="results-count" id="resultsCount">0 个匹配</div>
+                    </div>
+                    <div class="results-table-container">
+                        <table class="results-table" id="resultsTable">
+                            <thead>
+                                <tr>
+                                    <th>头像</th>
+                                    <th>用户名</th>
+                                    <th>年龄</th>
+                                    <th>性别</th>
+                                    <th>城市</th>
+                                    <th>职业</th>
+                                    <th>标签</th>
+                                    <th>匹配度</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsBody">
+                                <!-- Results will be populated here -->
+                            </tbody>
+                        </table>
+                        <div class="no-results" id="noResults" style="display: none;">
+                            <div class="no-results-icon">🔍</div>
+                            <h4>暂无匹配结果</h4>
+                            <p>试试调整搜索条件或关键词</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner large"></div>
+            <p>正在匹配中...</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html> 

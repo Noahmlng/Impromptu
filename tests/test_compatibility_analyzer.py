@@ -3,7 +3,7 @@
 import unittest
 import json
 import os
-from compatibility_analyzer import KimiCompatibilityAnalyzer
+from llm_compatibility_analyzer import KimiCompatibilityAnalyzer
 from models import UserRequest, CompatibilityResult
 
 class TestCompatibilityAnalyzer(unittest.TestCase):

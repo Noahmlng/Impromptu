@@ -1,0 +1,118 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "陈虹 Iris",
+      "nickname": "Iris",
+      "greeting": "艺术让生活更美好"
+    },
+    "professional": {
+      "current_role": "独立艺术家/策展人",
+      "responsibilities": [
+        "艺术创作",
+        "展览策划",
+        "艺术教育",
+        "文化项目管理"
+      ],
+      "previous_experience": [
+        "中央美院讲师",
+        "798艺术区策展助理",
+        "独立工作室"
+      ],
+      "industry": "艺术/文化"
+    },
+    "personal": {
+      "age_range": "28-32岁",
+      "location": "北京",
+      "living_situation": "与室友合租工作室",
+      "pets": "养了一只波斯猫"
+    },
+    "personality": {
+      "mbti_type": "INFP",
+      "personality_traits": [
+        "内向安静",
+        "感性浪漫",
+        "创意思维",
+        "独立自主"
+      ],
+      "interests": [
+        "绘画",
+        "雕塑",
+        "摄影",
+        "古典音乐",
+        "文学"
+      ],
+      "lifestyle": [
+        "夜猫子",
+        "居家型",
+        "随性而为",
+        "美食爱好者"
+      ],
+      "values": [
+        "精神富足",
+        "自由平等",
+        "个人成长",
+        "包容开放"
+      ]
+    },
+    "social_media": {
+      "instagram": {
+        "platform": "Instagram",
+        "username": "@iris_art_space",
+        "bio": "Contemporary artist exploring identity through mixed media",
+        "followers": "12k followers"
+      },
+      "xiaohongshu": {
+        "platform": "小红书",
+        "username": "Iris的艺术空间",
+        "description": "分享当代艺术与美学思考",
+        "followers": "1.8万粉丝"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "xiaohongshu",
+          "title": "当代艺术需要科技吗？｜一个艺术家的思考",
+          "content": "最近参加了几个艺术科技展，看到很多AI生成的作品，引发了我对艺术与科技关系的思考。科技确实为艺术创作提供了新的可能性，但艺术的本质仍然是人的情感表达。我觉得最好的科技艺术是让技术服务于艺术理念，而不是为了炫技而技术。正在策划一个主题展览，希望找到既懂艺术又懂技术的合作伙伴，一起探索艺术与科技的边界✨",
+          "tags": ["#当代艺术", "#艺术科技", "#策展", "#AI艺术"],
+          "engagement": "1.5万赞 342评论 567收藏"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "你最希望与什么背景的人合作？",
+        "answer": "我特别想和有技术背景但对艺术敏感的人合作。不一定要是艺术专业出身，但要能理解艺术的情感表达，愿意用技术去实现有深度的艺术作品。"
+      },
+      {
+        "question": "你理想的项目是什么样的？",
+        "answer": "希望做一些能够触动人心的项目，比如互动装置、沉浸式体验，或者用新技术来诠释传统文化。重要的是要有文化价值，而不只是视觉冲击。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "collaboration_interests": [
+        "艺术科技项目",
+        "文化展览",
+        "创意装置"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找队友",
+    "description": "寻找艺术科技领域的合作伙伴，希望找到有技术实力但对艺术有敏感度的人才。可以是程序员、交互设计师、或者新媒体艺术家。一起创作融合传统艺术与现代科技的作品，做一些有文化深度的项目。理想的合作伙伴应该认同艺术的社会价值，愿意为了作品质量而不断打磨细节。可以在北京面对面合作，也接受部分远程协作。"
+  },
+  "metadata": {
+    "profile_type": "teamwork",
+    "created_date": "2024",
+    "tags": {
+      "skills": ["艺术创作", "策展", "文化项目管理"],
+      "industry": "艺术",
+      "project_type": ["艺术项目", "文化展览", "创意项目"],
+      "collaboration_style": ["面对面合作", "创意型", "独立工作"],
+      "experience_level": "中级水平",
+      "availability": "灵活安排",
+      "goals": ["创造价值", "追求兴趣", "个人成长"]
+    }
+  }
+} 

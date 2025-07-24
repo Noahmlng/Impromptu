@@ -1,0 +1,117 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "张月 Luna",
+      "nickname": "Luna",
+      "greeting": "自由如风，创意如月"
+    },
+    "professional": {
+      "current_role": "自由职业者/内容创作者",
+      "responsibilities": [
+        "文案写作",
+        "品牌策划",
+        "视频制作",
+        "社交媒体运营"
+      ],
+      "previous_experience": [
+        "广告公司文案",
+        "互联网公司运营",
+        "媒体编辑"
+      ],
+      "industry": "内容创作/自媒体"
+    },
+    "personal": {
+      "age_range": "28-32岁",
+      "location": "成都",
+      "living_situation": "独居",
+      "pets": "养了一只金毛"
+    },
+    "personality": {
+      "mbti_type": "ISFP",
+      "personality_traits": [
+        "内向安静",
+        "感性浪漫",
+        "随性自由",
+        "创意思维"
+      ],
+      "interests": [
+        "写作",
+        "摄影",
+        "音乐",
+        "旅行",
+        "美食"
+      ],
+      "lifestyle": [
+        "夜猫子",
+        "居家型",
+        "随性而为",
+        "自由散漫"
+      ],
+      "values": [
+        "自由平等",
+        "精神富足",
+        "个人成长",
+        "知足常乐"
+      ]
+    },
+    "social_media": {
+      "xiaohongshu": {
+        "platform": "小红书",
+        "username": "Luna的慢生活",
+        "description": "记录自由职业的点点滴滴",
+        "followers": "8千粉丝"
+      },
+      "douyin": {
+        "platform": "抖音",
+        "username": "文字与镜头",
+        "description": "用文字和影像记录生活"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "xiaohongshu",
+          "title": "自由职业三年，我想对想裸辞的你说这些",
+          "content": "三年前从大厂裸辞做自由职业，收入不稳定但心态很稳定😊 想对还在纠结的朋友说：1）一定要有足够的储蓄，至少6个月的生活费 2）提前培养副业，有稳定客户再裸辞 3）保持学习，自由职业更需要自我驱动。现在主要做品牌文案和短视频制作，正在寻找志同道合的伙伴一起做项目。如果你也是自由职业者，或者想转型，欢迎交流~",
+          "tags": ["#自由职业", "#裸辞", "#副业", "#文案"],
+          "engagement": "1.2万赞 567评论 890收藏"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "你最想和什么样的人合作？",
+        "answer": "希望是那种有想法、有执行力，但不会给人太大压力的人。我喜欢轻松愉快的合作氛围，大家可以自由发挥各自的长处，一起创造有意思的内容。"
+      },
+      {
+        "question": "你对项目时间安排有什么要求？",
+        "answer": "我比较适合灵活的时间安排，不喜欢太紧的deadline。我相信好的创意需要时间沉淀，宁可慢一点也要做出质量更好的作品。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "collaboration_interests": [
+        "内容创作项目",
+        "品牌策划",
+        "自媒体合作"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找队友",
+    "description": "寻找内容创作领域的合作伙伴，可以是摄影师、设计师、或者其他创作者。希望一起做一些有创意的项目，比如品牌策划、短视频制作、或者自媒体内容。理想的合作伙伴应该和我一样追求创作自由，不喜欢太商业化的环境。可以远程合作，时间安排灵活，重视作品质量胜过数量。希望能建立长期的合作关系，一起成长。"
+  },
+  "metadata": {
+    "profile_type": "teamwork",
+    "created_date": "2024",
+    "tags": {
+      "skills": ["内容创作", "文案写作", "视频制作"],
+      "industry": "传媒娱乐",
+      "project_type": ["艺术项目", "内容创作"],
+      "collaboration_style": ["远程协作", "灵活时间", "创意型"],
+      "experience_level": "中级水平",
+      "availability": ["兼职参与", "灵活安排"],
+      "goals": ["追求兴趣", "创造价值", "技能提升"]
+    }
+  }
+} 

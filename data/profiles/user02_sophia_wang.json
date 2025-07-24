@@ -1,0 +1,121 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "王雅婷 Sophia",
+      "nickname": "Sophia",
+      "greeting": "创意无限！"
+    },
+    "professional": {
+      "current_role": "资深UI/UX设计师",
+      "responsibilities": [
+        "产品视觉设计",
+        "用户体验研究",
+        "设计团队管理"
+      ],
+      "previous_experience": [
+        "腾讯设计部",
+        "网易UEDC",
+        "自由设计师"
+      ],
+      "industry": "设计/创意"
+    },
+    "personal": {
+      "age_range": "28-32岁",
+      "location": "杭州",
+      "living_situation": "独居",
+      "pets": "养了两只猫"
+    },
+    "personality": {
+      "mbti_type": "ENFP",
+      "personality_traits": [
+        "外向开朗",
+        "创意思维",
+        "感性浪漫",
+        "随性自由"
+      ],
+      "interests": [
+        "艺术",
+        "摄影",
+        "旅行",
+        "美食",
+        "时尚"
+      ],
+      "lifestyle": [
+        "夜猫子",
+        "社交型",
+        "美食爱好者",
+        "随性而为"
+      ],
+      "values": [
+        "自由平等",
+        "精神富足",
+        "包容开放",
+        "追求刺激"
+      ]
+    },
+    "social_media": {
+      "behance": {
+        "platform": "Behance",
+        "username": "SophiaDesigns",
+        "bio": "Digital product designer exploring the intersection of art and technology"
+      },
+      "xiaohongshu": {
+        "platform": "小红书",
+        "username": "Sophia的设计日记",
+        "description": "分享设计灵感与美学生活",
+        "followers": "2.5万粉丝"
+      },
+      "instagram": {
+        "platform": "Instagram",
+        "username": "@sophia_visual_stories",
+        "bio": "Visual storyteller | Cat mom | Design enthusiast"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "xiaohongshu",
+          "title": "如何打造有温度的产品设计｜设计师的思考",
+          "content": "最近在思考什么是好的产品设计。技术可以很炫酷，功能可以很强大，但如果没有温度，用户就感受不到产品的善意。分享几个我常用的设计原则：1）从用户的情感出发，而不是功能需求 2）用微交互传达产品的性格 3）色彩和字体是情感的载体。正在和朋友筹备一个设计工作室，希望能做出更有温度的产品❤️",
+          "tags": ["#产品设计", "#UX设计", "#设计思考", "#创业"],
+          "engagement": "892赞 156评论 234收藏"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "你最想合作的项目类型是什么？",
+        "answer": "我特别想做一些有社会价值的项目，比如教育科技、医疗健康或者环保相关的产品。技术本身不是目的，用设计让技术更好地服务人类才是我的追求。"
+      },
+      {
+        "question": "你理想的合作伙伴是什么样的？",
+        "answer": "希望是那种有技术实力但不局限于技术的人。能够理解用户需求，愿意为了更好的用户体验去打磨细节。最重要的是要有共同的价值观和愿景。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "collaboration_interests": [
+        "产品设计项目",
+        "创意工作室",
+        "社会价值项目"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找队友",
+    "description": "正在筹备设计工作室，寻找技术合伙人。希望找到有全栈开发能力或产品管理经验的伙伴，一起做有温度、有社会价值的产品。理想的合作伙伴应该认同以用户为中心的设计理念，有创业热情和执行力。项目方向倾向于教育科技、健康医疗或可持续发展相关领域。可以远程协作，但最好能定期面对面交流。"
+  },
+  "metadata": {
+    "profile_type": "teamwork",
+    "created_date": "2024",
+    "tags": {
+      "skills": ["产品设计", "UI/UX设计"],
+      "industry": "设计",
+      "project_type": ["创业项目", "社会价值项目"],
+      "collaboration_style": ["远程协作", "创意型", "高频沟通"],
+      "experience_level": "中级水平",
+      "availability": "兼职参与",
+      "goals": ["创造价值", "扩展人脉", "追求兴趣"]
+    }
+  }
+} 
