@@ -31,9 +31,9 @@ const SubscribeModal: React.FC<SubscribeModalProps> = ({ show, onClose, subscrip
             {t.subscription.addon}
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-4">
           {subscriptionPlans.map((plan) => (
-            <div key={plan.id} className={`border border-gray-200 dark:border-gray-700 rounded-xl p-4 sm:p-6 relative transition-colors ${plan.isPopular ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-900'}`}>
+                          <div key={plan.id} className={`min-w-[280px] flex-1 border border-gray-200 dark:border-gray-700 rounded-xl p-4 sm:p-6 relative transition-colors ${plan.isPopular ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-900'}`}>
               {plan.isEarlyBird && (
                 <div className="absolute -right-8 sm:-right-12 top-4 bg-red-100 dark:bg-red-900 text-red-500 dark:text-red-300 px-8 sm:px-12 py-1 rotate-45 text-xs transition-colors">
                   {t.subscription.earlyBird}

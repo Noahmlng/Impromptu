@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { useAppStore } from '@/lib/store'
-import { User, Mail, Phone, MapPin, Calendar, Camera, Save, Edit3 } from 'lucide-react'
+import { User, UserMetadata, Language } from '@/lib/types'
+import { User as UserIcon, Mail, Phone, MapPin, Calendar, Camera, Save, Edit3 } from 'lucide-react'
 
 export default function ProfilePage() {
   const { language, user } = useAppStore()
@@ -127,7 +128,7 @@ export default function ProfilePage() {
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium flex items-center space-x-2">
-                  <User className="h-4 w-4" />
+                  <UserIcon className="h-4 w-4" />
                   <span>{language === 'zh' ? '姓名' : 'Name'}</span>
                 </label>
                 {isEditing ? (
