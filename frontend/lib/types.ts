@@ -33,6 +33,16 @@ export interface UserTag {
   is_active: boolean
 }
 
+export interface MatchUser {
+  user_id: string
+  display_name: string
+  email: string
+  avatar_url?: string
+  match_score: number
+  user_tags: string[]
+  metadata_summary: any
+}
+
 // Legacy types for compatibility
 export interface Profile {
   id: string
