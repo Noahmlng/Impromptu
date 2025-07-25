@@ -137,7 +137,7 @@ export function Navbar() {
               ) : (
                 <Users className="h-8 w-8 text-miami-blue-500" />
               )}
-              <span className="text-xl font-bold">Impromptu</span>
+              <span className="text-xl font-bold">Linker</span>
             </div>
 
             {/* Right Side Actions */}
