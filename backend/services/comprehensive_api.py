@@ -946,10 +946,15 @@ def get_user_complete_data(user_id: str) -> Optional[Dict]:
         # Tags
         tags_result = supabase.table('user_tags').select('*').eq('user_id', user_id).execute()
         
+        # 确保credits字段存在
+        if 'credits' not in profile:
+            profile['credits'] = 0
+        
         return {
             'profile': profile,
             'metadata': metadata_result.data,
-            'tags': tags_result.data
+            'tags': tags_result.data,
+            'credits': profile.get('credits', 0)  # 添加credits到顶层
         }
         
     except Exception as e:
@@ -1202,6 +1207,39 @@ def system_stats():
     except Exception as e:
         print(f"系统统计错误: {e}")
         return jsonify({'error': '获取系统统计失败', 'message': str(e)}), 500
+
+async def update_user_credits(user_id: str, credits_change: int) -> Optional[Dict]:
+    """更新用户积分
+    
+    Args:
+        user_id: 用户ID
+        credits_change: 积分变化值（正数为增加，负数为减少）
+        
+    Returns:
+        Dict with updated user profile or None if failed
+    """
+    try:
+        # 首先获取当前积分
+        profile_result = supabase.table('user_profile').select('credits').eq('user_id', user_id).execute()
+        if not profile_result.data:
+            print(f"未找到用户: {user_id}")
+            return None
+            
+        current_credits = profile_result.data[0].get('credits', 0)
+        new_credits = max(0, current_credits + credits_change)  # 确保积分不会为负
+        
+        # 更新积分
+        update_result = supabase.table('user_profile').update({
+            'credits': new_credits
+        }).eq('user_id', user_id).execute()
+        
+        if update_result.data:
+            return update_result.data[0]
+        return None
+        
+    except Exception as e:
+        print(f"更新用户积分错误: {e}")
+        return None
 
 # ==================== 错误处理 ====================
 
