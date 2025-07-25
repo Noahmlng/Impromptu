@@ -417,7 +417,24 @@ export const auth = {
         }
       })
       
-      if (error) throw error
+      if (error) {
+        // Handle specific error cases with better Chinese messages
+        let errorMessage = '注册失败';
+        
+        if (error.message.includes('rate limit') || error.message.includes('429')) {
+          errorMessage = '注册请求过于频繁，请稍后再试';
+        } else if (error.message.includes('User already registered')) {
+          errorMessage = '该邮箱已被注册，请使用其他邮箱或登录';
+        } else if (error.message.includes('Password should')) {
+          errorMessage = '密码至少需要6个字符';
+        } else if (error.message.includes('Invalid email')) {
+          errorMessage = '邮箱格式不正确';
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        throw new Error(errorMessage);
+      }
       
       if (data.user) {
         return {
