@@ -88,13 +88,56 @@ def auth_required(f):
             profile_response = supabase.table('user_profile').select('*').eq('auth_user_id', auth_user_id).execute()
             
             if not profile_response.data:
-                return jsonify({'error': '用户档案不存在'}), 404
+                # 用户档案不存在，自动创建一个
+                try:
+                    # 从JWT token中获取用户信息
+                    display_name = decoded_token.get('user_metadata', {}).get('display_name') or user_email.split('@')[0]
+                    avatar_url = decoded_token.get('user_metadata', {}).get('avatar_url')
+                    
+                    # 生成唯一的user_id
+                    import uuid
+                    user_id = f"user_{auth_user_id[:8]}_{int(datetime.datetime.now().timestamp())}"
+                    
+                    # 创建用户档案
+                    new_profile = {
+                        'user_id': user_id,
+                        'auth_user_id': auth_user_id,
+                        'email': user_email,
+                        'display_name': display_name,
+                        'avatar_url': avatar_url,
+                        'created_at': datetime.datetime.utcnow().isoformat(),
+                        'updated_at': datetime.datetime.utcnow().isoformat(),
+                        'last_login_at': datetime.datetime.utcnow().isoformat(),
+                        'is_active': True,
+                        'credits': 1000,  # 默认积分
+                        'subscription_type': 'free'
+                    }
+                    
+                    result = supabase.table('user_profile').insert(new_profile).execute()
+                    if result.data:
+                        profile_data = result.data[0]
+                        print(f"✅ 自动创建用户档案: {user_id}")
+                    else:
+                        return jsonify({'error': '用户档案创建失败'}), 500
+                        
+                except Exception as create_error:
+                    print(f"❌ 创建用户档案失败: {create_error}")
+                    return jsonify({'error': '用户档案创建失败', 'message': str(create_error)}), 500
+            else:
+                profile_data = profile_response.data[0]
+                # 更新最后登录时间
+                try:
+                    supabase.table('user_profile').update({
+                        'last_login_at': datetime.datetime.utcnow().isoformat()
+                    }).eq('user_id', profile_data['user_id']).execute()
+                except:
+                    pass  # 更新失败不影响主流程
             
             # 设置全局用户信息
-            g.current_user_id = profile_response.data[0]['user_id']
+            g.current_user_id = profile_data['user_id']
             g.current_user_email = user_email
             g.auth_user_id = auth_user_id
-            g.user_profile = profile_response.data[0]
+            g.user_profile = profile_data
             
             return f(*args, **kwargs)
         except Exception as e:

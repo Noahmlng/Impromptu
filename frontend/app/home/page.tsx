@@ -10,16 +10,12 @@ import { UserTag } from '@/lib/types'
 import { 
   Heart, 
   Users, 
-  Search, 
-  Plus, 
   ArrowRight, 
-  CheckCircle, 
+  CheckCircle,
   Tag,
   Settings,
   Sparkles,
-  TrendingUp,
-  Calendar,
-  MessageCircle
+  TrendingUp
 } from 'lucide-react'
 
 export default function HomePage() {
@@ -60,36 +56,7 @@ export default function HomePage() {
     loadUserTags()
   }, [authUser, setUserTags])
 
-  const quickActions = [
-    {
-      icon: Search,
-      title: language === 'zh' ? '智能搜索' : 'Smart Search',
-      description: language === 'zh' ? '基于AI的匹配搜索' : 'AI-powered matching search',
-      color: 'bg-blue-500',
-      onClick: () => setIsSearchOpen(true)
-    },
-    {
-      icon: Tag,
-      title: language === 'zh' ? '生成标签' : 'Generate Tags',
-      description: language === 'zh' ? '更新个人标签' : 'Update personal tags',
-      color: 'bg-green-500',
-      onClick: () => window.location.href = '/profile'
-    },
-    {
-      icon: Settings,
-      title: language === 'zh' ? '个人设置' : 'Profile Settings',
-      description: language === 'zh' ? '编辑个人资料' : 'Edit personal profile',
-      color: 'bg-purple-500',
-      onClick: () => window.location.href = '/profile'
-    },
-    {
-      icon: MessageCircle,
-      title: language === 'zh' ? '消息中心' : 'Message Center',
-      description: language === 'zh' ? '查看匹配消息' : 'View matching messages',
-      color: 'bg-orange-500',
-      onClick: () => window.location.href = '/chat'
-    }
-  ]
+
 
   const stats = [
     {
@@ -158,27 +125,7 @@ export default function HomePage() {
         ))}
       </div>
 
-      {/* Quick Actions */}
-      <div className="space-y-4">
-        <h2 className="text-2xl font-semibold">
-          {language === 'zh' ? '快速操作' : 'Quick Actions'}
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {quickActions.map((action, index) => (
-            <button
-              key={index}
-              onClick={action.onClick}
-              className="bg-card rounded-lg p-6 border shadow-sm hover:shadow-md transition-shadow text-left"
-            >
-              <div className={`w-12 h-12 rounded-lg ${action.color} flex items-center justify-center mb-4`}>
-                <action.icon className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="font-semibold text-lg mb-2">{action.title}</h3>
-              <p className="text-sm text-muted-foreground">{action.description}</p>
-            </button>
-          ))}
-        </div>
-      </div>
+
 
       {/* Recent Tags */}
       {recentTags.length > 0 && (

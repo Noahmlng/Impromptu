@@ -2,13 +2,14 @@
 
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/lib/store'
-import { Heart, Users } from 'lucide-react'
+import { Heart, Users, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 
 export function ModeSwitcher() {
   const { themeMode, setThemeMode } = useAppStore()
   const pathname = usePathname()
+  const router = useRouter()
   
   // Don't show ModeSwitcher on landing page and login/register pages
   const hiddenPages = ['/', '/login', '/register']
@@ -16,9 +17,25 @@ export function ModeSwitcher() {
     return null
   }
 
+  const handleProfileClick = () => {
+    router.push('/profile')
+  }
+
   return (
     <div className="fixed left-6 top-1/2 z-50 -translate-y-1/2">
       <div className="flex flex-col space-y-2 rounded-full bg-background/80 p-2 shadow-lg backdrop-blur-sm border">
+        <Button
+          variant={pathname === '/profile' ? 'default' : 'ghost'}
+          size="icon"
+          onClick={handleProfileClick}
+          className={cn(
+            "h-12 w-12 rounded-full",
+            pathname === '/profile' && "bg-primary hover:bg-primary/90"
+          )}
+        >
+          <User className="h-5 w-5" />
+        </Button>
+        
         <Button
           variant={themeMode === 'romantic' ? 'default' : 'ghost'}
           size="icon"
