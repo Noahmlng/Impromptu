@@ -269,7 +269,7 @@ export default function ProfilePage() {
               </div>
               <div className="flex justify-between">
                 <span>{language === 'zh' ? '订阅等级' : 'Subscription'}</span>
-                <span className="font-medium capitalize">{user?.subscription || 'Free'}</span>
+                <span className="font-medium capitalize">{backendUser?.subscription_type || user?.subscription || 'Free'}</span>
               </div>
               <div className="flex justify-between">
                 <span>{language === 'zh' ? '匹配数量' : 'Matches'}</span>

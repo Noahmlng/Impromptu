@@ -580,6 +580,7 @@ export const auth = {
             email: data.user.email!,
             display_name: profile?.display_name || data.user.user_metadata?.display_name,
             avatar_url: profile?.avatar_url || data.user.user_metadata?.avatar_url,
+            subscription_type: profile?.subscription_type || 'free',
             token: data.session.access_token
           }
         }
@@ -639,7 +640,8 @@ export const auth = {
               email: data.user.email!,
               display_name: displayName,
               avatar_url: avatarUrl,
-              status: 'active'
+              status: 'active',
+              subscription_type: 'free'
             })
             .select()
             .single()
@@ -725,6 +727,7 @@ export const auth = {
           email: user.email!,
           display_name: profile.display_name,
           avatar_url: profile.avatar_url,
+          subscription_type: profile.subscription_type,
           created_at: profile.created_at,
           updated_at: profile.updated_at,
           is_active: profile.is_active

@@ -37,7 +37,7 @@ export default function HomePage() {
         name: authUser.display_name || 'User',
         email: authUser.email,
         credits: 1250,
-        subscription: 'pro'
+        subscription: authUser.subscription_type || 'free'
       })
     }
   }, [user, authUser, setUser])
