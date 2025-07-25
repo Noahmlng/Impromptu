@@ -1,12 +1,26 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/lib/store'
-import { Heart, Users, Mail, Lock, User, Eye, EyeOff } from 'lucide-react'
+import { auth } from '@/lib/api'
+import { Heart, Users, Mail, Lock, User, Eye, EyeOff, AlertCircle } from 'lucide-react'
 
 export default function LoginPage() {
-  const { themeMode, language } = useAppStore()
+  const router = useRouter()
+  const { 
+    themeMode, 
+    language, 
+    setAuthToken, 
+    setBackendUser, 
+    setUser,
+    setIsAuthLoading,
+    setError,
+    error,
+    isAuthLoading
+  } = useAppStore()
+  
   const [isLogin, setIsLogin] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
@@ -16,10 +30,89 @@ export default function LoginPage() {
     confirmPassword: ''
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle login/register logic here
-    console.log('Form submitted:', formData)
+    setError(null)
+    setIsAuthLoading(true)
+
+    try {
+      if (isLogin) {
+        // Login
+        const response = await auth.login(formData.email, formData.password)
+        
+        if (response.success) {
+          // Update store with user data
+          setAuthToken(response.data.token)
+          setBackendUser({
+            user_id: response.data.user_id,
+            email: response.data.email,
+            display_name: response.data.display_name,
+            avatar_url: response.data.avatar_url,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            last_login_at: new Date().toISOString(),
+            is_active: true
+          })
+          
+          // Create legacy user object for compatibility
+          setUser({
+            id: response.data.user_id,
+            name: response.data.display_name,
+            email: response.data.email,
+            avatar: response.data.avatar_url,
+            credits: 0,
+            subscription: 'free'
+          })
+          
+          // Redirect to main app
+          router.push('/')
+        }
+      } else {
+        // Register
+        if (formData.password !== formData.confirmPassword) {
+          setError(language === 'zh' ? '密码不匹配' : 'Passwords do not match')
+          return
+        }
+        
+        const response = await auth.register(
+          formData.email, 
+          formData.password, 
+          formData.name
+        )
+        
+        if (response.success) {
+          // Update store with user data
+          setAuthToken(response.data.token)
+          setBackendUser({
+            user_id: response.data.user_id,
+            email: response.data.email,
+            display_name: response.data.display_name,
+            avatar_url: response.data.avatar_url,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            last_login_at: new Date().toISOString(),
+            is_active: true
+          })
+          
+          // Create legacy user object for compatibility
+          setUser({
+            id: response.data.user_id,
+            name: response.data.display_name,
+            email: response.data.email,
+            avatar: response.data.avatar_url,
+            credits: 0,
+            subscription: 'free'
+          })
+          
+          // Redirect to profile setup
+          router.push('/profile')
+        }
+      }
+    } catch (error: any) {
+      setError(error.message || (language === 'zh' ? '操作失败，请重试' : 'Operation failed, please try again'))
+    } finally {
+      setIsAuthLoading(false)
+    }
   }
 
   const handleInputChange = (field: string, value: string) => {
@@ -55,6 +148,14 @@ export default function LoginPage() {
 
         {/* Form */}
         <div className="bg-card p-8 rounded-lg shadow-lg border">
+          {/* Error Display */}
+          {error && (
+            <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center space-x-2">
+              <AlertCircle className="h-4 w-4 text-destructive" />
+              <span className="text-sm text-destructive">{error}</span>
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Name field for registration */}
             {!isLogin && (
@@ -138,11 +239,20 @@ export default function LoginPage() {
               type="submit"
               className="w-full"
               size="lg"
+              disabled={isAuthLoading}
             >
-              {isLogin 
+              {isAuthLoading ? (
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>
+                    {language === 'zh' ? '处理中...' : 'Processing...'}
+                  </span>
+                </div>
+              ) : (
+                isLogin 
                 ? (language === 'zh' ? '登录' : 'Sign In')
                 : (language === 'zh' ? '注册' : 'Sign Up')
-              }
+              )}
             </Button>
           </form>
 

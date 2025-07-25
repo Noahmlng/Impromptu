@@ -1,15 +1,33 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChatInterface } from '@/components/chat-interface'
 import { useAppStore } from '@/lib/store'
-import { MessageCircle, Bot, Users, Heart } from 'lucide-react'
+import { useRequireAuth } from '@/lib/hooks/useAuth'
+import { matching } from '@/lib/api'
+import { MatchUser } from '@/lib/api'
+import { MessageCircle, Bot, Users, Heart, Search, Star, MapPin, AlertCircle } from 'lucide-react'
 
 export default function ChatPage() {
-  const { themeMode, language } = useAppStore()
-  const [activeChatType, setActiveChatType] = useState<'ai' | 'match' | null>(null)
+  // Auth check
+  const { user: authUser, isLoading: authLoading } = useRequireAuth()
+  
+  const { 
+    themeMode, 
+    language, 
+    userTags,
+    setIsLoading,
+    setError,
+    error,
+    isLoading
+  } = useAppStore()
+  
+  const [activeChatType, setActiveChatType] = useState<'ai' | 'match' | 'search' | null>(null)
+  const [matchResults, setMatchResults] = useState<MatchUser[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchTags, setSearchTags] = useState<string[]>([])
 
   const chatOptions = [
     {
@@ -22,6 +40,15 @@ export default function ChatPage() {
       color: 'text-blue-500'
     },
     {
+      id: 'search',
+      title: language === 'zh' ? '智能匹配' : 'Smart Matching',
+      description: language === 'zh' 
+        ? '基于描述和标签找到合适的匹配用户'
+        : 'Find suitable matches based on description and tags',
+      icon: Search,
+      color: themeMode === 'romantic' ? 'text-romantic-pink-500' : 'text-miami-blue-500'
+    },
+    {
       id: 'match',
       title: language === 'zh' ? '匹配对话' : 'Match Conversations',
       description: language === 'zh' 
@@ -32,11 +59,228 @@ export default function ChatPage() {
     }
   ]
 
-  const recentMatches = [
-    { id: '1', name: 'Alice Chen', lastMessage: language === 'zh' ? '你好！' : 'Hello!', time: '2分钟前', unread: 2 },
-    { id: '2', name: 'Bob Wang', lastMessage: language === 'zh' ? '很期待合作' : 'Looking forward to working together', time: '1小时前', unread: 0 },
-    { id: '3', name: 'Carol Li', lastMessage: language === 'zh' ? '项目进展如何？' : 'How is the project going?', time: '昨天', unread: 1 },
-  ]
+  const performSearch = async () => {
+    if (!authUser || !searchQuery.trim()) return
+    
+    setIsLoading(true)
+    setError(null)
+    
+    try {
+      const matchType = themeMode === 'romantic' ? '找对象' : '找队友'
+      const response = await matching.search(
+        searchQuery,
+        searchTags,
+        matchType,
+        10
+      )
+      
+      if (response.success) {
+        setMatchResults(response.data)
+      }
+    } catch (error: any) {
+      setError(error.message || 'Search failed')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const addSearchTag = (tag: string) => {
+    if (!searchTags.includes(tag)) {
+      setSearchTags([...searchTags, tag])
+    }
+  }
+
+  const removeSearchTag = (tag: string) => {
+    setSearchTags(searchTags.filter(t => t !== tag))
+  }
+
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  if (activeChatType === 'search') {
+    return (
+      <div className="max-w-6xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <Button
+            variant="outline"
+            onClick={() => setActiveChatType(null)}
+          >
+            ← {language === 'zh' ? '返回' : 'Back'}
+          </Button>
+          <h1 className="text-2xl font-bold">
+            {language === 'zh' ? '智能匹配搜索' : 'Smart Match Search'}
+          </h1>
+          <div />
+        </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center space-x-2">
+            <AlertCircle className="h-4 w-4 text-destructive" />
+            <span className="text-sm text-destructive">{error}</span>
+          </div>
+        )}
+
+        {/* Search Interface */}
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {language === 'zh' ? '搜索匹配用户' : 'Search for Matches'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Search Query */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                {language === 'zh' ? '描述您的需求' : 'Describe what you are looking for'}
+              </label>
+              <textarea
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={language === 'zh' 
+                  ? '例如：寻找一起创业的技术合伙人，有产品开发经验...'
+                  : 'e.g., Looking for a technical co-founder with product development experience...'
+                }
+                rows={3}
+                className="w-full px-3 py-2 border border-input rounded-md bg-background resize-none"
+              />
+            </div>
+
+            {/* Tag Selection */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                {language === 'zh' ? '添加标签' : 'Add Tags'}
+              </label>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {userTags.slice(0, 10).map((tag) => (
+                  <Button
+                    key={tag.id}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => addSearchTag(tag.tag_name)}
+                    disabled={searchTags.includes(tag.tag_name)}
+                  >
+                    {tag.tag_name}
+                  </Button>
+                ))}
+              </div>
+              
+              {/* Selected Tags */}
+              {searchTags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {searchTags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm flex items-center space-x-1"
+                    >
+                      <span>{tag}</span>
+                      <button
+                        onClick={() => removeSearchTag(tag)}
+                        className="ml-1 hover:bg-primary/80 rounded"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Search Button */}
+            <Button
+              onClick={performSearch}
+              disabled={isLoading || !searchQuery.trim()}
+              className="w-full"
+            >
+              {isLoading ? (
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>{language === 'zh' ? '搜索中...' : 'Searching...'}</span>
+                </div>
+              ) : (
+                <>
+                  <Search className="h-4 w-4 mr-2" />
+                  {language === 'zh' ? '开始搜索' : 'Start Search'}
+                </>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Search Results */}
+        {matchResults.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                {language === 'zh' ? `找到 ${matchResults.length} 个匹配用户` : `Found ${matchResults.length} matches`}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-4">
+                {matchResults.map((match) => (
+                  <div
+                    key={match.user_id}
+                    className="p-4 border rounded-lg hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-gradient-to-r from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
+                          <span className="font-semibold text-primary text-lg">
+                            {match.display_name.charAt(0)}
+                          </span>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">{match.display_name}</h3>
+                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                            <span>{(match.match_score * 10).toFixed(1)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Tags */}
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {match.user_tags.slice(0, 3).map((tag, index) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 bg-muted text-muted-foreground rounded text-xs"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                      {match.user_tags.length > 3 && (
+                        <span className="px-2 py-1 bg-muted text-muted-foreground rounded text-xs">
+                          +{match.user_tags.length - 3}
+                        </span>
+                      )}
+                    </div>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => {
+                        // Start conversation with this match
+                        console.log('Start conversation with', match.user_id)
+                      }}
+                    >
+                      {language === 'zh' ? '开始对话' : 'Start Conversation'}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    )
+  }
 
   if (activeChatType) {
     return (
@@ -107,43 +351,51 @@ export default function ChatPage() {
         })}
       </div>
 
-      {/* Recent Matches */}
+      {/* Recent Activity */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Users className="h-5 w-5" />
-            <span>{language === 'zh' ? '最近匹配' : 'Recent Matches'}</span>
+            <span>{language === 'zh' ? '使用提示' : 'Getting Started'}</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {recentMatches.map((match) => (
-              <div 
-                key={match.id}
-                className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg cursor-pointer"
-                onClick={() => setActiveChatType('match')}
-              >
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
-                    <span className="font-semibold text-primary">
-                      {match.name.charAt(0)}
-                    </span>
+            <div className="p-4 bg-muted/50 rounded-lg">
+              <h4 className="font-medium mb-2">
+                {language === 'zh' ? '1. 完善个人资料' : '1. Complete Your Profile'}
+              </h4>
+              <p className="text-sm text-muted-foreground">
+                {language === 'zh' 
+                  ? '前往个人资料页面，填写详细信息并生成个人标签'
+                  : 'Go to profile page, fill in details and generate personal tags'
+                }
+              </p>
                   </div>
-                  <div>
-                    <h3 className="font-medium">{match.name}</h3>
-                    <p className="text-sm text-muted-foreground">{match.lastMessage}</p>
+            
+            <div className="p-4 bg-muted/50 rounded-lg">
+              <h4 className="font-medium mb-2">
+                {language === 'zh' ? '2. 智能匹配搜索' : '2. Smart Matching Search'}
+              </h4>
+              <p className="text-sm text-muted-foreground">
+                {language === 'zh' 
+                  ? '使用智能匹配功能找到符合您需求的用户'
+                  : 'Use smart matching to find users that meet your needs'
+                }
+              </p>
                   </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-muted-foreground">{match.time}</p>
-                  {match.unread > 0 && (
-                    <div className="w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs mt-1">
-                      {match.unread}
-                    </div>
-                  )}
-                </div>
+            
+            <div className="p-4 bg-muted/50 rounded-lg">
+              <h4 className="font-medium mb-2">
+                {language === 'zh' ? '3. AI助手优化' : '3. AI Assistant Optimization'}
+              </h4>
+              <p className="text-sm text-muted-foreground">
+                {language === 'zh' 
+                  ? '与AI助手对话，获得个性化的匹配建议'
+                  : 'Chat with AI assistant for personalized matching advice'
+                }
+              </p>
               </div>
-            ))}
           </div>
         </CardContent>
       </Card>
