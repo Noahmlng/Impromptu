@@ -1,0 +1,117 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "周璐希 Lucy",
+      "nickname": "Lucy",
+      "greeting": "用镜头记录美好瞬间"
+    },
+    "professional": {
+      "current_role": "自由摄影师",
+      "responsibilities": [
+        "婚礼摄影",
+        "人像摄影",
+        "商业摄影",
+        "后期修图"
+      ],
+      "previous_experience": [
+        "杂志社摄影师",
+        "广告公司创意"
+      ],
+      "industry": "创意/艺术"
+    },
+    "personal": {
+      "age_range": "26-30岁",
+      "location": "成都",
+      "living_situation": "独居",
+      "pets": "养了一只柴犬"
+    },
+    "personality": {
+      "mbti_type": "ESFP",
+      "personality_traits": [
+        "外向热情",
+        "感性细腻",
+        "乐观向上",
+        "创意丰富"
+      ],
+      "interests": [
+        "摄影",
+        "旅行",
+        "美食",
+        "音乐",
+        "艺术展览"
+      ],
+      "lifestyle": [
+        "自由灵活",
+        "社交型",
+        "追求美感",
+        "享受当下"
+      ],
+      "values": [
+        "真实自然",
+        "艺术表达",
+        "情感连接",
+        "自由创作"
+      ]
+    },
+    "social_media": {
+      "instagram": {
+        "platform": "Instagram",
+        "username": "@lucy_lens_life",
+        "bio": "Capturing life's beautiful moments | Wedding & Portrait photographer"
+      },
+      "xiaohongshu": {
+        "platform": "小红书",
+        "username": "摄影师璐希",
+        "description": "分享摄影技巧和生活美学",
+        "followers": "8万粉丝"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "xiaohongshu",
+          "title": "如何拍出有故事感的人像照片｜摄影技巧分享",
+          "content": "好的人像照片不仅仅是技术好，更重要的是能传达情感和故事。分享几个我常用的技巧：1）拍摄前多和模特聊天，了解她的性格 2）利用自然光和生活场景，避免过度摆拍 3）抓拍真实的表情和动作。最近在拍一组关于成都街头文化的作品，希望能记录这座城市的烟火气息。摄影对我来说不只是职业，更是表达内心的方式。",
+          "tags": ["#人像摄影", "#摄影技巧", "#成都", "#街头摄影"],
+          "engagement": "2.3万赞 567评论 1.2万收藏"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "你最喜欢拍摄什么类型的作品？",
+        "answer": "我最爱拍真实自然的人像，特别是那些不经意间的美好瞬间。每个人都有独特的故事，我希望通过镜头记录下来。最近也在尝试街头摄影，想要捕捉城市的灵魂。"
+      },
+      {
+        "question": "你理想的伴侣是什么样的？",
+        "answer": "希望他能理解并支持我的艺术创作，最好也有一颗敏感细腻的心。我经常需要到处拍摄，希望他能和我一起旅行，或者至少不会因为我的工作时间不规律而介意。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "relationship_goals": [
+        "寻找真爱",
+        "精神伴侣",
+        "共同成长"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找对象",
+    "description": "希望找到一个有艺术气质或至少能欣赏艺术的男性。年龄27-35岁，最好在成都或愿意接受异地恋。他应该是个有趣的人，有自己的爱好和追求，能够理解自由职业者的生活方式。我希望我们能一起去旅行，一起发现生活中的美好。不需要他也是艺术相关行业，但要有开放的心态和审美品味。"
+  },
+  "metadata": {
+    "profile_type": "dating",
+    "created_date": "2024",
+    "tags": {
+      "age": "26-30岁",
+      "profession": "摄影师",
+      "personality": ["外向热情", "感性细腻", "乐观向上", "创意丰富"],
+      "interests": ["摄影", "旅行", "美食", "音乐", "艺术展览"],
+      "lifestyle": ["自由灵活", "社交型", "追求美感", "享受当下"],
+      "values": ["真实自然", "艺术表达", "情感连接", "自由创作"],
+      "relationship_goals": ["寻找真爱", "精神伴侣", "共同成长"],
+      "location": "成都"
+    }
+  }
+} 

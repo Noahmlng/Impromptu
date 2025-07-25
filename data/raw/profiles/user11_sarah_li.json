@@ -1,0 +1,118 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "李莎拉 Sarah",
+      "nickname": "Sarah",
+      "greeting": "音乐让生活更美好！"
+    },
+    "professional": {
+      "current_role": "小学音乐教师",
+      "responsibilities": [
+        "音乐课程教学",
+        "合唱团指导",
+        "学校演出策划",
+        "乐器培训"
+      ],
+      "previous_experience": [
+        "私人钢琴教师",
+        "音乐培训机构",
+        "教育志愿者"
+      ],
+      "industry": "教育/艺术"
+    },
+    "personal": {
+      "age_range": "26-30岁",
+      "location": "成都",
+      "living_situation": "与室友合租",
+      "pets": "养了一只金毛犬"
+    },
+    "personality": {
+      "mbti_type": "ESFP",
+      "personality_traits": [
+        "外向活泼",
+        "富有创造力",
+        "热情开朗",
+        "善于沟通"
+      ],
+      "interests": [
+        "音乐创作",
+        "钢琴演奏",
+        "户外活动",
+        "烹饪",
+        "摄影"
+      ],
+      "lifestyle": [
+        "早睡早起",
+        "社交活跃",
+        "运动爱好者",
+        "艺术气息"
+      ],
+      "values": [
+        "教育使命",
+        "创造美好",
+        "关爱他人",
+        "快乐至上"
+      ]
+    },
+    "social_media": {
+      "douyin": {
+        "platform": "抖音",
+        "username": "Sarah音乐课堂",
+        "description": "分享音乐教学与生活美好瞬间",
+        "followers": "8万粉丝"
+      },
+      "bilibili": {
+        "platform": "哔哩哔哩",
+        "username": "钢琴Sarah老师",
+        "description": "原创音乐作品与教学视频"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "douyin",
+          "title": "用音乐开启孩子们的创造力 | 音乐老师的日常",
+          "content": "今天给二年级的小朋友们上了一堂特别的音乐课，让他们用身边的物品创造节拍。看到他们专注的小脸和开心的笑容，觉得选择做音乐老师真是太幸福了！音乐不只是技巧，更是表达情感和创造力的方式。每个孩子都有音乐天赋，我的工作就是帮他们发现并培养这份天赋。🎵✨",
+          "tags": ["#音乐教育", "#小学生", "#创造力", "#教师生活"],
+          "engagement": "2.3万赞 856评论"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "你最喜欢音乐的哪个方面？",
+        "answer": "我最喜欢音乐的治愈力量。无论是演奏时的专注，还是看到学生们因为音乐而快乐的表情，都让我觉得音乐能够连接人心，传递美好。"
+      },
+      {
+        "question": "你希望找到什么样的另一半？",
+        "answer": "希望他也是个有艺术感悟力的人，不一定要懂音乐，但要能欣赏美好的事物。性格上希望能包容我的活泼，也愿意和我一起探索生活中的小美好。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "relationship_goals": [
+        "寻找真爱",
+        "长期关系",
+        "精神伙伴"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找对象",
+    "description": "希望找到一个有艺术感悟、性格温和的男生。年龄26-35岁，最好也在成都或愿意来成都发展。我是个比较活泼的人，希望他能包容我的热情，也愿意和我分享生活中的美好瞬间。我们可以一起听音乐会、看展览，一起探索这座城市的文艺角落。希望建立真诚深入的关系。"
+  },
+  "metadata": {
+    "profile_type": "dating",
+    "created_date": "2024",
+    "tags": {
+      "age": "26-30岁",
+      "profession": "音乐教师",
+      "personality": ["外向活泼", "富有创造力", "热情开朗", "善于沟通"],
+      "interests": ["音乐创作", "钢琴演奏", "户外活动", "烹饪", "摄影"],
+      "lifestyle": ["早睡早起", "社交活跃", "运动爱好者", "艺术气息"],
+      "values": ["教育使命", "创造美好", "关爱他人", "快乐至上"],
+      "relationship_goals": ["寻找真爱", "长期关系", "精神伙伴"],
+      "location": "成都"
+    }
+  }
+} 

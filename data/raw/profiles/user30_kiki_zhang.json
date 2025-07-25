@@ -1,0 +1,120 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "张琪琪 Kiki",
+      "nickname": "Kiki",
+      "greeting": "设计改变世界，创意点亮生活"
+    },
+    "professional": {
+      "current_role": "UI/UX设计师",
+      "responsibilities": [
+        "移动端界面设计",
+        "用户体验研究",
+        "原型制作",
+        "设计规范制定"
+      ],
+      "previous_experience": [
+        "培训班学习设计",
+        "电商公司设计实习",
+        "自由接单设计师"
+      ],
+      "industry": "互联网设计"
+    },
+    "personal": {
+      "age_range": "24-28岁",
+      "location": "厦门",
+      "living_situation": "和闺蜜合租",
+      "pets": "养了一只布偶猫"
+    },
+    "personality": {
+      "mbti_type": "ENFP",
+      "personality_traits": [
+        "创意无限",
+        "乐观向上",
+        "敏感细腻",
+        "追求完美"
+      ],
+      "interests": [
+        "平面设计",
+        "时尚潮流",
+        "插画手绘",
+        "动漫二次元",
+        "美妆穿搭"
+      ],
+      "lifestyle": [
+        "熬夜达人",
+        "社交活跃",
+        "追求美感",
+        "自由创作"
+      ],
+      "values": [
+        "创意表达",
+        "美学追求",
+        "个性独立",
+        "持续学习"
+      ]
+    },
+    "social_media": {
+      "xiaohongshu": {
+        "platform": "小红书",
+        "username": "设计师Kiki的日常",
+        "description": "分享设计灵感和美学生活",
+        "followers": "5.8万粉丝"
+      },
+      "behance": {
+        "platform": "Behance",
+        "username": "KikiDesigns",
+        "bio": "Self-taught UI/UX designer passionate about creating beautiful experiences"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "xiaohongshu",
+          "title": "高中毕业做设计师：非科班出身也能闯出一片天",
+          "content": "很多人问我高中学历怎么做设计师？其实设计看的是作品不是文凭！我高考失利后去培训班学了半年设计，然后疯狂练习，每天画图到凌晨。从最开始的模仿到现在有自己的风格，用了3年时间。分享几个心得：1）多看优秀作品，培养审美 2）勤加练习，技能比学历重要 3）保持学习，设计趋势变化很快。现在我的作品也能上Behance首页了！梦想不分出身，努力就有回报。",
+          "tags": ["#UI设计", "#非科班", "#自学设计", "#励志"],
+          "engagement": "3.2万赞 891评论 1.8万收藏"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "没有大学学历在设计行业会不会受限？",
+        "answer": "确实会有一些大公司卡学历，但现在很多公司更看重能力。我通过作品集证明自己的实力，也能拿到不错的机会。关键是要持续学习，跟上行业发展。"
+      },
+      {
+        "question": "你希望另一半是什么类型的人？",
+        "answer": "希望他有创意思维，能理解设计师的工作节奏。最好也是做创意相关工作的，我们能有共同话题。颜值不一定要很高，但一定要有自己的审美品味。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "relationship_goals": [
+        "寻找创意伙伴",
+        "精神共鸣",
+        "美学共享",
+        "共同成长"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找对象",
+    "description": "希望找到一个有审美品味、理解创意工作的男生，年龄26-32岁，最好在厦门或愿意来厦门。他可以是设计师、摄影师、或其他创意行业的人。我们可以一起讨论设计，一起去看展览，一起创造美好的作品。学历不重要，重要的是要有共同的兴趣和价值观。"
+  },
+  "metadata": {
+    "profile_type": "dating",
+    "created_date": "2024",
+    "tags": {
+      "age": "24-28岁",
+      "profession": "UI/UX设计师",
+      "education": "高中",
+      "personality": ["创意无限", "乐观向上", "敏感细腻", "追求完美"],
+      "interests": ["平面设计", "时尚潮流", "插画手绘", "动漫二次元", "美妆穿搭"],
+      "lifestyle": ["熬夜达人", "社交活跃", "追求美感", "自由创作"],
+      "values": ["创意表达", "美学追求", "个性独立", "持续学习"],
+      "relationship_goals": ["寻找创意伙伴", "精神共鸣", "美学共享", "共同成长"],
+      "location": "厦门"
+    }
+  }
+} 

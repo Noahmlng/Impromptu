@@ -1,0 +1,119 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "吴安德 Andrew",
+      "nickname": "Andrew",
+      "greeting": "用设计思维解决问题，创造更好的用户体验"
+    },
+    "professional": {
+      "current_role": "高级产品设计师",
+      "responsibilities": [
+        "产品交互设计",
+        "用户研究分析",
+        "设计系统搭建",
+        "跨部门协作"
+      ],
+      "previous_experience": [
+        "中央美术学院工业设计",
+        "字节跳动产品设计实习",
+        "小红书产品设计师"
+      ],
+      "industry": "互联网产品"
+    },
+    "personal": {
+      "age_range": "26-30岁",
+      "location": "北京",
+      "living_situation": "独居",
+      "pets": "养了一只柯基"
+    },
+    "personality": {
+      "mbti_type": "INFJ",
+      "personality_traits": [
+        "理性思考",
+        "用户导向",
+        "追求极致",
+        "系统思维"
+      ],
+      "interests": [
+        "产品设计",
+        "用户心理学",
+        "科技前沿",
+        "摄影后期",
+        "极简美学"
+      ],
+      "lifestyle": [
+        "工作专注",
+        "生活规律",
+        "品质追求",
+        "持续学习"
+      ],
+      "values": [
+        "用户至上",
+        "专业精神",
+        "创新思维",
+        "团队协作"
+      ]
+    },
+    "social_media": {
+      "zhihu": {
+        "platform": "知乎",
+        "username": "产品设计师Andrew",
+        "description": "分享产品设计思考和用户体验洞察"
+      },
+      "dribbble": {
+        "platform": "Dribbble",
+        "username": "AndrewWu_Design",
+        "bio": "Product Designer crafting delightful user experiences"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "zhihu",
+          "title": "从央美工设到互联网产品设计师：我的专业转型思考",
+          "content": "大学学的是传统工业设计，毕业后却选择了互联网产品设计。两个领域虽然都叫设计，但思维方式差别很大。工业设计更注重形态和材料，产品设计更关注用户和数据。分享几个转型心得：1）要理解商业逻辑，设计不只是好看 2）数据驱动设计决策，而不是主观感受 3）快速迭代比完美更重要。现在做C端产品设计，每次看到用户数据增长都特别有成就感。设计的价值就是让更多人享受更好的体验。",
+          "tags": ["#产品设计", "#UX设计", "#职业转型", "#用户体验"],
+          "engagement": "2.8万赞 456评论"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "产品设计师最重要的能力是什么？",
+        "answer": "我觉得是同理心和逻辑思维的结合。要能站在用户角度思考问题，同时用数据和逻辑验证设计决策。技法可以学，但这种思维方式需要长期培养。"
+      },
+      {
+        "question": "你理想的另一半是什么样的？",
+        "answer": "希望她也有自己的专业追求，能理解互联网行业的节奏。最好有一定的审美能力，我们可以一起讨论设计和生活。性格上希望比我外向一些，能带我体验更多生活的美好。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "relationship_goals": [
+        "寻找知音",
+        "专业互补",
+        "共同成长",
+        "美学共享"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找对象",
+    "description": "希望找到一个有独立事业、理解互联网行业的女性，年龄24-29岁，最好在北京或一线城市。她不一定要懂设计，但要有一定的审美能力和学习能力。希望我们能在专业上互相启发，在生活中互相陪伴。我比较内向，希望她能带我体验更多生活的乐趣。"
+  },
+  "metadata": {
+    "profile_type": "dating",
+    "created_date": "2024",
+    "tags": {
+      "age": "26-30岁",
+      "profession": "产品设计师",
+      "education": "大学",
+      "personality": ["理性思考", "用户导向", "追求极致", "系统思维"],
+      "interests": ["产品设计", "用户心理学", "科技前沿", "摄影后期", "极简美学"],
+      "lifestyle": ["工作专注", "生活规律", "品质追求", "持续学习"],
+      "values": ["用户至上", "专业精神", "创新思维", "团队协作"],
+      "relationship_goals": ["寻找知音", "专业互补", "共同成长", "美学共享"],
+      "location": "北京"
+    }
+  }
+} 

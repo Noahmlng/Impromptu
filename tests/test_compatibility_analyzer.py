@@ -1,10 +1,18 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
-import unittest
-import json
+import sys
 import os
-from llm_compatibility_analyzer import KimiCompatibilityAnalyzer
-from models import UserRequest, CompatibilityResult
+import json
+import tempfile
+from pathlib import Path
+
+# 添加项目根目录到Python路径
+project_root = Path(__file__).parent.parent
+sys.path.append(str(project_root))
+
+from src.algorithms.tag_compatibility_analyzer import EnhancedCompatibilityAnalyzer
+from src.models import UserRequest, CompatibilityResult
 
 class TestCompatibilityAnalyzer(unittest.TestCase):
     
@@ -14,7 +22,7 @@ class TestCompatibilityAnalyzer(unittest.TestCase):
         if not os.getenv('KIMI_API_KEY'):
             self.skipTest("KIMI_API_KEY not available")
             
-        self.analyzer = KimiCompatibilityAnalyzer()
+        self.analyzer = EnhancedCompatibilityAnalyzer()
         
         # Create test profile data
         self.test_profile_a = {

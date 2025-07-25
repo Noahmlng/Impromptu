@@ -7,9 +7,17 @@
 测试新的简洁JSON输出格式，只包含各个方向的匹配值和匹配描述
 """
 
+import sys
 import os
 import json
-from tag_compatibility_analyzer import EnhancedCompatibilityAnalyzer
+import tempfile
+from pathlib import Path
+
+# 添加项目根目录到Python路径
+project_root = Path(__file__).parent.parent
+sys.path.append(str(project_root))
+
+from src.algorithms.tag_compatibility_analyzer import EnhancedCompatibilityAnalyzer
 
 def test_simple_json_output():
     """测试简洁JSON输出"""

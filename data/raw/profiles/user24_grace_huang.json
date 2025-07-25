@@ -1,0 +1,118 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "黄雅雯 Grace",
+      "nickname": "Grace",
+      "greeting": "数据驱动决策，理性创造价值"
+    },
+    "professional": {
+      "current_role": "资深金融分析师",
+      "responsibilities": [
+        "股票研究分析",
+        "投资策略制定",
+        "客户投资咨询",
+        "市场风险评估"
+      ],
+      "previous_experience": [
+        "纽约华尔街投行",
+        "香港汇丰银行",
+        "哥伦比亚大学MBA"
+      ],
+      "industry": "金融投资"
+    },
+    "personal": {
+      "age_range": "30-34岁",
+      "location": "上海",
+      "living_situation": "独居高档公寓",
+      "pets": "养了一只英短猫"
+    },
+    "personality": {
+      "mbti_type": "ENTJ",
+      "personality_traits": [
+        "理性决断",
+        "目标导向",
+        "国际视野",
+        "追求卓越"
+      ],
+      "interests": [
+        "投资理财",
+        "马术",
+        "艺术收藏",
+        "高端美食",
+        "跨文化交流"
+      ],
+      "lifestyle": [
+        "精英社交",
+        "品质生活",
+        "效率至上",
+        "全球化思维"
+      ],
+      "values": [
+        "财务自由",
+        "专业精神",
+        "国际化",
+        "独立自主"
+      ]
+    },
+    "social_media": {
+      "linkedin": {
+        "platform": "LinkedIn",
+        "username": "Grace Huang - Senior Financial Analyst",
+        "bio": "Wall Street veteran | Investment strategy expert | Columbia MBA"
+      },
+      "zhihu": {
+        "platform": "知乎",
+        "username": "华尔街Grace",
+        "description": "分享投资理念和海外金融经验"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "zhihu",
+          "title": "从华尔街回国创业：中美金融市场的差异思考",
+          "content": "在纽约工作5年后回到上海，深刻感受到两个金融市场的差异。美国更注重制度和流程，中国更强调关系和机会。但两边都需要专业能力做基础。分享几个观察：1）A股散户比例高，情绪波动大 2）美股机构化程度高，更理性 3）中国新兴行业机会更多。现在我更多关注ESG投资和科技创新，这是未来趋势。投资不只是数字游戏，更是对未来的判断。",
+          "tags": ["#金融投资", "#华尔街", "#A股", "#投资策略"],
+          "engagement": "1.8万赞 432评论"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "海外工作经历对你最大的改变是什么？",
+        "answer": "让我更独立、更理性。在纽约那种竞争环境下，你必须证明自己的价值。回国后我保持了这种专业精神，但也学会了更好地适应本土文化。"
+      },
+      {
+        "question": "你希望另一半具备什么条件？",
+        "answer": "希望他有国际视野和独立事业，能理解我的工作压力。年龄比我大一些也没关系，成熟稳重比较重要。最好能一起规划财务和投资，共同实现财务自由。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "relationship_goals": [
+        "寻找事业伙伴",
+        "高质量恋爱",
+        "财务规划伴侣",
+        "国际化生活"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找对象",
+    "description": "希望找到有海外背景或国际视野的成功男性，年龄32-40岁，在上海或北京工作。他应该有自己的事业成就，能够理解金融行业的工作节奏。希望我们能在事业上互相支持，在投资理财方面有共同话题。我比较独立，不需要他养我，但希望能一起规划未来，实现更高的人生目标。"
+  },
+  "metadata": {
+    "profile_type": "dating",
+    "created_date": "2024",
+    "tags": {
+      "age": "30-34岁",
+      "profession": "金融分析师",
+      "personality": ["理性决断", "目标导向", "国际视野", "追求卓越"],
+      "interests": ["投资理财", "马术", "艺术收藏", "高端美食", "跨文化交流"],
+      "lifestyle": ["精英社交", "品质生活", "效率至上", "全球化思维"],
+      "values": ["财务自由", "专业精神", "国际化", "独立自主"],
+      "relationship_goals": ["寻找事业伙伴", "高质量恋爱", "财务规划伴侣", "国际化生活"],
+      "location": "上海"
+    }
+  }
+} 

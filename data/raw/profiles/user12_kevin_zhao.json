@@ -1,0 +1,116 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "赵凯文 Kevin",
+      "nickname": "Kevin",
+      "greeting": "理性思辨，公正为先"
+    },
+    "professional": {
+      "current_role": "商业律师合伙人",
+      "responsibilities": [
+        "公司法律事务",
+        "合同谈判",
+        "法律风险评估",
+        "团队管理"
+      ],
+      "previous_experience": [
+        "君合律师事务所",
+        "外资企业法务",
+        "政府法制办实习"
+      ],
+      "industry": "法律/服务"
+    },
+    "personal": {
+      "age_range": "30-34岁",
+      "location": "北京",
+      "living_situation": "独居公寓",
+      "pets": "无宠物"
+    },
+    "personality": {
+      "mbti_type": "ENTJ",
+      "personality_traits": [
+        "理性逻辑",
+        "领导能力",
+        "目标导向",
+        "决断力强"
+      ],
+      "interests": [
+        "法理研究",
+        "商业分析",
+        "高尔夫",
+        "红酒收藏",
+        "历史"
+      ],
+      "lifestyle": [
+        "高效工作",
+        "精英社交",
+        "品质生活",
+        "注重形象"
+      ],
+      "values": [
+        "公平正义",
+        "专业精神",
+        "诚信守则",
+        "成功导向"
+      ]
+    },
+    "social_media": {
+      "linkedin": {
+        "platform": "LinkedIn",
+        "username": "Kevin Zhao - Corporate Lawyer",
+        "description": "Senior Partner specializing in corporate law and M&A"
+      },
+      "wechat": {
+        "platform": "微信",
+        "username": "Kevin律师说法",
+        "description": "分享商业法律知识"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "linkedin",
+          "title": "中美商法差异对跨国并购的影响分析",
+          "content": "最近参与了几个跨国并购项目，深感中美两国商业法律体系的差异对交易结构设计的重要影响。从尽职调查到交割后整合，每个环节都需要充分考虑两国法律环境的不同。分享几个关键要点：1）合规要求的差异化处理 2）税务结构的优化设计 3）员工权益的平衡保护。法律人需要在专业深度和国际视野之间找到平衡。",
+          "tags": ["#商业法", "#跨国并购", "#法律实务"],
+          "engagement": "324 likes 89 comments"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "你认为什么是成功的合作关系？",
+        "answer": "成功的合作建立在互补能力、共同目标和相互信任的基础上。每个人都能发挥自己的专长，同时为共同的愿景努力。透明的沟通和清晰的权责分工也很重要。"
+      },
+      {
+        "question": "你希望找到什么样的事业伙伴？",
+        "answer": "希望是有商业头脑和执行力的人，能够在市场开拓或运营管理方面与我形成互补。最重要的是价值观一致，能够长期合作共赢。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "collaboration_interests": [
+        "法律科技创业",
+        "商业咨询",
+        "投资项目"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找队友",
+    "description": "正在寻找有志于法律科技创新的合作伙伴。我有丰富的法律实务经验和客户资源，希望找到技术背景或商业运营经验丰富的伙伴，一起开发针对中小企业的法律服务SaaS平台。理想的合作者应该有创业经历，理解B2B业务模式，具备产品思维。可以兼职合作开始，根据项目进展决定是否全职投入。"
+  },
+  "metadata": {
+    "profile_type": "teamwork",
+    "created_date": "2024",
+    "tags": {
+      "skills": ["法律咨询", "商业分析", "团队管理"],
+      "industry": "法律服务",
+      "project_type": ["创业项目", "法律科技"],
+      "collaboration_style": ["结果导向", "专业严谨", "长期合作"],
+      "experience_level": "高级水平",
+      "availability": "兼职参与",
+      "goals": ["商业成功", "行业创新", "价值创造"]
+    }
+  }
+} 

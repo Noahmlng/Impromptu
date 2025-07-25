@@ -1,0 +1,117 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "刘建明 James",
+      "nickname": "James",
+      "greeting": "以法为准，以理服人"
+    },
+    "professional": {
+      "current_role": "公司法律顾问",
+      "responsibilities": [
+        "合同审核",
+        "法律风险评估",
+        "诉讼代理",
+        "法律培训"
+      ],
+      "previous_experience": [
+        "知名律师事务所",
+        "互联网公司法务"
+      ],
+      "industry": "法律服务"
+    },
+    "personal": {
+      "age_range": "29-33岁",
+      "location": "北京",
+      "living_situation": "独居",
+      "pets": "无宠物"
+    },
+    "personality": {
+      "mbti_type": "ESTJ",
+      "personality_traits": [
+        "外向坚定",
+        "逻辑严谨",
+        "责任感强",
+        "目标导向"
+      ],
+      "interests": [
+        "法律研究",
+        "历史",
+        "辩论",
+        "网球",
+        "红酒"
+      ],
+      "lifestyle": [
+        "严谨有序",
+        "追求品质",
+        "社交活跃",
+        "注重形象"
+      ],
+      "values": [
+        "公平正义",
+        "诚信原则",
+        "专业精神",
+        "社会责任"
+      ]
+    },
+    "social_media": {
+      "zhihu": {
+        "platform": "知乎",
+        "username": "法律人James",
+        "description": "解读法律条文，分享职场法务经验"
+      },
+      "linkedin": {
+        "platform": "LinkedIn",
+        "username": "James Liu, Legal Counsel",
+        "bio": "Corporate Legal Counsel with expertise in tech law and contract management"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "zhihu",
+          "title": "互联网公司法务工作的那些事｜职场法律人的思考",
+          "content": "在互联网公司做法务3年了，见证了行业从野蛮生长到规范发展的过程。和传统律所不同，公司法务更像是业务的伙伴而不是阻碍者。分享几点体会：1）要懂业务，才能提供有价值的法律建议 2）风险控制和商业效率要平衡 3）合规不是束缚，而是为了更好的发展。最近在研究数据保护相关法律，这将是未来几年的重点。法律人也要与时俱进。",
+          "tags": ["#法务", "#互联网法律", "#职场", "#合规"],
+          "engagement": "423赞 78评论"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "法律工作会让你变得很严肃吗？",
+        "answer": "哈哈，确实工作时需要严谨，但生活中我还是很轻松的。我喜欢和朋友辩论时事，也享受品红酒的过程。法律训练让我思考更有逻辑，但不代表我不懂浪漫。"
+      },
+      {
+        "question": "你希望另一半是什么样的人？",
+        "answer": "希望她有独立的思想和事业，能够进行深入的交流。不一定要懂法律，但要有自己的专业领域。我比较传统，希望能建立稳定的家庭关系。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "relationship_goals": [
+        "寻找真爱",
+        "长期关系",
+        "结婚生子",
+        "事业伴侣"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找对象",
+    "description": "希望找到一个有事业心、有独立思考能力的女性。年龄26-32岁，最好在北京工作。她应该有自己的专业追求，我们可以在事业上互相支持。性格上希望她比较理性，但也不失女性的温柔。我相信好的婚姻应该是两个独立个体的结合，既有激情也有理性，既有浪漫也有现实考量。希望我们能一起规划未来，建立一个和谐的家庭。"
+  },
+  "metadata": {
+    "profile_type": "dating",
+    "created_date": "2024",
+    "tags": {
+      "age": "29-33岁",
+      "profession": "律师",
+      "personality": ["外向坚定", "逻辑严谨", "责任感强", "目标导向"],
+      "interests": ["法律研究", "历史", "辩论", "网球", "红酒"],
+      "lifestyle": ["严谨有序", "追求品质", "社交活跃", "注重形象"],
+      "values": ["公平正义", "诚信原则", "专业精神", "社会责任"],
+      "relationship_goals": ["寻找真爱", "长期关系", "结婚生子", "事业伴侣"],
+      "location": "北京"
+    }
+  }
+} 

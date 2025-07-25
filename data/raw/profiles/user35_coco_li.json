@@ -1,0 +1,119 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "李可可 Coco",
+      "nickname": "Coco",
+      "greeting": "Code is poetry, debug is life"
+    },
+    "professional": {
+      "current_role": "全栈开发工程师",
+      "responsibilities": [
+        "前端React开发",
+        "后端Node.js开发",
+        "数据库设计优化",
+        "DevOps运维部署"
+      ],
+      "previous_experience": [
+        "高中毕业后自学编程",
+        "在线教育平台实习",
+        "远程自由职业者"
+      ],
+      "industry": "互联网/软件开发"
+    },
+    "personal": {
+      "age_range": "22-26岁",
+      "location": "长沙",
+      "living_situation": "独居小公寓",
+      "pets": "养了一只橘猫"
+    },
+    "personality": {
+      "mbti_type": "INTP",
+      "personality_traits": [
+        "逻辑思维强",
+        "求知欲旺盛",
+        "内向专注",
+        "创新思维"
+      ],
+      "interests": [
+        "编程技术",
+        "开源项目",
+        "算法竞赛",
+        "技术博客",
+        "动漫游戏"
+      ],
+      "lifestyle": [
+        "夜猫子",
+        "宅女属性",
+        "效率优先",
+        "持续学习"
+      ],
+      "values": [
+        "技术驱动",
+        "知识共享",
+        "自由创作",
+        "持续进步"
+      ]
+    },
+    "social_media": {
+      "github": {
+        "platform": "GitHub",
+        "username": "coco-fullstack",
+        "bio": "Self-taught full-stack developer | Open source enthusiast"
+      },
+      "juejin": {
+        "platform": "掘金",
+        "username": "全栈少女Coco",
+        "description": "分享前后端技术和自学经验"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "juejin",
+          "title": "高中毕业4年成为全栈工程师：我的自学编程之路",
+          "content": "高考失利后没去读大学，而是选择自学编程。4年时间从HTML/CSS到现在的全栈开发，这条路虽然孤独但很充实。分享几个自学心得：1）制定系统的学习计划，循序渐进 2）多动手实践，理论结合项目 3）加入技术社区，找到学习伙伴 4）保持好奇心，紧跟技术趋势。现在我能独立完成Web应用的前后端开发，月薪也达到了15K。证明了一点：学历不是唯一出路，热爱和坚持更重要！",
+          "tags": ["#自学编程", "#全栈开发", "#非科班", "#技术成长"],
+          "engagement": "5.8万赞 1.2万评论 3.5万收藏"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "没有计算机学位在求职时会遇到什么困难？",
+        "answer": "确实会有一些大厂卡学历，但现在很多公司更看重实际能力。我通过GitHub作品和技术面试证明自己的实力。关键是要有过硬的技术和解决问题的能力。"
+      },
+      {
+        "question": "你希望另一半是什么样的人？",
+        "answer": "希望他也是技术型的人，能理解程序员的工作节奏。最好也喜欢学习新东西，我们可以一起讨论技术，一起成长。年龄差不多就行，重要的是三观合拍。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "relationship_goals": [
+        "寻找技术伙伴",
+        "共同学习成长",
+        "理解包容",
+        "简单纯粹"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找对象",
+    "description": "希望找到一个理解技术工作、有共同语言的男生，年龄24-30岁，最好也是程序员或相关技术背景。我比较宅，喜欢安静的环境，希望他能理解我的生活方式。学历不重要，重要的是要有学习能力和上进心。我们可以一起学技术，一起做有趣的项目。"
+  },
+  "metadata": {
+    "profile_type": "dating",
+    "created_date": "2024",
+    "tags": {
+      "age": "22-26岁",
+      "profession": "全栈开发工程师",
+      "education": "高中",
+      "personality": ["逻辑思维强", "求知欲旺盛", "内向专注", "创新思维"],
+      "interests": ["编程技术", "开源项目", "算法竞赛", "技术博客", "动漫游戏"],
+      "lifestyle": ["夜猫子", "宅女属性", "效率优先", "持续学习"],
+      "values": ["技术驱动", "知识共享", "自由创作", "持续进步"],
+      "relationship_goals": ["寻找技术伙伴", "共同学习成长", "理解包容", "简单纯粹"],
+      "location": "长沙"
+    }
+  }
+} 

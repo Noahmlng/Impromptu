@@ -1,0 +1,119 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "王晶晶 Crystal",
+      "nickname": "Crystal",
+      "greeting": "设计有温度的交互，创造有意义的体验"
+    },
+    "professional": {
+      "current_role": "高级交互设计师",
+      "responsibilities": [
+        "交互原型设计",
+        "用户体验研究",
+        "设计规范制定",
+        "跨团队协作"
+      ],
+      "previous_experience": [
+        "中央美术学院设计学学士",
+        "腾讯设计实习生",
+        "字节跳动交互设计师"
+      ],
+      "industry": "互联网设计"
+    },
+    "personal": {
+      "age_range": "27-31岁",
+      "location": "北京",
+      "living_situation": "独居",
+      "pets": "养了一只布偶猫"
+    },
+    "personality": {
+      "mbti_type": "INFP",
+      "personality_traits": [
+        "理想主义",
+        "创意思维",
+        "细致入微",
+        "追求完美"
+      ],
+      "interests": [
+        "用户体验",
+        "心理学",
+        "艺术展览",
+        "咖啡文化",
+        "独立音乐"
+      ],
+      "lifestyle": [
+        "品质生活",
+        "文艺范儿",
+        "独立思考",
+        "精神追求"
+      ],
+      "values": [
+        "用户至上",
+        "设计伦理",
+        "创新突破",
+        "人文关怀"
+      ]
+    },
+    "social_media": {
+      "dribbble": {
+        "platform": "Dribbble",
+        "username": "CrystalUX",
+        "bio": "Interaction designer crafting meaningful digital experiences"
+      },
+      "zhihu": {
+        "platform": "知乎",
+        "username": "交互设计师Crystal",
+        "description": "分享交互设计思考和用户体验洞察"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "zhihu",
+          "title": "从央美到大厂：艺术设计如何转向交互设计？",
+          "content": "大学学的是传统视觉传达，毕业后却选择了交互设计。两个领域看似相关，但思维方式很不同。艺术设计更注重视觉表达，交互设计更关注用户行为。分享几个转型心得：1）要理解用户心理，不只是做好看的界面 2）学会用数据验证设计假设 3）培养系统性思维，考虑完整的用户旅程。现在我在设计一个教育产品，每次看到用户反馈说我们的设计帮助他们更好地学习，就觉得特别有意义。设计的价值不是炫技，而是解决真实的问题。",
+          "tags": ["#交互设计", "#用户体验", "#设计转型", "#产品设计"],
+          "engagement": "1.9万赞 532评论"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "交互设计师最需要具备什么能力？",
+        "answer": "我觉得是同理心和逻辑思维的结合。要能站在用户角度思考问题，同时用系统性的方法设计解决方案。技能可以学，但这种思维方式需要持续培养。"
+      },
+      {
+        "question": "你理想的另一半是什么样的？",
+        "answer": "希望他有独立的思考能力和审美品味，能理解设计工作的特殊性。最好也在创意或科技行业，我们可以有共同话题。年龄相近，三观合拍比较重要。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "relationship_goals": [
+        "寻找精神共鸣",
+        "创意伙伴",
+        "高质量关系",
+        "相互启发"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找对象",
+    "description": "希望找到一个有创意思维、理解设计工作的男性，年龄28-34岁，最好在北京或一线城市。他应该有自己的专业追求，能够进行深度交流。最好也是创意或科技行业的人，我们可以互相启发。我比较理想主义，希望找到真正的精神伙伴，一起创造有意义的作品和生活。"
+  },
+  "metadata": {
+    "profile_type": "dating",
+    "created_date": "2024",
+    "tags": {
+      "age": "27-31岁",
+      "profession": "交互设计师",
+      "education": "大学",
+      "personality": ["理想主义", "创意思维", "细致入微", "追求完美"],
+      "interests": ["用户体验", "心理学", "艺术展览", "咖啡文化", "独立音乐"],
+      "lifestyle": ["品质生活", "文艺范儿", "独立思考", "精神追求"],
+      "values": ["用户至上", "设计伦理", "创新突破", "人文关怀"],
+      "relationship_goals": ["寻找精神共鸣", "创意伙伴", "高质量关系", "相互启发"],
+      "location": "北京"
+    }
+  }
+} 

@@ -1,0 +1,119 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "陈海伦娜 Helena",
+      "nickname": "Helena",
+      "greeting": "建筑是凝固的音乐，设计是空间的诗歌"
+    },
+    "professional": {
+      "current_role": "建筑设计公司创始人",
+      "responsibilities": [
+        "公司战略规划",
+        "项目创意总监",
+        "客户关系管理",
+        "团队建设管理"
+      ],
+      "previous_experience": [
+        "清华大学建筑学硕士",
+        "扎哈·哈迪德建筑事务所",
+        "国际知名建筑公司合伙人"
+      ],
+      "industry": "建筑设计"
+    },
+    "personal": {
+      "age_range": "35-39岁",
+      "location": "深圳",
+      "living_situation": "独居复式公寓",
+      "pets": "养了两只缅因猫"
+    },
+    "personality": {
+      "mbti_type": "ENTJ",
+      "personality_traits": [
+        "领导力强",
+        "视野宏大",
+        "执行力强",
+        "完美主义"
+      ],
+      "interests": [
+        "当代建筑",
+        "艺术收藏",
+        "国际旅行",
+        "红酒品鉴",
+        "建筑摄影"
+      ],
+      "lifestyle": [
+        "高端社交",
+        "国际化视野",
+        "品质生活",
+        "工作狂人"
+      ],
+      "values": [
+        "创新突破",
+        "美学追求",
+        "社会责任",
+        "专业卓越"
+      ]
+    },
+    "social_media": {
+      "linkedin": {
+        "platform": "LinkedIn",
+        "username": "Helena Chen - Principal Architect",
+        "bio": "Founder & Creative Director | Architectural visionary shaping urban landscapes"
+      },
+      "instagram": {
+        "platform": "Instagram",
+        "username": "@helena_architecture",
+        "bio": "Transforming spaces, creating experiences | Architectural entrepreneur"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "linkedin",
+          "title": "从国际建筑事务所到创业：为什么我选择回国创立自己的公司",
+          "content": "在伦敦工作5年后，我决定回深圳创立自己的建筑设计公司。很多人问我为什么放弃国外的高薪和平台？其实答案很简单：我想为中国的城市建设贡献自己的力量。这两年我们完成了20多个项目，从住宅到商业综合体，每个都融入了可持续设计理念。创业不容易，但看到自己的设计真正改变了人们的生活空间，这种成就感无可比拟。建筑不只是钢筋混凝土，更是承载人们梦想的容器。",
+          "tags": ["#建筑设计", "#创业", "#可持续建筑", "#城市规划"],
+          "engagement": "5.2万赞 892评论"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "创业最大的挑战是什么？",
+        "answer": "平衡创意理想和商业现实。作为设计师，我希望每个项目都是艺术品；作为创业者，我必须考虑成本和市场。关键是找到两者的平衡点，既不妥协设计品质，又能确保公司健康发展。"
+      },
+      {
+        "question": "你希望另一半具备什么特质？",
+        "answer": "希望他有国际视野和独立事业，能理解创业者的工作压力。年龄可以比我大一些，成熟稳重比较重要。最好能欣赏建筑和艺术，我们可以一起旅行，一起发现世界的美好。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "relationship_goals": [
+        "寻找事业伙伴",
+        "高质量恋爱",
+        "国际化生活",
+        "精神共鸣"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找对象",
+    "description": "希望找到一个成功、成熟的男性，年龄37-45岁，最好在深圳或一线城市。他应该有自己的事业成就，能理解创业者的工作节奏和压力。希望我们能在事业上互相支持，在生活中互相陪伴。我对另一半的要求比较高，但我也会全力经营这段感情。"
+  },
+  "metadata": {
+    "profile_type": "dating",
+    "created_date": "2024",
+    "tags": {
+      "age": "35-39岁",
+      "profession": "建筑设计师",
+      "education": "硕士",
+      "personality": ["领导力强", "视野宏大", "执行力强", "完美主义"],
+      "interests": ["当代建筑", "艺术收藏", "国际旅行", "红酒品鉴", "建筑摄影"],
+      "lifestyle": ["高端社交", "国际化视野", "品质生活", "工作狂人"],
+      "values": ["创新突破", "美学追求", "社会责任", "专业卓越"],
+      "relationship_goals": ["寻找事业伙伴", "高质量恋爱", "国际化生活", "精神共鸣"],
+      "location": "深圳"
+    }
+  }
+} 

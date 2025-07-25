@@ -1,0 +1,119 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "张立欧 Leo",
+      "nickname": "Leo",
+      "greeting": "硬件是灵魂，软件是生命"
+    },
+    "professional": {
+      "current_role": "高级嵌入式工程师",
+      "responsibilities": [
+        "嵌入式系统设计",
+        "MCU/FPGA开发",
+        "硬件电路设计",
+        "产品原型制作"
+      ],
+      "previous_experience": [
+        "西安电子科技大学电子工程",
+        "华为终端硬件工程师",
+        "汽车电子公司技术专家"
+      ],
+      "industry": "嵌入式系统"
+    },
+    "personal": {
+      "age_range": "30-34岁",
+      "location": "西安",
+      "living_situation": "独居",
+      "pets": "养了一只英短"
+    },
+    "personality": {
+      "mbti_type": "INTJ",
+      "personality_traits": [
+        "理性分析",
+        "追求完美",
+        "专业专注",
+        "创新思维"
+      ],
+      "interests": [
+        "嵌入式开发",
+        "电路设计",
+        "汽车技术",
+        "科技前沿",
+        "摄影后期"
+      ],
+      "lifestyle": [
+        "技术导向",
+        "规律作息",
+        "品质追求",
+        "深度思考"
+      ],
+      "values": [
+        "技术精进",
+        "工程质量",
+        "创新突破",
+        "专业精神"
+      ]
+    },
+    "social_media": {
+      "zhihu": {
+        "platform": "知乎",
+        "username": "嵌入式工程师Leo",
+        "description": "分享嵌入式技术和硬件设计经验"
+      },
+      "csdn": {
+        "platform": "CSDN",
+        "username": "LeoEmbedded",
+        "description": "记录嵌入式开发技术博客"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "zhihu",
+          "title": "从华为到汽车电子：嵌入式工程师的技术演进之路",
+          "content": "在华为做了3年终端硬件后，转到汽车电子行业，感受到了完全不同的技术挑战。手机追求小型化和功耗，汽车更注重稳定性和安全性。分享几个技术感悟：1）不同行业的嵌入式需求差异很大 2）实时性和可靠性是汽车电子的核心 3）AUTOSAR标准让软件架构更规范。现在正在研究ADAS系统，毫米波雷达和视觉融合很有挑战性。技术无止境，每天都在学习新东西。",
+          "tags": ["#嵌入式", "#汽车电子", "#ADAS", "#硬件设计"],
+          "engagement": "1.5万赞 385评论"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "嵌入式开发最有挑战性的是什么？",
+        "answer": "我觉得是系统级的优化和调试。嵌入式资源有限，需要在性能、功耗、成本之间找平衡。而且调试环境受限，有时候一个bug要查很久。但解决问题的成就感也很大。"
+      },
+      {
+        "question": "你希望另一半是什么样的人？",
+        "answer": "希望她有独立的思考能力，不一定懂技术但要能理解我的工作。我比较内向，希望她能带我体验更多生活的乐趣。最好也在西安，或者愿意来西安发展。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "relationship_goals": [
+        "寻找理解者",
+        "互补性格",
+        "稳定发展",
+        "技术与生活平衡"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找对象",
+    "description": "希望找到一个有独立思考能力、能理解技术工作的女性，年龄26-32岁，最好在西安或愿意来西安。她不需要也是技术背景，但要支持我的职业发展。我性格比较内向，希望她能带我体验更多生活的乐趣。希望我们能建立稳定的关系，在技术与生活之间找到平衡。"
+  },
+  "metadata": {
+    "profile_type": "dating",
+    "created_date": "2024",
+    "tags": {
+      "age": "30-34岁",
+      "profession": "嵌入式工程师",
+      "education": "大学",
+      "personality": ["理性分析", "追求完美", "专业专注", "创新思维"],
+      "interests": ["嵌入式开发", "电路设计", "汽车技术", "科技前沿", "摄影后期"],
+      "lifestyle": ["技术导向", "规律作息", "品质追求", "深度思考"],
+      "values": ["技术精进", "工程质量", "创新突破", "专业精神"],
+      "relationship_goals": ["寻找理解者", "互补性格", "稳定发展", "技术与生活平衡"],
+      "location": "西安"
+    }
+  }
+} 

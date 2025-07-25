@@ -1,0 +1,122 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "王尔力 Eric",
+      "nickname": "Eric",
+      "greeting": "创新改变世界"
+    },
+    "professional": {
+      "current_role": "AI初创公司创始人",
+      "responsibilities": [
+        "产品规划",
+        "团队管理",
+        "融资谈判",
+        "战略决策"
+      ],
+      "previous_experience": [
+        "字节跳动算法工程师",
+        "斯坦福大学博士后"
+      ],
+      "industry": "人工智能/创业"
+    },
+    "personal": {
+      "age_range": "31-35岁",
+      "location": "深圳",
+      "living_situation": "独居",
+      "pets": "无宠物（太忙了）"
+    },
+    "personality": {
+      "mbti_type": "ENTJ",
+      "personality_traits": [
+        "外向自信",
+        "战略思维",
+        "执行力强",
+        "风险承担者"
+      ],
+      "interests": [
+        "人工智能",
+        "商业策略",
+        "高尔夫",
+        "投资理财",
+        "科技前沿"
+      ],
+      "lifestyle": [
+        "高效率",
+        "压力承受力强",
+        "社交型",
+        "成果导向"
+      ],
+      "values": [
+        "创新突破",
+        "价值创造",
+        "团队合作",
+        "长远视野"
+      ]
+    },
+    "social_media": {
+      "linkedin": {
+        "platform": "LinkedIn",
+        "username": "Eric Wang - AI Entrepreneur",
+        "bio": "Founder & CEO at InnovaAI | Former ByteDance | Stanford PhD"
+      },
+      "zhihu": {
+        "platform": "知乎",
+        "username": "AI创业者Eric",
+        "description": "分享AI技术和创业经验"
+      },
+      "twitter": {
+        "platform": "Twitter",
+        "username": "@EricWangAI",
+        "bio": "Building the future with AI | Entrepreneur | Tech enthusiast"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "zhihu",
+          "title": "从大厂到创业：我为什么选择All in AI｜创业者自述",
+          "content": "离开字节跳动创业一年了，很多人问我后悔吗？说不紧张是假的，但我从未后悔。在大厂工作让我积累了技术和管理经验，但创业让我真正感受到创造的力量。我们的AI产品已经服务了50万用户，B轮融资也在进行中。创业教会我：1）技术要解决真实问题 2）团队比个人能力更重要 3）坚持比聪明更珍贵。现在AI赛道竞争激烈，但我相信专注和坚持会带来回报。",
+          "tags": ["#创业", "#人工智能", "#大厂", "#融资"],
+          "engagement": "2.1万赞 456评论"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "创业最困难的时候是什么样的？",
+        "answer": "最困难的是A轮融资被拒绝的那段时间，账上只剩两个月的资金，团队有人要离职。那时候每天凌晨两点还在修改BP，白天还要装作很淡定。但正是这些困难让我成长，也让团队更团结。"
+      },
+      {
+        "question": "你希望找到什么样的人生伴侣？",
+        "answer": "希望她能理解创业者的生活节奏，有自己的事业和追求。我的时间不能完全自由支配，但我会努力平衡工作和感情。希望我们能成为彼此的支持者，一起面对未来的挑战。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "relationship_goals": [
+        "寻找真爱",
+        "人生伴侣",
+        "相互支持",
+        "共同成长"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找对象",
+    "description": "希望找到一个独立、理解创业生活的女性。年龄28-34岁，最好在深圳或一线城市。她应该有自己的事业追求，能够理解我作为创业者的工作压力和时间安排。我希望我们是平等的伙伴关系，可以在事业上互相支持，在生活中互相依靠。不需要她也是创业者，但要有开放的心态和积极的人生观。希望我们能一起规划未来，建立一个相互支持的家庭。"
+  },
+  "metadata": {
+    "profile_type": "dating",
+    "created_date": "2024",
+    "tags": {
+      "age": "31-35岁",
+      "profession": "创业者",
+      "personality": ["外向自信", "战略思维", "执行力强", "风险承担者"],
+      "interests": ["人工智能", "商业策略", "高尔夫", "投资理财", "科技前沿"],
+      "lifestyle": ["高效率", "压力承受力强", "社交型", "成果导向"],
+      "values": ["创新突破", "价值创造", "团队合作", "长远视野"],
+      "relationship_goals": ["寻找真爱", "人生伴侣", "相互支持", "共同成长"],
+      "location": "深圳"
+    }
+  }
+} 

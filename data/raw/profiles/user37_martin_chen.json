@@ -1,0 +1,120 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "陈马丁 Martin",
+      "nickname": "Martin",
+      "greeting": "用技术改变世界，用产品创造价值"
+    },
+    "professional": {
+      "current_role": "软件科技公司创始人兼CTO",
+      "responsibilities": [
+        "技术战略规划",
+        "产品架构设计",
+        "团队技术管理",
+        "投资人关系维护"
+      ],
+      "previous_experience": [
+        "北京邮电大学计算机硕士",
+        "腾讯高级工程师",
+        "美团技术专家",
+        "3次创业经历"
+      ],
+      "industry": "企业级SaaS"
+    },
+    "personal": {
+      "age_range": "36-40岁",
+      "location": "杭州",
+      "living_situation": "独居别墅",
+      "pets": "养了一只萨摩耶"
+    },
+    "personality": {
+      "mbti_type": "ENTP",
+      "personality_traits": [
+        "战略思维",
+        "创新领导",
+        "风险承担",
+        "执行力强"
+      ],
+      "interests": [
+        "企业管理",
+        "技术架构",
+        "投资理财",
+        "户外运动",
+        "商业思考"
+      ],
+      "lifestyle": [
+        "高效工作",
+        "品质生活",
+        "社交活跃",
+        "持续学习"
+      ],
+      "values": [
+        "价值创造",
+        "技术驱动",
+        "团队合作",
+        "长期主义"
+      ]
+    },
+    "social_media": {
+      "linkedin": {
+        "platform": "LinkedIn",
+        "username": "Martin Chen - Tech Entrepreneur",
+        "bio": "Serial entrepreneur | Building enterprise software solutions | Ex-Tencent/Meituan"
+      },
+      "zhihu": {
+        "platform": "知乎",
+        "username": "创业技术人Martin",
+        "description": "分享技术创业和团队管理经验"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "zhihu",
+          "title": "第三次创业的思考：从技术专家到创业者的转型",
+          "content": "这是我第三次创业了，前两次都以失败告终，但每次都学到很多。从技术专家到创业者，最大的挑战不是技术，而是如何平衡技术理想和商业现实。分享几个心得：1）技术只是手段，解决客户问题才是目的 2）找对合伙人比找对方向更重要 3）现金流比估值更重要 4）团队文化决定公司上限。现在我们的企业级SaaS产品已经服务了500+客户，B轮融资也在进行中。创业路很难，但改变世界的梦想从未改变。",
+          "tags": ["#技术创业", "#SaaS", "#团队管理", "#创业心得"],
+          "engagement": "3.8万赞 1.2万评论"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "技术出身的创业者有什么优势和劣势？",
+        "answer": "优势是对技术趋势敏感，能做出真正有技术门槛的产品。劣势是容易过度工程化，忽视市场需求。我花了很多年学会用商业思维思考问题。"
+      },
+      {
+        "question": "你希望另一半具备什么条件？",
+        "answer": "希望她有独立的事业和思考，能理解创业者的压力和不确定性。年龄可以比我小一些，但一定要成熟理性。最好能成为我事业上的顾问，生活中的伙伴。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "relationship_goals": [
+        "寻找事业伙伴",
+        "高质量关系",
+        "相互成就",
+        "理性成熟"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找对象",
+    "description": "希望找到一个独立、成熟、有事业心的女性，年龄30-36岁，最好在杭州或一线城市。她应该能理解创业者的生活节奏，有自己的专业追求。我经历过创业的起伏，现在更看重精神层面的契合。希望我们能成为彼此事业的支持者，生活的伙伴，一起面对未来的挑战和机遇。"
+  },
+  "metadata": {
+    "profile_type": "dating",
+    "created_date": "2024",
+    "tags": {
+      "age": "36-40岁",
+      "profession": "软件创业者",
+      "education": "硕士",
+      "personality": ["战略思维", "创新领导", "风险承担", "执行力强"],
+      "interests": ["企业管理", "技术架构", "投资理财", "户外运动", "商业思考"],
+      "lifestyle": ["高效工作", "品质生活", "社交活跃", "持续学习"],
+      "values": ["价值创造", "技术驱动", "团队合作", "长期主义"],
+      "relationship_goals": ["寻找事业伙伴", "高质量关系", "相互成就", "理性成熟"],
+      "location": "杭州"
+    }
+  }
+} 

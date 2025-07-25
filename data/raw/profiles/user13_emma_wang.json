@@ -1,0 +1,118 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "王艾玛 Emma",
+      "nickname": "Emma",
+      "greeting": "文字是心灵的窗户"
+    },
+    "professional": {
+      "current_role": "自由撰稿人/文学编辑",
+      "responsibilities": [
+        "杂志专栏写作",
+        "文学作品编辑",
+        "品牌软文撰写",
+        "文学翻译"
+      ],
+      "previous_experience": [
+        "《青年文学》编辑",
+        "互联网公司内容运营",
+        "文学网站兼职编辑"
+      ],
+      "industry": "文化/媒体"
+    },
+    "personal": {
+      "age_range": "27-31岁",
+      "location": "厦门",
+      "living_situation": "独居小公寓",
+      "pets": "养了一只英短猫咪"
+    },
+    "personality": {
+      "mbti_type": "INFP",
+      "personality_traits": [
+        "内向敏感",
+        "富有想象力",
+        "理想主义",
+        "情感丰富"
+      ],
+      "interests": [
+        "文学创作",
+        "独立电影",
+        "摄影",
+        "咖啡文化",
+        "植物养护"
+      ],
+      "lifestyle": [
+        "夜猫子",
+        "慢生活",
+        "文艺青年",
+        "简约主义"
+      ],
+      "values": [
+        "精神自由",
+        "真实表达",
+        "艺术追求",
+        "内心平静"
+      ]
+    },
+    "social_media": {
+      "wechat_public": {
+        "platform": "微信公众号",
+        "username": "Emma的文字花园",
+        "description": "记录生活，思考人生",
+        "followers": "1.2万关注"
+      },
+      "douban": {
+        "platform": "豆瓣",
+        "username": "猫咪与文字",
+        "description": "书影音分享与生活感悟"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "wechat_public",
+          "title": "在快节奏时代里寻找慢生活的意义",
+          "content": "最近在读《瓦尔登湖》，被梭罗的生活哲学深深打动。在这个所有人都在追求效率和速度的时代，我却越来越向往那种简单纯粹的生活。今早坐在阳台上，看着猫咪懒洋洋地晒太阳，突然明白什么是真正的富足。不是物质的丰盈，而是内心的充实和对当下的珍惜。写作让我学会观察生活的细节，发现平凡中的美好。或许这就是文字的魅力，它能让我们在匆忙中停下来，重新审视生活的本质。",
+          "tags": ["#慢生活", "#文学思考", "#生活哲学"],
+          "engagement": "1.8万阅读 567赞"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "写作对你意味着什么？",
+        "answer": "写作是我与世界对话的方式，也是我理解自己内心的工具。通过文字，我可以表达那些无法言喻的情感，也能与读者产生深层的共鸣。"
+      },
+      {
+        "question": "你理想的生活伴侣是什么样的？",
+        "answer": "希望他也是个有内在世界的人，我们可以分享彼此的思考和感受。不需要时刻在一起，但要能够相互理解和支持各自的追求。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "relationship_goals": [
+        "精神伙伴",
+        "深度连接",
+        "相互成长"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找对象",
+    "description": "希望遇到一个有精神追求的人，年龄27-35岁。他不一定要从事文艺工作，但要能理解我对文字和艺术的热爱。我喜欢安静的相处，深度的交流，一起看电影、读书、讨论人生。希望我们能在各自的世界里发光，同时给彼此温暖的陪伴。地理位置不是主要考虑因素，精神契合更重要。"
+  },
+  "metadata": {
+    "profile_type": "dating",
+    "created_date": "2024",
+    "tags": {
+      "age": "27-31岁",
+      "profession": "自由撰稿人",
+      "personality": ["内向敏感", "富有想象力", "理想主义", "情感丰富"],
+      "interests": ["文学创作", "独立电影", "摄影", "咖啡文化", "植物养护"],
+      "lifestyle": ["夜猫子", "慢生活", "文艺青年", "简约主义"],
+      "values": ["精神自由", "真实表达", "艺术追求", "内心平静"],
+      "relationship_goals": ["精神伙伴", "深度连接", "相互成长"],
+      "location": "厦门"
+    }
+  }
+} 

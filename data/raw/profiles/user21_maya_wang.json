@@ -1,0 +1,118 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "王玛雅 Maya",
+      "nickname": "Maya",
+      "greeting": "艺术让灵魂相遇"
+    },
+    "professional": {
+      "current_role": "艺术史博士候选人",
+      "responsibilities": [
+        "博士论文研究",
+        "博物馆策展",
+        "学术论文发表",
+        "艺术评论写作"
+      ],
+      "previous_experience": [
+        "伦敦大学学院",
+        "大英博物馆实习",
+        "苏富比拍卖行"
+      ],
+      "industry": "学术研究/艺术"
+    },
+    "personal": {
+      "age_range": "26-30岁",
+      "location": "伦敦",
+      "living_situation": "独居",
+      "pets": "无宠物"
+    },
+    "personality": {
+      "mbti_type": "INFP",
+      "personality_traits": [
+        "敏感细腻",
+        "理想主义",
+        "深度思考",
+        "文化包容"
+      ],
+      "interests": [
+        "文艺复兴艺术",
+        "古典音乐",
+        "诗歌创作",
+        "欧洲历史",
+        "哲学思辨"
+      ],
+      "lifestyle": [
+        "慢生活",
+        "文化沉浸",
+        "深度社交",
+        "精神追求"
+      ],
+      "values": [
+        "文化理解",
+        "精神共鸣",
+        "个人成长",
+        "跨文化交流"
+      ]
+    },
+    "social_media": {
+      "instagram": {
+        "platform": "Instagram",
+        "username": "@maya_art_historian",
+        "bio": "PhD in Art History | Renaissance lover | Cultural bridge between East and West"
+      },
+      "medium": {
+        "platform": "Medium",
+        "username": "Maya Wang",
+        "description": "Writing about art, culture, and identity"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "medium",
+          "title": "在佛罗伦萨的乌菲兹美术馆，我重新理解了东方美学",
+          "content": "站在波提切利的《春》前，我突然意识到东西方艺术对美的理解如此不同。西方追求永恒的形式，东方讲究瞬间的意境。这种文化差异让我开始思考：在全球化时代，我们如何既保持文化独特性，又能进行深度对话？",
+          "tags": ["#艺术史", "#文化研究", "#东西方对话"],
+          "engagement": "2.8k claps 156 responses"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "为什么选择研究西方艺术史？",
+        "answer": "因为艺术是理解不同文化的钥匙。通过研究西方艺术，我反而更深刻地理解了东方美学的独特价值。这种跨文化的视角让我看到了更多可能性。"
+      },
+      {
+        "question": "你希望找到什么样的伴侣？",
+        "answer": "希望他有开放的文化视野，能够进行深度的精神对话。不一定要懂艺术，但要有感受美的能力。我们可以一起探索世界，分享对不同文化的理解。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "relationship_goals": [
+        "精神伴侣",
+        "文化对话",
+        "共同成长",
+        "跨国关系"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找对象",
+    "description": "希望找到有深度思考能力的男性，年龄28-35岁。他应该有开放的心态，愿意了解不同文化。我们可以进行深度的精神对话，一起探索世界。距离不是问题，重要的是心灵的契合。"
+  },
+  "metadata": {
+    "profile_type": "dating",
+    "created_date": "2024",
+    "tags": {
+      "age": "26-30岁",
+      "profession": "学者",
+      "personality": ["敏感细腻", "理想主义", "深度思考", "文化包容"],
+      "interests": ["文艺复兴艺术", "古典音乐", "诗歌创作", "欧洲历史", "哲学思辨"],
+      "lifestyle": ["慢生活", "文化沉浸", "深度社交", "精神追求"],
+      "values": ["文化理解", "精神共鸣", "个人成长", "跨文化交流"],
+      "relationship_goals": ["精神伴侣", "文化对话", "共同成长", "跨国关系"],
+      "location": "伦敦"
+    }
+  }
+} 

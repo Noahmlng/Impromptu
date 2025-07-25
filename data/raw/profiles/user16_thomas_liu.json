@@ -1,0 +1,117 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "刘托马斯 Thomas",
+      "nickname": "Thomas",
+      "greeting": "创新改变世界！"
+    },
+    "professional": {
+      "current_role": "AI初创公司CEO/创始人",
+      "responsibilities": [
+        "公司战略规划",
+        "融资与投资",
+        "产品方向把控",
+        "团队建设"
+      ],
+      "previous_experience": [
+        "腾讯产品经理",
+        "麦肯锡咨询顾问",
+        "斯坦福MBA"
+      ],
+      "industry": "人工智能/创业"
+    },
+    "personal": {
+      "age_range": "31-35岁",
+      "location": "北京",
+      "living_situation": "独居豪华公寓",
+      "pets": "无宠物（太忙）"
+    },
+    "personality": {
+      "mbti_type": "ENTP",
+      "personality_traits": [
+        "外向创新",
+        "战略思维",
+        "冒险精神",
+        "领导魅力"
+      ],
+      "interests": [
+        "科技趋势",
+        "投资理财",
+        "高尔夫",
+        "威士忌",
+        "演讲"
+      ],
+      "lifestyle": [
+        "高强度工作",
+        "精英社交",
+        "全球视野",
+        "品质追求"
+      ],
+      "values": [
+        "创新突破",
+        "成功导向",
+        "影响力",
+        "改变世界"
+      ]
+    },
+    "social_media": {
+      "linkedin": {
+        "platform": "LinkedIn",
+        "username": "Thomas Liu - AI Entrepreneur",
+        "description": "Building the future with AI technology",
+        "followers": "5万关注者"
+      },
+      "twitter": {
+        "platform": "Twitter",
+        "username": "@ThomasLiuAI",
+        "description": "Thoughts on AI, startups, and the future"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "linkedin",
+          "title": "从0到1：AI创业的思考与实践",
+          "content": "创业两年来，最大的感悟是：技术很重要，但找对问题更重要。我们的AI平台现在服务了500+企业客户，年收入过千万，但回想起来，最困难的不是技术实现，而是找到真正的市场需求。分享几个心得：1）先验证需求再开发产品 2）团队比想法更重要 3）现金流是生命线。感谢投资人的信任，感谢团队的努力，2024年我们要冲击独角兽！有志同道合的伙伴欢迎联系。",
+          "tags": ["#AI创业", "#企业服务", "#创新", "#融资"],
+          "engagement": "3.2千赞 856评论"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "创业最大的挑战是什么？",
+        "answer": "最大的挑战是在不确定性中做决策。市场在变，技术在变，团队在变，需要在有限信息下快速判断和行动。这需要强大的心理素质和学习能力。"
+      },
+      {
+        "question": "你理想的合作伙伴是什么样的？",
+        "answer": "希望是有互补技能的人，比如技术大牛或者销售高手。更重要的是要有创业精神，能承受高压，愿意为共同目标全力以赴。诚信和执行力是基础。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "collaboration_interests": [
+        "AI技术合作",
+        "联合创业",
+        "投资项目"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "找队友",
+    "description": "寻找有志于AI领域创业的技术合伙人或业务合伙人。我们目前在企业级AI服务赛道，已有稳定收入和知名投资方支持。希望找到CTO级别的技术专家，或者有B2B销售背景的业务专家。理想候选人要有大厂经验，对AI技术有深度理解，能够承受创业高压环境。可以股权合作，具体条件面议。有意者请发送简历和项目经历。"
+  },
+  "metadata": {
+    "profile_type": "teamwork",
+    "created_date": "2024",
+    "tags": {
+      "skills": ["战略规划", "融资", "团队管理"],
+      "industry": "人工智能",
+      "project_type": ["成长期创业", "AI技术"],
+      "collaboration_style": ["高强度", "结果导向", "股权合作"],
+      "experience_level": "高级水平",
+      "availability": "全职",
+      "goals": ["商业成功", "技术创新", "行业影响力"]
+    }
+  }
+} 

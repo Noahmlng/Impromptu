@@ -1,0 +1,124 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "林云霏 Yunfei",
+      "nickname": "云霏",
+      "greeting": "让传统在当代绽放"
+    },
+    "professional": {
+      "current_role": "非遗苏绣传承人",
+      "responsibilities": [
+        "苏绣技艺传承",
+        "创新设计研发",
+        "文化推广教学",
+        "国际文化交流"
+      ],
+      "previous_experience": [
+        "苏州刺绣研究所",
+        "巴黎时装周合作设计师",
+        "非遗保护中心讲师"
+      ],
+      "industry": "传统文化/艺术设计"
+    },
+    "personal": {
+      "age_range": "30-34岁",
+      "location": "苏州",
+      "living_situation": "独居老宅改造工作室",
+      "pets": "收养了两只流浪猫"
+    },
+    "personality": {
+      "mbti_type": "INFJ",
+      "personality_traits": [
+        "内敛深沉",
+        "艺术敏感",
+        "文化使命感",
+        "完美主义"
+      ],
+      "interests": [
+        "古典文学",
+        "茶道",
+        "古琴",
+        "园林设计",
+        "传统服饰"
+      ],
+      "lifestyle": [
+        "慢生活",
+        "手工制作",
+        "文化沉浸",
+        "自然和谐"
+      ],
+      "values": [
+        "文化传承",
+        "匠心精神",
+        "美学生活",
+        "社会责任"
+      ]
+    },
+    "social_media": {
+      "bilibili": {
+        "platform": "B站",
+        "username": "云霏的苏绣日记",
+        "description": "记录非遗传承人的日常，分享传统美学",
+        "followers": "12万粉丝"
+      },
+      "xiaohongshu": {
+        "platform": "小红书",
+        "username": "非遗传承人云霏",
+        "description": "苏绣技艺分享，传统与现代的对话"
+      },
+      "instagram": {
+        "platform": "Instagram",
+        "username": "@yunfei_suzhou_embroidery",
+        "bio": "Preserving heritage through contemporary design | Suzhou embroidery artist"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "bilibili",
+          "title": "【非遗传承】一针一线绣出千年文化｜苏绣技艺分享",
+          "content": "很多人以为非遗就是守旧，其实真正的传承是让传统在当代找到新的表达方式。今天绣的是《千里江山图》局部，用了传统技法但配色更现代。一个细节：宋徽宗的青色我调了7次才找到既符合古意又有当代感的色调。传承不是复制，是让古老的美在当下继续生长。最近在筹备一个跨界展览，把苏绣和数字艺术结合，希望能吸引更多年轻人关注传统文化。",
+          "tags": ["#非遗传承", "#苏绣", "#传统文化", "#匠心"],
+          "engagement": "8.9万播放 2.3万赞 1567条弹幕"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "为什么选择做非遗传承这么小众的职业？",
+        "answer": "这不是选择，是使命。小时候看奶奶绣花，觉得那些丝线是有生命的。后来去国外留学，发现外国人比我们还珍惜东方美学，这让我意识到传承的重要性。现在的工作是让传统技艺在当代生活中找到位置，而不是放在博物馆里。"
+      },
+      {
+        "question": "你理想中的伴侣需要理解你的工作吗？",
+        "answer": "不需要懂刺绣，但要理解文化传承的意义。希望他有文化底蕴，能欣赏慢工出细活的价值。我的工作时间不固定，经常为了完美一个细节熬夜，希望他能理解这种匠心。最重要的是要有耐心，因为传统技艺的传承是一辈子的事。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "relationship_goals": [
+        "精神伴侣",
+        "文化传承",
+        "共同成长",
+        "美学生活"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "寻找文化知音",
+    "description": "希望找到有文化底蕴、理解传统美学价值的男性。年龄32-38岁，最好在苏州或周边城市。他应该对传统文化有敬意，不一定要从事相关行业，但要有美学品味和文化敏感度。希望我们能一起探讨诗词歌赋，一起逛园林博物馆，在快节奏的现代生活中守护一份古典的浪漫。我相信最好的关系是精神共鸣，在文化传承的道路上相互扶持。"
+  },
+  "metadata": {
+    "profile_type": "dating",
+    "created_date": "2024",
+    "tags": {
+      "age": "30-34岁",
+      "profession": "非遗传承人",
+      "personality": ["内敛深沉", "艺术敏感", "文化使命感", "完美主义"],
+      "interests": ["古典文学", "茶道", "古琴", "园林设计", "传统服饰"],
+      "lifestyle": ["慢生活", "手工制作", "文化沉浸", "自然和谐"],
+      "values": ["文化传承", "匠心精神", "美学生活", "社会责任"],
+      "relationship_goals": ["精神伴侣", "文化传承", "共同成长", "美学生活"],
+      "location": "苏州"
+    }
+  }
+} 

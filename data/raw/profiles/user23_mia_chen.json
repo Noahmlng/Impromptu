@@ -1,0 +1,123 @@
+{
+  "profile": {
+    "name": {
+      "display_name": "陈米娅 Mia",
+      "nickname": "Mia",
+      "greeting": "世界那么大，我想去看看"
+    },
+    "professional": {
+      "current_role": "独立UI/UX设计师",
+      "responsibilities": [
+        "远程设计咨询",
+        "数字产品设计",
+        "用户体验研究",
+        "设计教育分享"
+      ],
+      "previous_experience": [
+        "硅谷科技公司",
+        "巴厘岛数字游民社区",
+        "清迈创意市集"
+      ],
+      "industry": "数字设计/远程工作"
+    },
+    "personal": {
+      "age_range": "27-31岁",
+      "location": "全球游牧（目前在清迈）",
+      "living_situation": "数字游民社区",
+      "pets": "无宠物（经常搬家）"
+    },
+    "personality": {
+      "mbti_type": "ENFP",
+      "personality_traits": [
+        "外向好奇",
+        "适应力强",
+        "创意无限",
+        "自由灵魂"
+      ],
+      "interests": [
+        "潜水",
+        "瑜伽",
+        "当地美食",
+        "摄影",
+        "学习新语言"
+      ],
+      "lifestyle": [
+        "极简主义",
+        "可持续生活",
+        "文化体验",
+        "灵活工作"
+      ],
+      "values": [
+        "体验至上",
+        "文化包容",
+        "个人成长",
+        "全球公民"
+      ]
+    },
+    "social_media": {
+      "instagram": {
+        "platform": "Instagram",
+        "username": "@mia_digitalnomad",
+        "bio": "Digital nomad designer | Currently in Chiang Mai | Sharing remote work & travel stories"
+      },
+      "youtube": {
+        "platform": "YouTube",
+        "username": "Mia的数字游民日记",
+        "description": "记录全球游牧生活，分享远程工作经验"
+      },
+      "xiaohongshu": {
+        "platform": "小红书",
+        "username": "数字游民米娅",
+        "description": "分享全球旅居生活和远程工作技巧"
+      }
+    },
+    "content": {
+      "posts": [
+        {
+          "platform": "xiaohongshu",
+          "title": "在清迈做数字游民是什么体验？｜真实生活分享",
+          "content": "很多人以为数字游民就是天天在海边工作，其实现实更复杂。清迈的生活：早上7点在稻田边瑜伽，9点开始工作，下午3点去咖啡馆见其他游民交流项目，晚上学习泰语。成本：住宿1500/月，餐饮1000/月，比上海便宜一半。挑战：网络不稳定，时差协调，孤独感。收获：认识了来自20个国家的自由职业者，项目合作机会，真正的work-life balance。下个月计划去巴厘岛，有同行吗？",
+          "tags": ["#数字游民", "#清迈生活", "#远程工作", "#全球旅居"],
+          "engagement": "5.6万赞 1.2万收藏 892评论"
+        }
+      ]
+    },
+    "qa_responses": [
+      {
+        "question": "数字游民生活最大的挑战是什么？",
+        "answer": "不是网络或时差，而是建立深度关系。经常在一个地方待2-3个月就要离开，很难维持长期关系。但我学会了珍惜当下的连接，也认识了很多志同道合的朋友。"
+      },
+      {
+        "question": "你希望找到什么样的伴侣？",
+        "answer": "希望他也是数字游民或能接受这种生活方式。我们要能一起背包旅行，也能一起安静工作。重要的是有开放的心态，愿意体验不同文化，不介意生活的不确定性。"
+      }
+    ],
+    "contact_preferences": {
+      "open_to_communication": true,
+      "relationship_goals": [
+        "旅行伴侣",
+        "精神共鸣",
+        "共同成长",
+        "全球冒险"
+      ]
+    }
+  },
+  "user_request": {
+    "request_type": "寻找旅行伴侣",
+    "description": "希望找到能接受数字游民生活方式的伴侣。年龄25-35岁，最好也是远程工作者或自由职业者。他应该热爱旅行，有独立精神，能享受简单生活。我们可以一起探索世界，在不同城市留下足迹。不需要承诺定居，但希望能在旅途中建立深度连接，一起工作，一起成长，一起体验这个精彩的世界。"
+  },
+  "metadata": {
+    "profile_type": "dating",
+    "created_date": "2024",
+    "tags": {
+      "age": "27-31岁",
+      "profession": "数字游民",
+      "personality": ["外向好奇", "适应力强", "创意无限", "自由灵魂"],
+      "interests": ["潜水", "瑜伽", "当地美食", "摄影", "学习新语言"],
+      "lifestyle": ["极简主义", "可持续生活", "文化体验", "灵活工作"],
+      "values": ["体验至上", "文化包容", "个人成长", "全球公民"],
+      "relationship_goals": ["旅行伴侣", "精神共鸣", "共同成长", "全球冒险"],
+      "location": "全球游牧"
+    }
+  }
+} 
