@@ -4,6 +4,7 @@ export interface BackendUserInfo {
   email: string
   display_name: string
   avatar_url?: string
+  subscription_type: string
   created_at: string
   updated_at: string
   last_login_at: string
