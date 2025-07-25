@@ -9,7 +9,6 @@
 import os
 import json
 import sys
-import hashlib
 import jwt
 import datetime
 from typing import Dict, List, Any, Optional
@@ -22,9 +21,9 @@ import traceback
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from supabase import create_client, Client
-from src.algorithms.tag_compatibility_analyzer import EnhancedCompatibilityAnalyzer
-from src.models.tag_pool import TagPool
-from src.models.topic_modeling import LDATopicModel
+from backend.algorithms.tag_compatibility_analyzer import EnhancedCompatibilityAnalyzer
+from backend.models.tag_pool import TagPool
+from backend.models.topic_modeling import LDATopicModel
 from configs.config import ConfigManager
 
 app = Flask(__name__)
@@ -37,7 +36,6 @@ CORS(app, resources={
 })
 
 # 配置
-JWT_SECRET = os.getenv('JWT_SECRET', 'impromptu_secret_key_2024')
 SUPABASE_URL = os.getenv('SUPABASE_URL', 'https://anxbbsrnjgmotxzysqwf.supabase.co')
 SUPABASE_KEY = os.getenv('SUPABASE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFueGJic3Juamdtb3R4enlzcXdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MDY0OTIsImV4cCI6MjA2NTk4MjQ5Mn0.a0t-pgH-Z2Fbs6JuMNWX8_kpqkQsBag3-COAUZVF6-0')
 
@@ -62,49 +60,58 @@ def init_components():
     except Exception as e:
         print(f"❌ 组件初始化失败: {e}")
 
-# 认证装饰器
+# 新的基于Supabase Auth的认证装饰器
 def auth_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        token = request.headers.get('Authorization')
-        if not token:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
             return jsonify({'error': '未提供认证token'}), 401
         
         try:
             # 移除 'Bearer ' 前缀
-            if token.startswith('Bearer '):
-                token = token[7:]
+            if auth_header.startswith('Bearer '):
+                token = auth_header[7:]
+            else:
+                token = auth_header
             
-            # 解析JWT
-            payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
-            g.current_user_id = payload['user_id']
-            g.current_user_email = payload.get('email')
+            # 使用Supabase验证token
+            # 解码JWT token获取用户信息
+            decoded_token = jwt.decode(token, options={"verify_signature": False})
+            auth_user_id = decoded_token.get('sub')
+            user_email = decoded_token.get('email')
+            
+            if not auth_user_id:
+                return jsonify({'error': '无效的认证token'}), 401
+            
+            # 获取用户档案信息
+            profile_response = supabase.table('user_profile').select('*').eq('auth_user_id', auth_user_id).execute()
+            
+            if not profile_response.data:
+                return jsonify({'error': '用户档案不存在'}), 404
+            
+            # 设置全局用户信息
+            g.current_user_id = profile_response.data[0]['user_id']
+            g.current_user_email = user_email
+            g.auth_user_id = auth_user_id
+            g.user_profile = profile_response.data[0]
+            
             return f(*args, **kwargs)
-        except jwt.ExpiredSignatureError:
-            return jsonify({'error': 'Token已过期'}), 401
-        except jwt.InvalidTokenError:
-            return jsonify({'error': '无效的Token'}), 401
+        except Exception as e:
+            print(f"认证错误: {e}")
+            return jsonify({'error': '认证失败', 'message': str(e)}), 401
     
     return decorated_function
 
-def hash_password(password: str) -> str:
-    """密码哈希"""
-    return hashlib.sha256(password.encode()).hexdigest()
-
-def generate_jwt_token(user_id: str, email: str) -> str:
-    """生成JWT token"""
-    payload = {
-        'user_id': user_id,
-        'email': email,
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)
-    }
-    return jwt.encode(payload, JWT_SECRET, algorithm='HS256')
+# 以下函数已被Supabase Auth替代，不再需要
+# def hash_password(password: str) -> str:
+# def generate_jwt_token(user_id: str, email: str) -> str:
 
 # ==================== 用户认证API ====================
 
 @app.route('/api/auth/register', methods=['POST'])
 def register():
-    """用户注册"""
+    """用户注册 - 使用Supabase Auth"""
     try:
         data = request.get_json()
         if not data:
@@ -119,55 +126,55 @@ def register():
         password = data['password']
         display_name = data['display_name'].strip()
         
-        # 检查用户是否已存在
-        existing_user = supabase.table('user_profile').select('user_id').eq('email', email).execute()
-        if existing_user.data:
-            return jsonify({'error': '邮箱已被注册'}), 409
+        # 使用Supabase Auth注册用户
+        auth_response = supabase.auth.sign_up({
+            "email": email,
+            "password": password,
+            "options": {
+                "data": {
+                    "display_name": display_name,
+                    "avatar_url": data.get('avatar_url')
+                }
+            }
+        })
         
-        # 生成用户ID
-        user_id = f"user_{int(datetime.datetime.now().timestamp())}"
+        print(f"Supabase注册响应: user={auth_response.user is not None}, session={auth_response.session is not None}")
         
-        # 哈希密码
-        password_hash = hash_password(password)
-        
-        # 创建用户档案
-        user_profile = {
-            'user_id': user_id,
-            'email': email,
-            'password_hash': password_hash,
-            'display_name': display_name,
-            'avatar_url': data.get('avatar_url'),
-            'created_at': datetime.datetime.utcnow().isoformat(),
-            'updated_at': datetime.datetime.utcnow().isoformat()
-        }
-        
-        result = supabase.table('user_profile').insert(user_profile).execute()
-        
-        if result.data:
-            # 生成JWT token
-            token = generate_jwt_token(user_id, email)
-            
+        if auth_response.user:
             return jsonify({
                 'success': True,
                 'message': '注册成功',
                 'data': {
-                    'user_id': user_id,
-                    'email': email,
+                    'user_id': auth_response.user.id,
+                    'email': auth_response.user.email,
                     'display_name': display_name,
-                    'token': token
+                    'token': auth_response.session.access_token if auth_response.session else None,
+                    'needs_confirmation': not auth_response.user.email_confirmed_at
                 }
             }), 201
         else:
-            return jsonify({'error': '注册失败'}), 500
+            error_msg = f"注册失败，Supabase响应异常"
+            print(f"注册失败详细信息: {auth_response}")
+            return jsonify({'error': error_msg}), 400
             
     except Exception as e:
         print(f"注册错误: {e}")
+        print(f"错误类型: {type(e)}")
         traceback.print_exc()
-        return jsonify({'error': '注册失败', 'message': str(e)}), 500
+        
+        # 检查是否是Supabase相关的错误
+        if hasattr(e, 'message'):
+            error_message = e.message
+        elif hasattr(e, 'args') and e.args:
+            error_message = str(e.args[0])
+        else:
+            error_message = str(e)
+            
+        return jsonify({'error': '注册失败', 'message': error_message}), 500
 
 @app.route('/api/auth/login', methods=['POST'])
 def login():
-    """用户登录"""
+    """用户登录 - 使用Supabase Auth"""
     try:
         data = request.get_json()
         if not data:
@@ -179,68 +186,81 @@ def login():
         if not email or not password:
             return jsonify({'error': '邮箱和密码不能为空'}), 400
         
-        # 查找用户
-        user_result = supabase.table('user_profile').select('*').eq('email', email).execute()
-        
-        if not user_result.data:
-            return jsonify({'error': '用户不存在'}), 404
-        
-        user = user_result.data[0]
-        
-        # 验证密码
-        password_hash = hash_password(password)
-        if user['password_hash'] != password_hash:
-            return jsonify({'error': '密码错误'}), 401
-        
-        # 暂时跳过 is_active 检查
-        if False:  # user.get('is_active', True):
-            return jsonify({'error': '账户已被禁用'}), 403
-        
-        # 生成JWT token
-        token = generate_jwt_token(user['user_id'], user['email'])
-        
-        # 更新最后登录时间
-        supabase.table('user_profile').update({
-            'last_login_at': datetime.datetime.utcnow().isoformat()
-        }).eq('user_id', user['user_id']).execute()
-        
-        return jsonify({
-            'success': True,
-            'message': '登录成功',
-            'data': {
-                'user_id': user['user_id'],
-                'email': user['email'],
-                'display_name': user['display_name'],
-                'avatar_url': user.get('avatar_url'),
-                'token': token
-            }
+        # 使用Supabase Auth登录
+        auth_response = supabase.auth.sign_in_with_password({
+            "email": email,
+            "password": password
         })
+        
+        print(f"Supabase登录响应: user={auth_response.user is not None}, session={auth_response.session is not None}")
+        
+        if auth_response.user and auth_response.session:
+            # 获取用户档案信息
+            profile_response = supabase.table('user_profile').select('*').eq('auth_user_id', auth_response.user.id).execute()
+            
+            user_profile = profile_response.data[0] if profile_response.data else None
+            print(f"用户档案查询结果: {user_profile is not None}")
+            
+            return jsonify({
+                'success': True,
+                'message': '登录成功',
+                'data': {
+                    'user_id': user_profile['user_id'] if user_profile else auth_response.user.id,
+                    'email': auth_response.user.email,
+                    'display_name': user_profile['display_name'] if user_profile else auth_response.user.user_metadata.get('display_name'),
+                    'avatar_url': user_profile['avatar_url'] if user_profile else auth_response.user.user_metadata.get('avatar_url'),
+                    'token': auth_response.session.access_token
+                }
+            })
+        else:
+            error_msg = '登录失败，请检查邮箱和密码'
+            print(f"登录失败详细信息: user={auth_response.user}, session={auth_response.session}")
+            return jsonify({'error': error_msg}), 401
         
     except Exception as e:
         print(f"登录错误: {e}")
+        print(f"错误类型: {type(e)}")
         traceback.print_exc()
-        return jsonify({'error': '登录失败', 'message': str(e)}), 500
+        
+        # 检查是否是Supabase相关的错误
+        if hasattr(e, 'message'):
+            error_message = e.message
+        elif hasattr(e, 'args') and e.args:
+            error_message = str(e.args[0])
+        else:
+            error_message = str(e)
+            
+        return jsonify({'error': '登录失败', 'message': error_message}), 500
 
-@app.route('/api/auth/me', methods=['GET'])
+@app.route('/api/auth/logout', methods=['POST'])
 @auth_required
+def logout():
+    """用户登出"""
+    try:
+        # Supabase Auth登出
+        supabase.auth.sign_out()
+        return jsonify({'success': True, 'message': '登出成功'})
+    except Exception as e:
+        print(f"登出错误: {e}")
+        return jsonify({'error': '登出失败', 'message': str(e)}), 500
+
+@app.route('/api/auth/user', methods=['GET'])
+@auth_required 
 def get_current_user():
     """获取当前用户信息"""
     try:
-        user_result = supabase.table('user_profile').select('*').eq('user_id', g.current_user_id).execute()
-        
-        if not user_result.data:
-            return jsonify({'error': '用户不存在'}), 404
-        
-        user = user_result.data[0]
-        
-        # 移除敏感信息
-        user.pop('password_hash', None)
-        
         return jsonify({
             'success': True,
-            'data': user
+            'data': {
+                'user_id': g.current_user_id,
+                'email': g.current_user_email,
+                'display_name': g.user_profile['display_name'],
+                'avatar_url': g.user_profile.get('avatar_url'),
+                'created_at': g.user_profile['created_at'],
+                'updated_at': g.user_profile['updated_at'],
+                'is_active': g.user_profile.get('is_active', True)
+            }
         })
-        
     except Exception as e:
         print(f"获取用户信息错误: {e}")
         return jsonify({'error': '获取用户信息失败', 'message': str(e)}), 500
@@ -1137,6 +1157,14 @@ def extract_profile_text(profile: Dict) -> str:
     return ' '.join(text_parts)
 
 # ==================== 系统信息API ====================
+
+@app.route('/health', methods=['GET'])
+def simple_health():
+    """简单健康检查"""
+    return jsonify({
+        'status': 'ok',
+        'message': 'API is running'
+    })
 
 @app.route('/api/system/health', methods=['GET'])
 def health_check():

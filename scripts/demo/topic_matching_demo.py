@@ -20,8 +20,8 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent
 sys.path.append(str(project_root))
 
-from src.models.topic_modeling import LDATopicModel
-from src.models.vector_matching import TopicVectorizer, VectorUserMatcher
+from backend.models.topic_modeling import LDATopicModel
+from backend.models.vector_matching import TopicVectorizer, VectorUserMatcher
 from typing import List, Dict, Any
 
 class ProductionMatchingSystem:

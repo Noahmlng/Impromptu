@@ -14,7 +14,7 @@ from dataclasses import dataclass
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from configs.config import ConfigManager
-from src.models import CompatibilityResult, UserRequest
+from backend.models import CompatibilityResult, UserRequest
 
 class KimiCompatibilityAnalyzer:
     def __init__(self, config: Optional[ConfigManager] = None, api_key: str = None, prompts_file: str = "prompts/prompts.yaml"):

@@ -16,7 +16,7 @@ sys.path.append(str(project_root))
 def test_basic_import():
     """测试基本导入"""
     try:
-        from src.models import CompatibilityResult
+        from backend.models import CompatibilityResult
         from configs.config import ConfigManager
         print("✅ 基本模块导入成功")
         return True
@@ -27,7 +27,7 @@ def test_basic_import():
 def test_analyzer_import():
     """测试分析器导入"""
     try:
-        from src.algorithms.tag_compatibility_analyzer import EnhancedCompatibilityAnalyzer
+        from backend.algorithms.tag_compatibility_analyzer import EnhancedCompatibilityAnalyzer
         print("✅ 分析器导入成功")
         return True
     except Exception as e:
@@ -37,7 +37,7 @@ def test_analyzer_import():
 def test_analyzer_creation():
     """测试分析器创建"""
     try:
-        from src.algorithms.tag_compatibility_analyzer import EnhancedCompatibilityAnalyzer
+        from backend.algorithms.tag_compatibility_analyzer import EnhancedCompatibilityAnalyzer
         analyzer = EnhancedCompatibilityAnalyzer()
         print("✅ 分析器创建成功")
         return True

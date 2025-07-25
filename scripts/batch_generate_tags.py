@@ -26,8 +26,8 @@ except ImportError:
     SUPABASE_AVAILABLE = False
 
 # 导入标签生成相关模块
-from src.models.topic_modeling import topic_model
-from src.algorithms.user_profile_analyzer import UserProfileAnalyzer
+from backend.models.topic_modeling import topic_model
+from backend.algorithms.user_profile_analyzer import UserProfileAnalyzer
 
 @dataclass
 class TagGenerationResult:

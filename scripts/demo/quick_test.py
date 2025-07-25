@@ -21,13 +21,13 @@ def test_basic_imports():
     print("🔧 测试模块导入...")
     
     try:
-        from src.models import CompatibilityResult, UserRequest
+        from backend.models import CompatibilityResult, UserRequest
         print("✅ 数据模型导入成功")
         
         from configs.config import ConfigManager
         print("✅ 配置管理导入成功")
         
-        from src.algorithms.tag_compatibility_analyzer import EnhancedCompatibilityAnalyzer
+        from backend.algorithms.tag_compatibility_analyzer import EnhancedCompatibilityAnalyzer
         print("✅ 核心算法导入成功")
         
         return True
@@ -40,7 +40,7 @@ def test_analyzer_initialization():
     print("\n🧠 测试分析器初始化...")
     
     try:
-        from src.algorithms.tag_compatibility_analyzer import EnhancedCompatibilityAnalyzer
+        from backend.algorithms.tag_compatibility_analyzer import EnhancedCompatibilityAnalyzer
         
         analyzer = EnhancedCompatibilityAnalyzer()
         print("✅ 分析器初始化成功")
@@ -79,7 +79,7 @@ def test_simple_matching():
     print("\n🔍 测试简单匹配功能...")
     
     try:
-        from src.algorithms.tag_compatibility_analyzer import EnhancedCompatibilityAnalyzer
+        from backend.algorithms.tag_compatibility_analyzer import EnhancedCompatibilityAnalyzer
         
         # 获取两个测试档案
         profiles_dir = Path("data/raw/profiles")

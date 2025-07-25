@@ -11,11 +11,11 @@ from dataclasses import dataclass
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from configs.config import ConfigManager
-from src.models import CompatibilityResult
-from src.models.tag_pool import TagPool
-from src.models.topic_modeling import LDATopicModel, TopicResult
-from src.models.vector_matching import VectorUserMatcher, UserVector
-from src.models.matching_result import SimpleMatchingResult, create_match_dimension, generate_score_description, calculate_complementary_score
+from backend.models import CompatibilityResult
+from backend.models.tag_pool import TagPool
+from backend.models.topic_modeling import LDATopicModel, TopicResult
+from backend.models.vector_matching import VectorUserMatcher, UserVector
+from backend.models.matching_result import SimpleMatchingResult, create_match_dimension, generate_score_description, calculate_complementary_score
 
 @dataclass
 class EnhancedCompatibilityResult:

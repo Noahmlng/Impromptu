@@ -5,7 +5,7 @@ import { Navbar } from '@/components/navbar'
 import { ModeSwitcher } from '@/components/mode-switcher'
 
 export const metadata: Metadata = {
-  title: 'Linker - AI-Powered Social Matching',
+  title: 'Linker - AI-Powered Social Linking',
   description: 'Find your perfect match with AI-powered compatibility analysis',
 }
 
@@ -16,7 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="font-sans antialiased">
+      <body className="font-sans antialiased" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

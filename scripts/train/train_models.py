@@ -17,9 +17,9 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent
 sys.path.append(str(project_root))
 
-from src.models.topic_modeling import LDATopicModel
-from src.models.vector_matching import TopicVectorizer
-from src.algorithms.tag_compatibility_analyzer import EnhancedCompatibilityAnalyzer
+from backend.models.topic_modeling import LDATopicModel
+from backend.models.vector_matching import TopicVectorizer
+from backend.algorithms.tag_compatibility_analyzer import EnhancedCompatibilityAnalyzer
 
 def train_topic_model(profiles_dir: str, output_dir: str):
     """训练LDA主题模型"""
