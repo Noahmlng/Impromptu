@@ -1,0 +1,39 @@
+{
+  "timestamp": "2025-07-25T16:13:16.464344",
+  "api_url": "http://localhost:5003",
+  "summary": {
+    "total_tests": 3,
+    "passed_tests": 1,
+    "failed_tests": 2,
+    "total_duration": 38.280962228775024
+  },
+  "results": [
+    {
+      "suite_name": "基础功能测试",
+      "success": true,
+      "duration": 0.11598706245422363,
+      "exit_code": 0,
+      "error_message": null,
+      "stdout_length": 232,
+      "stderr_length": 0
+    },
+    {
+      "suite_name": "安全测试",
+      "success": false,
+      "duration": 14.808640956878662,
+      "exit_code": 1,
+      "error_message": null,
+      "stdout_length": 1356,
+      "stderr_length": 0
+    },
+    {
+      "suite_name": "功能稳定性测试",
+      "success": false,
+      "duration": 23.35633420944214,
+      "exit_code": 1,
+      "error_message": null,
+      "stdout_length": 285,
+      "stderr_length": 957
+    }
+  ]
+}

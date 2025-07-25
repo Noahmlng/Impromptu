@@ -138,8 +138,7 @@ def register():
             'display_name': display_name,
             'avatar_url': data.get('avatar_url'),
             'created_at': datetime.datetime.utcnow().isoformat(),
-            'updated_at': datetime.datetime.utcnow().isoformat(),
-            'is_active': True
+            'updated_at': datetime.datetime.utcnow().isoformat()
         }
         
         result = supabase.table('user_profile').insert(user_profile).execute()
@@ -193,7 +192,8 @@ def login():
         if user['password_hash'] != password_hash:
             return jsonify({'error': '密码错误'}), 401
         
-        if not user.get('is_active', True):
+        # 暂时跳过 is_active 检查
+        if False:  # user.get('is_active', True):
             return jsonify({'error': '账户已被禁用'}), 403
         
         # 生成JWT token
@@ -273,7 +273,6 @@ def create_or_update_metadata():
             'content': json.dumps(content, ensure_ascii=False) if isinstance(content, dict) else content,
             'data_type': data.get('data_type', 'nested_object'),
             'display_order': data.get('display_order', 1),
-            'is_active': True,
             'metadata': json.dumps(data.get('metadata', {}), ensure_ascii=False),
             'updated_at': datetime.datetime.utcnow().isoformat()
         }
@@ -304,7 +303,7 @@ def create_or_update_metadata():
 def get_user_metadata():
     """获取用户的所有metadata"""
     try:
-        result = supabase.table('user_metadata').select('*').eq('user_id', g.current_user_id).eq('is_active', True).execute()
+        result = supabase.table('user_metadata').select('*').eq('user_id', g.current_user_id).execute()
         
         # 按section_type和section_key组织数据
         organized_metadata = {}
@@ -373,7 +372,6 @@ def batch_update_metadata():
                     'content': json.dumps(content, ensure_ascii=False) if isinstance(content, dict) else content,
                     'data_type': entry.get('data_type', 'nested_object'),
                     'display_order': entry.get('display_order', 1),
-                    'is_active': True,
                     'metadata': json.dumps(entry.get('metadata', {}), ensure_ascii=False),
                     'updated_at': datetime.datetime.utcnow().isoformat()
                 }
@@ -421,7 +419,7 @@ def generate_user_tags():
         request_type = data.get('request_type', '找队友')  # '找对象' 或 '找队友'
         
         # 获取用户的所有metadata
-        metadata_result = supabase.table('user_metadata').select('*').eq('user_id', g.current_user_id).eq('is_active', True).execute()
+        metadata_result = supabase.table('user_metadata').select('*').eq('user_id', g.current_user_id).execute()
         
         if not metadata_result.data:
             return jsonify({'error': '用户metadata为空，请先完善个人信息'}), 400
@@ -468,8 +466,7 @@ def generate_user_tags():
                 'tag_category': 'generated',
                 'confidence_score': confidence,
                 'tag_source': 'topic_modeling',
-                'created_at': datetime.datetime.utcnow().isoformat(),
-                'is_active': True
+                'created_at': datetime.datetime.utcnow().isoformat()
             }
             
             result = supabase.table('user_tags').insert(tag_entry).execute()
@@ -531,8 +528,7 @@ def add_manual_tags():
                 'tag_category': tag_category,
                 'confidence_score': confidence,
                 'tag_source': 'manual',
-                'created_at': datetime.datetime.utcnow().isoformat(),
-                'is_active': True
+                'created_at': datetime.datetime.utcnow().isoformat()
             }
             
             result = supabase.table('user_tags').insert(tag_entry).execute()
@@ -554,7 +550,7 @@ def add_manual_tags():
 def get_user_tags():
     """获取用户的所有tags"""
     try:
-        result = supabase.table('user_tags').select('*').eq('user_id', g.current_user_id).eq('is_active', True).order('confidence_score', desc=True).execute()
+        result = supabase.table('user_tags').select('*').eq('user_id', g.current_user_id).order('confidence_score', desc=True).execute()
         
         return jsonify({
             'success': True,
@@ -580,7 +576,7 @@ def search_users():
         limit = int(data.get('limit', 10))
         
         # 获取所有用户（除了当前用户）
-        users_result = supabase.table('user_profile').select('*').neq('user_id', g.current_user_id).eq('is_active', True).execute()
+        users_result = supabase.table('user_profile').select('*').neq('user_id', g.current_user_id).execute()
         
         if not users_result.data:
             return jsonify({
@@ -595,10 +591,10 @@ def search_users():
             user_id = user['user_id']
             
             # 获取用户的metadata
-            metadata_result = supabase.table('user_metadata').select('*').eq('user_id', user_id).eq('is_active', True).execute()
+            metadata_result = supabase.table('user_metadata').select('*').eq('user_id', user_id).execute()
             
             # 获取用户的tags
-            tags_result = supabase.table('user_tags').select('*').eq('user_id', user_id).eq('is_active', True).execute()
+            tags_result = supabase.table('user_tags').select('*').eq('user_id', user_id).execute()
             
             # 计算匹配度
             match_score = calculate_match_score(
@@ -925,10 +921,10 @@ def get_user_complete_data(user_id: str) -> Optional[Dict]:
         profile = profile_result.data[0]
         
         # Metadata
-        metadata_result = supabase.table('user_metadata').select('*').eq('user_id', user_id).eq('is_active', True).execute()
+        metadata_result = supabase.table('user_metadata').select('*').eq('user_id', user_id).execute()
         
         # Tags
-        tags_result = supabase.table('user_tags').select('*').eq('user_id', user_id).eq('is_active', True).execute()
+        tags_result = supabase.table('user_tags').select('*').eq('user_id', user_id).execute()
         
         return {
             'profile': profile,
@@ -994,7 +990,7 @@ def create_profile_from_metadata(user_id: str) -> Optional[Dict]:
         user_profile = profile_result.data[0]
         
         # 获取用户metadata
-        metadata_result = supabase.table('user_metadata').select('*').eq('user_id', user_id).eq('is_active', True).execute()
+        metadata_result = supabase.table('user_metadata').select('*').eq('user_id', user_id).execute()
         
         # 构建档案数据结构
         profile_data = {
@@ -1039,7 +1035,7 @@ def create_profile_from_metadata(user_id: str) -> Optional[Dict]:
                 profile_data['user_request'].update(content)
         
         # 获取用户标签
-        tags_result = supabase.table('user_tags').select('*').eq('user_id', user_id).eq('is_active', True).execute()
+        tags_result = supabase.table('user_tags').select('*').eq('user_id', user_id).execute()
         
         # 按类别组织标签
         for tag in tags_result.data:
