@@ -51,7 +51,7 @@ class ChineseTextPreprocessor:
     def tokenize(self, text: str) -> List[str]:
         """分词"""
         text = self.clean_text(text)
-        if not text:
+        if not text
             return []
         
         print(f"分词前文本: {text[:100]}...")
