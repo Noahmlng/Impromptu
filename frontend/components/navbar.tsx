@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -12,13 +13,16 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useAppStore } from '@/lib/store'
-import { Heart, Users, Moon, Sun, Globe, Crown, Coins } from 'lucide-react'
+import { useOptionalAuth } from '@/lib/hooks/useAuth'
+import { Heart, Users, Moon, Sun, Globe, Crown, Coins, LogOut } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import SubscribeModal from './SubscribeModal'
 
 export function Navbar() {
   const { themeMode, language, user, setLanguage } = useAppStore()
   const { theme, setTheme } = useTheme()
+  const { logout } = useOptionalAuth()
+  const router = useRouter()
   const [showSubscribeModal, setShowSubscribeModal] = useState(false)
   const [isPending, setIsPending] = useState(false)
 
@@ -195,10 +199,15 @@ export function Navbar() {
                       <Crown className="mr-2 h-4 w-4" />
                       <span>{language === 'zh' ? '管理订阅' : 'Manage Subscription'}</span>
                     </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={logout} className="text-red-600 focus:text-red-600">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>{language === 'zh' ? '退出登录' : 'Logout'}</span>
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button size="sm">
+                <Button size="sm" onClick={() => router.push('/login')}>
                   {language === 'zh' ? '登录' : 'Login'}
                 </Button>
               )}
