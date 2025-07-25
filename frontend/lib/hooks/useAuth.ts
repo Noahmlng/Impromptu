@@ -2,12 +2,12 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppStore } from '@/lib/store'
 import { auth } from '@/lib/api'
+import { supabase } from '@/lib/supabase'
 
 export function useAuth(requireAuth: boolean = true) {
   const router = useRouter()
   const {
     isAuthenticated,
-    authToken,
     backendUser,
     setBackendUser,
     setUser,
@@ -19,17 +19,27 @@ export function useAuth(requireAuth: boolean = true) {
 
   useEffect(() => {
     const checkAuth = async () => {
-      // Check if we have a token in localStorage
-      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null
+      setIsAuthLoading(true)
       
-      if (token && !isAuthenticated) {
-        // We have a token but not authenticated, verify it
-        setIsAuthLoading(true)
-        try {
+      try {
+        // 获取当前Supabase session
+        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        if (error) {
+          console.error('Session check error:', error)
+          if (requireAuth) {
+            router.push('/login')
+          }
+          return
+        }
+        
+        if (session?.user) {
+          // 有有效session，获取用户档案信息
           const response = await auth.getCurrentUser()
+          
           if (response.success && response.data) {
-            // Token is valid, update state
-            setAuthToken(token)
+            // 更新state
+            setAuthToken(session.access_token)
             setBackendUser(response.data)
             setUser({
               id: response.data.user_id,
@@ -40,29 +50,68 @@ export function useAuth(requireAuth: boolean = true) {
               subscription: 'free'
             })
           } else {
-            // Token is invalid, clear it
+            // 用户档案获取失败，清除session
+            await supabase.auth.signOut()
             logout()
-            auth.logout()
+            if (requireAuth) {
+              router.push('/login')
+            }
           }
-        } catch (error) {
-          console.error('Auth check failed:', error)
-          logout()
-          auth.logout()
-        } finally {
-          setIsAuthLoading(false)
+        } else if (requireAuth) {
+          // 没有session但需要认证，跳转到登录页
+          router.push('/login')
         }
-      } else if (!token && requireAuth) {
-        // No token and auth is required, redirect to login
-        router.push('/login')
+      } catch (error) {
+        console.error('Auth check failed:', error)
+        if (requireAuth) {
+          router.push('/login')
+        }
+      } finally {
+        setIsAuthLoading(false)
       }
     }
 
-    checkAuth()
-  }, [isAuthenticated, authToken, requireAuth, router, setAuthToken, setBackendUser, setUser, setIsAuthLoading, logout])
+    // 监听认证状态变化
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email)
+        
+        if (event === 'SIGNED_IN' && session?.user) {
+          // 用户登录
+          const response = await auth.getCurrentUser()
+          if (response.success && response.data) {
+            setAuthToken(session.access_token)
+            setBackendUser(response.data)
+            setUser({
+              id: response.data.user_id,
+              name: response.data.display_name,
+              email: response.data.email,
+              avatar: response.data.avatar_url,
+              credits: 0,
+              subscription: 'free'
+            })
+          }
+        } else if (event === 'SIGNED_OUT') {
+          // 用户登出
+          logout()
+          if (requireAuth) {
+            router.push('/login')
+          }
+        }
+      }
+    )
 
-  const handleLogout = () => {
+    checkAuth()
+
+    // 清理订阅
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [requireAuth, router, setAuthToken, setBackendUser, setUser, setIsAuthLoading, logout])
+
+  const handleLogout = async () => {
+    await auth.logout()
     logout()
-    auth.logout()
     router.push('/login')
   }
 

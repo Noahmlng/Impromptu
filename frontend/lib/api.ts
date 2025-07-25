@@ -1,6 +1,8 @@
 // API Client for Comprehensive Matching System
+import { supabase } from './supabase'
+
 // Base URL for the backend API
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5003'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5003'
 
 // Types based on backend API documentation
 export interface LoginRequest {
@@ -148,6 +150,7 @@ class ApiClient {
 
   constructor(baseUrl: string = API_BASE_URL) {
     this.baseUrl = baseUrl
+    console.log('API Client initialized with base URL:', this.baseUrl)
     // Try to get token from localStorage on initialization
     if (typeof window !== 'undefined') {
       this.token = localStorage.getItem('auth_token')
@@ -157,10 +160,28 @@ class ApiClient {
   private getHeaders(): HeadersInit {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
     }
     
+    // 从localStorage获取token（兼容旧方式）
     if (this.token) {
       headers['Authorization'] = `Bearer ${this.token}`
+    }
+    
+    return headers
+  }
+
+  // 新的方法：从Supabase获取认证header
+  private async getSupabaseHeaders(): Promise<HeadersInit> {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    }
+    
+    // 从Supabase获取当前session的token
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session?.access_token) {
+      headers['Authorization'] = `Bearer ${session.access_token}`
     }
     
     return headers
@@ -229,9 +250,9 @@ class ApiClient {
   }
 
   async getCurrentUser(): Promise<ApiResponse<UserInfo>> {
-    const response = await fetch(`${this.baseUrl}/api/auth/me`, {
+    const response = await fetch(`${this.baseUrl}/api/auth/user`, {
       method: 'GET',
-      headers: this.getHeaders(),
+      headers: await this.getSupabaseHeaders(),
     })
     
     return this.handleResponse<ApiResponse<UserInfo>>(response)
@@ -241,7 +262,7 @@ class ApiClient {
   async createMetadata(data: MetadataEntry): Promise<ApiResponse<any>> {
     const response = await fetch(`${this.baseUrl}/api/profile/metadata`, {
       method: 'POST',
-      headers: this.getHeaders(),
+      headers: await this.getSupabaseHeaders(),
       body: JSON.stringify(data),
     })
     
@@ -251,7 +272,7 @@ class ApiClient {
   async getUserMetadata(): Promise<MetadataResponse> {
     const response = await fetch(`${this.baseUrl}/api/profile/metadata`, {
       method: 'GET',
-      headers: this.getHeaders(),
+      headers: await this.getSupabaseHeaders(),
     })
     
     return this.handleResponse<MetadataResponse>(response)
@@ -260,7 +281,7 @@ class ApiClient {
   async batchUpdateMetadata(data: { metadata_entries: MetadataEntry[] }): Promise<ApiResponse<any>> {
     const response = await fetch(`${this.baseUrl}/api/profile/metadata/batch`, {
       method: 'POST',
-      headers: this.getHeaders(),
+      headers: await this.getSupabaseHeaders(),
       body: JSON.stringify(data),
     })
     
@@ -271,7 +292,7 @@ class ApiClient {
   async generateTags(data: GenerateTagsRequest): Promise<GenerateTagsResponse> {
     const response = await fetch(`${this.baseUrl}/api/tags/generate`, {
       method: 'POST',
-      headers: this.getHeaders(),
+      headers: await this.getSupabaseHeaders(),
       body: JSON.stringify(data),
     })
     
@@ -281,7 +302,7 @@ class ApiClient {
   async addManualTags(data: ManualTagsRequest): Promise<ApiResponse<UserTag[]>> {
     const response = await fetch(`${this.baseUrl}/api/tags/manual`, {
       method: 'POST',
-      headers: this.getHeaders(),
+      headers: await this.getSupabaseHeaders(),
       body: JSON.stringify(data),
     })
     
@@ -291,7 +312,7 @@ class ApiClient {
   async getUserTags(): Promise<ApiResponse<UserTag[]>> {
     const response = await fetch(`${this.baseUrl}/api/tags/user`, {
       method: 'GET',
-      headers: this.getHeaders(),
+      headers: await this.getSupabaseHeaders(),
     })
     
     return this.handleResponse<ApiResponse<UserTag[]>>(response)
@@ -301,7 +322,7 @@ class ApiClient {
   async searchMatches(data: MatchSearchRequest): Promise<MatchSearchResponse> {
     const response = await fetch(`${this.baseUrl}/api/match/search`, {
       method: 'POST',
-      headers: this.getHeaders(),
+      headers: await this.getSupabaseHeaders(),
       body: JSON.stringify(data),
     })
     
@@ -311,7 +332,7 @@ class ApiClient {
   async analyzeCompatibility(data: CompatibilityAnalysisRequest): Promise<CompatibilityAnalysisResponse> {
     const response = await fetch(`${this.baseUrl}/api/match/analyze`, {
       method: 'POST',
-      headers: this.getHeaders(),
+      headers: await this.getSupabaseHeaders(),
       body: JSON.stringify(data),
     })
     
@@ -331,7 +352,7 @@ class ApiClient {
   async getSystemStats(): Promise<ApiResponse<any>> {
     const response = await fetch(`${this.baseUrl}/api/system/stats`, {
       method: 'GET',
-      headers: this.getHeaders(),
+      headers: await this.getSupabaseHeaders(),
     })
     
     return this.handleResponse<ApiResponse<any>>(response)
@@ -341,27 +362,136 @@ class ApiClient {
 // Create a singleton instance
 export const apiClient = new ApiClient()
 
-// Utility functions for common operations
+// 新的基于Supabase Auth的认证工具函数
 export const auth = {
   login: async (email: string, password: string) => {
-    return apiClient.login({ email, password })
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      
+      if (error) throw error
+      
+      if (data.user && data.session) {
+        // 获取用户档案信息
+        const { data: profile, error: profileError } = await supabase
+          .from('user_profile')
+          .select('*')
+          .eq('auth_user_id', data.user.id)
+          .single()
+        
+        return {
+          success: true,
+          message: '登录成功',
+          data: {
+            user_id: profile?.user_id || data.user.id,
+            email: data.user.email!,
+            display_name: profile?.display_name || data.user.user_metadata?.display_name,
+            avatar_url: profile?.avatar_url || data.user.user_metadata?.avatar_url,
+            token: data.session.access_token
+          }
+        }
+      }
+      
+      throw new Error('登录失败')
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.message || '登录失败',
+        data: null
+      }
+    }
   },
   
   register: async (email: string, password: string, displayName: string, avatarUrl?: string) => {
-    return apiClient.register({ 
-      email, 
-      password, 
-      display_name: displayName, 
-      avatar_url: avatarUrl 
-    })
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            display_name: displayName,
+            avatar_url: avatarUrl
+          }
+        }
+      })
+      
+      if (error) throw error
+      
+      if (data.user) {
+        return {
+          success: true,
+          message: '注册成功',
+          data: {
+            user_id: data.user.id,
+            email: data.user.email!,
+            display_name: displayName,
+            avatar_url: avatarUrl,
+            token: data.session?.access_token || null,
+            needs_confirmation: !data.user.email_confirmed_at
+          }
+        }
+      }
+      
+      throw new Error('注册失败')
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.message || '注册失败',
+        data: null
+      }
+    }
   },
   
-  logout: () => {
-    apiClient.clearToken()
+  logout: async () => {
+    try {
+      await supabase.auth.signOut()
+      // 清除本地存储的token
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth_token')
+      }
+      return { success: true, message: '登出成功' }
+    } catch (error: any) {
+      return { success: false, message: error.message || '登出失败' }
+    }
   },
   
-  getCurrentUser: () => {
-    return apiClient.getCurrentUser()
+  getCurrentUser: async () => {
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser()
+      
+      if (error) throw error
+      if (!user) throw new Error('用户未登录')
+      
+      // 获取用户档案信息
+      const { data: profile, error: profileError } = await supabase
+        .from('user_profile')
+        .select('*')
+        .eq('auth_user_id', user.id)
+        .single()
+      
+      if (profileError) throw profileError
+      
+      return {
+        success: true,
+        data: {
+          user_id: profile.user_id,
+          email: user.email!,
+          display_name: profile.display_name,
+          avatar_url: profile.avatar_url,
+          created_at: profile.created_at,
+          updated_at: profile.updated_at,
+          is_active: profile.is_active
+        }
+      }
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.message || '获取用户信息失败',
+        data: null
+      }
+    }
   }
 }
 

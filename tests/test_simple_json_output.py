@@ -17,7 +17,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
 
-from src.algorithms.tag_compatibility_analyzer import EnhancedCompatibilityAnalyzer
+from backend.algorithms.tag_compatibility_analyzer import EnhancedCompatibilityAnalyzer
 
 def test_simple_json_output():
     """测试简洁JSON输出"""

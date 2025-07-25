@@ -1,10 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['localhost', 'example.com'],
+    domains: ['localhost', '127.0.0.1', 'example.com'],
   },
   env: {
-    CUSTOM_KEY: 'my-value',
+    NEXT_PUBLIC_API_URL: 'http://127.0.0.1:5003',
   },
 }
 

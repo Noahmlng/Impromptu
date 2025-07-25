@@ -21,8 +21,8 @@ from dataclasses import dataclass, asdict
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from configs.config import ConfigManager
-from src.models.tag_pool import TagPool, TagCategory
-from src.models.tag_matching import TagMatcher, TagMatchResult
+from backend.models.tag_pool import TagPool, TagCategory
+from backend.models.tag_matching import TagMatcher, TagMatchResult
 
 @dataclass
 class UserProfile:

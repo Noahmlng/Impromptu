@@ -471,7 +471,7 @@ def match_users_lda():
     """
     try:
         # 导入LDA模型
-        from src.models.topic_modeling import topic_model
+        from backend.models.topic_modeling import topic_model
         
         data = request.get_json()
         if not data:
@@ -815,7 +815,7 @@ def load_model():
 def get_tag_pool():
     """获取标签池信息"""
     try:
-        from src.models.tag_pool import TagPool
+        from backend.models.tag_pool import TagPool
         
         request_type = request.args.get('type', 'all')
         

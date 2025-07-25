@@ -129,13 +129,13 @@ def check_imports():
         sys.path.append(str(project_root))
         
         # 测试导入
-        from src.models import CompatibilityResult, UserRequest
+        from backend.models import CompatibilityResult, UserRequest
         print("✅ src.models 导入成功")
         
         from configs.config import ConfigManager
         print("✅ configs.config 导入成功")
         
-        from src.algorithms.tag_compatibility_analyzer import EnhancedCompatibilityAnalyzer
+        from backend.algorithms.tag_compatibility_analyzer import EnhancedCompatibilityAnalyzer
         print("✅ 核心算法模块导入成功")
         
         return True
