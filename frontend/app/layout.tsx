@@ -5,7 +5,7 @@ import { Navbar } from '@/components/navbar'
 import { ModeSwitcher } from '@/components/mode-switcher'
 
 export const metadata: Metadata = {
-  title: 'Impromptu - AI-Powered Social Matching',
+  title: 'Linker - AI-Powered Social Linking',
   description: 'Find your perfect match with AI-powered compatibility analysis',
 }
 

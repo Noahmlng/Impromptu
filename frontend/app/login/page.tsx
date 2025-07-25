@@ -148,7 +148,7 @@ export default function LoginPage() {
             ) : (
               <Users className="h-10 w-10 text-miami-blue-500" />
             )}
-            <h1 className="text-3xl font-bold">Impromptu</h1>
+            <h1 className="text-3xl font-bold">Linker</h1>
           </div>
           <h2 className="text-xl font-semibold">
             {isLogin 
