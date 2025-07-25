@@ -50,12 +50,12 @@ export default function LoginPage() {
         
         if (response.success) {
           // Update store with user data
-          setAuthToken(response.data.token)
+          setAuthToken(response.data!.token)
           setBackendUser({
-            user_id: response.data.user_id,
-            email: response.data.email,
-            display_name: response.data.display_name,
-            avatar_url: response.data.avatar_url,
+            user_id: response.data!.user_id,
+            email: response.data!.email,
+            display_name: response.data!.display_name,
+            avatar_url: response.data!.avatar_url,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
             last_login_at: new Date().toISOString(),
@@ -64,10 +64,10 @@ export default function LoginPage() {
           
           // Create legacy user object for compatibility
           setUser({
-            id: response.data.user_id,
-            name: response.data.display_name,
-            email: response.data.email,
-            avatar: response.data.avatar_url,
+            id: response.data!.user_id,
+            name: response.data!.display_name,
+            email: response.data!.email,
+            avatar: response.data!.avatar_url,
             credits: 0,
             subscription: 'free'
           })
@@ -97,12 +97,12 @@ export default function LoginPage() {
         
         if (response.success) {
           // Update store with user data
-          setAuthToken(response.data.token)
+          setAuthToken(response.data!.token)
           setBackendUser({
-            user_id: response.data.user_id,
-            email: response.data.email,
-            display_name: response.data.display_name,
-            avatar_url: response.data.avatar_url,
+            user_id: response.data!.user_id,
+            email: response.data!.email,
+            display_name: response.data!.display_name,
+            avatar_url: response.data!.avatar_url,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
             last_login_at: new Date().toISOString(),
@@ -111,10 +111,10 @@ export default function LoginPage() {
           
           // Create legacy user object for compatibility
           setUser({
-            id: response.data.user_id,
-            name: response.data.display_name,
-            email: response.data.email,
-            avatar: response.data.avatar_url,
+            id: response.data!.user_id,
+            name: response.data!.display_name,
+            email: response.data!.email,
+            avatar: response.data!.avatar_url,
             credits: 0,
             subscription: 'free'
           })
@@ -168,7 +168,7 @@ export default function LoginPage() {
         <div className="bg-card p-8 rounded-lg shadow-lg border">
           {/* Error Display */}
           {error && (
-            <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center space-x-2">
+            <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center space-x-2" suppressHydrationWarning>
               <AlertCircle className="h-4 w-4 text-destructive" />
               <span className="text-sm text-destructive">{error}</span>
             </div>

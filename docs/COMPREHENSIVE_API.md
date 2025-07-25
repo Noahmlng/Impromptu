@@ -401,7 +401,7 @@ Authorization: Bearer <token>
       "confidence_score": 0.95,
       "tag_source": "topic_modeling",
       "created_at": "2024-01-01T00:00:00Z",
-      "is_active": true
+      "status": active
     }
   ],
   "total": 15
