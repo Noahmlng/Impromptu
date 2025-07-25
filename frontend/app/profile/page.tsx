@@ -1,26 +1,42 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { useAppStore } from '@/lib/store'
+import { useRequireAuth } from '@/lib/hooks/useAuth'
+import { profile, tags } from '@/lib/api'
 import { User, UserMetadata, Language } from '@/lib/types'
-import { User as UserIcon, Mail, Phone, MapPin, Calendar, Camera, Save, Edit3 } from 'lucide-react'
+import { User as UserIcon, Mail, Phone, MapPin, Calendar, Camera, Save, Edit3, Tag, AlertCircle, CheckCircle } from 'lucide-react'
 
 export default function ProfilePage() {
-  const { language, user } = useAppStore()
+  // Auth check
+  const { user: authUser, isLoading: authLoading } = useRequireAuth()
+  
+  const { 
+    language, 
+    user, 
+    backendUser, 
+    userMetadata, 
+    userTags,
+    setUserMetadata,
+    setUserTags,
+    setIsLoading,
+    setError,
+    error,
+    isLoading
+  } = useAppStore()
+  
   const [isEditing, setIsEditing] = useState(false)
-  const [profile, setProfile] = useState({
-    name: user?.name || 'Alex Chen',
-    email: 'alex.chen@example.com',
-    phone: '+1 (555) 123-4567',
-    location: 'San Francisco, CA',
-    age: 28,
-    bio: language === 'zh' 
-      ? '热爱科技的产品经理，喜欢旅行和摄影。正在寻找志同道合的伙伴，无论是工作还是生活。'
-      : 'Tech-savvy product manager who loves traveling and photography. Looking for like-minded partners for both work and life.',
-    interests: ['Technology', 'Travel', 'Photography', 'Startups', 'Design'],
+  const [saveSuccess, setSaveSuccess] = useState(false)
+  const [profileData, setProfileData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    location: '',
+    age: '',
+    bio: '',
     preferences: {
       romanticMode: true,
       teamMode: true,
@@ -28,18 +44,146 @@ export default function ProfilePage() {
       emailNotifications: true
     }
   })
+  const [generatedTags, setGeneratedTags] = useState<string[]>([])
 
-  const handleSave = () => {
-    // Save profile logic here
+  // Load user data on mount
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (!authUser) return
+      
+      setIsLoading(true)
+      try {
+        // Load metadata
+        const metadataResponse = await profile.getMetadata()
+        if (metadataResponse.success) {
+          setUserMetadata(metadataResponse.data)
+          
+          // Parse metadata into profile form
+          const profileSection = metadataResponse.data.profile || {}
+          const personalData = profileSection.personal?.content || {}
+          const contactData = profileSection.contact?.content || {}
+          const preferencesData = profileSection.preferences?.content || {}
+          
+          setProfileData({
+            name: backendUser?.display_name || '',
+            email: backendUser?.email || '',
+            phone: contactData.phone || '',
+            location: personalData.location || '',
+            age: personalData.age || '',
+            bio: personalData.bio || '',
+            preferences: {
+              romanticMode: preferencesData.romantic_mode !== false,
+              teamMode: preferencesData.team_mode !== false,
+              publicProfile: preferencesData.public_profile !== false,
+              emailNotifications: preferencesData.email_notifications !== false
+            }
+          })
+        }
+        
+        // Load tags
+        const tagsResponse = await tags.getUserTags()
+        if (tagsResponse.success && tagsResponse.data) {
+          setUserTags(tagsResponse.data)
+          setGeneratedTags(tagsResponse.data.map(tag => tag.tag_name))
+        }
+        
+      } catch (error: any) {
+        setError(error.message || 'Failed to load profile data')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadUserData()
+  }, [authUser, backendUser])
+
+  const handleSave = async () => {
+    if (!authUser) return
+    
+    setIsLoading(true)
+    setSaveSuccess(false)
+    setError(null)
+    
+    try {
+      // Prepare metadata entries
+      const metadataEntries = [
+        {
+          section_type: 'profile',
+          section_key: 'personal',
+          content: {
+            location: profileData.location,
+            age: profileData.age,
+            bio: profileData.bio
+          }
+        },
+        {
+          section_type: 'profile',
+          section_key: 'contact',
+          content: {
+            phone: profileData.phone
+          }
+        },
+        {
+          section_type: 'profile',
+          section_key: 'preferences',
+          content: {
+            romantic_mode: profileData.preferences.romanticMode,
+            team_mode: profileData.preferences.teamMode,
+            public_profile: profileData.preferences.publicProfile,
+            email_notifications: profileData.preferences.emailNotifications
+          }
+        }
+      ]
+
+      // Save metadata
+      await profile.batchUpdateMetadata(metadataEntries)
+      
+      setSaveSuccess(true)
     setIsEditing(false)
+      
+      // Auto-hide success message
+      setTimeout(() => setSaveSuccess(false), 3000)
+      
+    } catch (error: any) {
+      setError(error.message || 'Failed to save profile')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const generateTags = async (requestType: '找队友' | '找对象') => {
+    if (!authUser) return
+    
+    setIsLoading(true)
+    try {
+      const response = await tags.generate(requestType)
+      if (response.success) {
+        setUserTags(response.data.generated_tags)
+        setGeneratedTags(response.data.generated_tags.map(tag => tag.tag_name))
+        setSaveSuccess(true)
+        setTimeout(() => setSaveSuccess(false), 3000)
+      }
+    } catch (error: any) {
+      setError(error.message || 'Failed to generate tags')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  if (authLoading || isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
   }
 
   const handleInputChange = (field: string, value: any) => {
-    setProfile(prev => ({ ...prev, [field]: value }))
+    setProfileData(prev => ({ ...prev, [field]: value }))
   }
 
   const handlePreferenceChange = (preference: string, value: boolean) => {
-    setProfile(prev => ({
+    setProfileData(prev => ({
       ...prev,
       preferences: { ...prev.preferences, [preference]: value }
     }))
@@ -47,6 +191,23 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
+        {/* Status Messages */}
+        {error && (
+          <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center space-x-2">
+            <AlertCircle className="h-4 w-4 text-destructive" />
+            <span className="text-sm text-destructive">{error}</span>
+          </div>
+        )}
+        
+        {saveSuccess && (
+          <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center space-x-2">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <span className="text-sm text-green-600">
+              {language === 'zh' ? '保存成功！' : 'Saved successfully!'}
+            </span>
+          </div>
+        )}
+        
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">
@@ -78,7 +239,7 @@ export default function ProfilePage() {
               <Avatar className="h-32 w-32 mx-auto">
                 <AvatarImage src={user?.avatar} />
                 <AvatarFallback className="text-2xl">
-                  {profile.name.charAt(0)}
+                  {(profileData.name || backendUser?.display_name || 'U').charAt(0)}
                 </AvatarFallback>
               </Avatar>
               {isEditing && (
@@ -91,8 +252,8 @@ export default function ProfilePage() {
               )}
             </div>
             <div>
-              <h2 className="text-2xl font-semibold">{profile.name}</h2>
-              <p className="text-muted-foreground">{profile.email}</p>
+              <h2 className="text-2xl font-semibold">{profileData.name || backendUser?.display_name}</h2>
+              <p className="text-muted-foreground">{profileData.email || backendUser?.email}</p>
             </div>
           </div>
 
@@ -134,12 +295,12 @@ export default function ProfilePage() {
                 {isEditing ? (
                   <input
                     type="text"
-                    value={profile.name}
+                    value={profileData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
                     className="w-full px-3 py-2 border border-input rounded-md bg-background"
                   />
                 ) : (
-                  <p className="px-3 py-2">{profile.name}</p>
+                  <p className="px-3 py-2">{profileData.name}</p>
                 )}
               </div>
 
@@ -151,12 +312,12 @@ export default function ProfilePage() {
                 {isEditing ? (
                   <input
                     type="email"
-                    value={profile.email}
+                    value={profileData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     className="w-full px-3 py-2 border border-input rounded-md bg-background"
                   />
                 ) : (
-                  <p className="px-3 py-2">{profile.email}</p>
+                  <p className="px-3 py-2">{profileData.email}</p>
                 )}
               </div>
 
@@ -168,12 +329,12 @@ export default function ProfilePage() {
                 {isEditing ? (
                   <input
                     type="tel"
-                    value={profile.phone}
+                    value={profileData.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
                     className="w-full px-3 py-2 border border-input rounded-md bg-background"
                   />
                 ) : (
-                  <p className="px-3 py-2">{profile.phone}</p>
+                  <p className="px-3 py-2">{profileData.phone}</p>
                 )}
               </div>
 
@@ -185,12 +346,12 @@ export default function ProfilePage() {
                 {isEditing ? (
                   <input
                     type="text"
-                    value={profile.location}
+                    value={profileData.location}
                     onChange={(e) => handleInputChange('location', e.target.value)}
                     className="w-full px-3 py-2 border border-input rounded-md bg-background"
                   />
                 ) : (
-                  <p className="px-3 py-2">{profile.location}</p>
+                  <p className="px-3 py-2">{profileData.location}</p>
                 )}
               </div>
             </div>
@@ -202,31 +363,58 @@ export default function ProfilePage() {
               </label>
               {isEditing ? (
                 <textarea
-                  value={profile.bio}
+                  value={profileData.bio}
                   onChange={(e) => handleInputChange('bio', e.target.value)}
                   rows={4}
                   className="w-full px-3 py-2 border border-input rounded-md bg-background resize-none"
                 />
               ) : (
-                <p className="px-3 py-2 text-sm leading-relaxed">{profile.bio}</p>
+                <p className="px-3 py-2 text-sm leading-relaxed">{profileData.bio}</p>
               )}
             </div>
           </div>
 
-          {/* Interests */}
+          {/* Tags */}
           <div className="bg-card rounded-lg p-6 space-y-4">
+            <div className="flex items-center justify-between">
             <h3 className="text-xl font-semibold">
-              {language === 'zh' ? '兴趣爱好' : 'Interests'}
+                {language === 'zh' ? '个人标签' : 'Tags'}
             </h3>
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => generateTags('找队友')}
+                  disabled={isLoading}
+                >
+                  <Tag className="h-4 w-4 mr-2" />
+                  {language === 'zh' ? '生成队友标签' : 'Generate Team Tags'}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => generateTags('找对象')}
+                  disabled={isLoading}
+                >
+                  <Tag className="h-4 w-4 mr-2" />
+                  {language === 'zh' ? '生成浪漫标签' : 'Generate Romantic Tags'}
+                </Button>
+              </div>
+            </div>
             <div className="flex flex-wrap gap-2">
-              {profile.interests.map((interest, index) => (
+              {generatedTags.map((tag, index) => (
                 <span
                   key={index}
                   className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
                 >
-                  {interest}
+                  {tag}
                 </span>
               ))}
+              {generatedTags.length === 0 && (
+                <p className="text-muted-foreground text-sm">
+                  {language === 'zh' ? '暂无标签，点击按钮生成' : 'No tags yet, click button to generate'}
+                </p>
+              )}
             </div>
           </div>
 
@@ -249,7 +437,7 @@ export default function ProfilePage() {
                   </p>
                 </div>
                 <Switch
-                  checked={profile.preferences.romanticMode}
+                  checked={profileData.preferences.romanticMode}
                   onCheckedChange={(value) => handlePreferenceChange('romanticMode', value)}
                   disabled={!isEditing}
                 />
@@ -268,7 +456,7 @@ export default function ProfilePage() {
                   </p>
                 </div>
                 <Switch
-                  checked={profile.preferences.teamMode}
+                  checked={profileData.preferences.teamMode}
                   onCheckedChange={(value) => handlePreferenceChange('teamMode', value)}
                   disabled={!isEditing}
                 />
@@ -287,7 +475,7 @@ export default function ProfilePage() {
                   </p>
                 </div>
                 <Switch
-                  checked={profile.preferences.publicProfile}
+                  checked={profileData.preferences.publicProfile}
                   onCheckedChange={(value) => handlePreferenceChange('publicProfile', value)}
                   disabled={!isEditing}
                 />
@@ -306,7 +494,7 @@ export default function ProfilePage() {
                   </p>
                 </div>
                 <Switch
-                  checked={profile.preferences.emailNotifications}
+                  checked={profileData.preferences.emailNotifications}
                   onCheckedChange={(value) => handlePreferenceChange('emailNotifications', value)}
                   disabled={!isEditing}
                 />

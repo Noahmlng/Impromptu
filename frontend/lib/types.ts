@@ -1,35 +1,41 @@
-// Database Types
-export interface Profile {
-  id: string
-  username: string
+// Backend API Types - Based on Comprehensive Matching System
+export interface BackendUserInfo {
+  user_id: string
+  email: string
+  display_name: string
+  avatar_url?: string
+  created_at: string
+  updated_at: string
+  last_login_at: string
+  is_active: boolean
+}
+
+export interface UserMetadata {
+  id?: string
+  section_type: string
+  section_key: string
+  content: any
+  data_type: string
+  display_order: number
   created_at: string
   updated_at: string
 }
 
-export interface UserMetadata {
+export interface UserTag {
+  id: number
+  user_id: string
+  tag_name: string
+  tag_category: string
+  confidence_score: number
+  tag_source: string
+  created_at: string
+  is_active: boolean
+}
+
+// Legacy types for compatibility
+export interface Profile {
   id: string
-  age?: number
-  gender?: 'male' | 'female' | 'non-binary' | 'other' | 'prefer-not-to-say'
-  location_city?: string
-  location_state?: string
-  location_country?: string
-  latitude?: number
-  longitude?: number
-  bio?: string
-  occupation?: string
-  education?: string
-  height_cm?: number
-  looking_for?: string[]
-  age_min?: number
-  age_max?: number
-  max_distance_km?: number
-  profile_photo_url?: string
-  additional_photos?: string[]
-  social_links?: Record<string, any>
-  preferences?: Record<string, any>
-  is_profile_complete?: boolean
-  is_verified?: boolean
-  visibility?: 'public' | 'private' | 'friends_only'
+  username: string
   created_at: string
   updated_at: string
 }
@@ -42,14 +48,6 @@ export interface Tag {
   color?: string
   is_active?: boolean
   created_at: string
-}
-
-export interface UserTag {
-  id: string
-  user_id: string
-  tag_id: number
-  weight?: number
-  added_at: string
 }
 
 export interface Conversation {
@@ -78,7 +76,9 @@ export interface User {
   credits: number
   subscription?: string
   profile?: Profile
-  metadata?: UserMetadata
+  metadata?: Record<string, any>  // Backend metadata structure
+  backendInfo?: BackendUserInfo   // Direct backend user info
+  tags?: UserTag[]               // User tags from backend
 }
 
 export interface SubscriptionPlan {
