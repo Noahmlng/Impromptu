@@ -4,9 +4,17 @@ import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/lib/store'
 import { Heart, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { usePathname } from 'next/navigation'
 
 export function ModeSwitcher() {
   const { themeMode, setThemeMode } = useAppStore()
+  const pathname = usePathname()
+  
+  // Don't show ModeSwitcher on landing page and login/register pages
+  const hiddenPages = ['/', '/login', '/register']
+  if (hiddenPages.includes(pathname)) {
+    return null
+  }
 
   return (
     <div className="fixed left-6 top-1/2 z-50 -translate-y-1/2">

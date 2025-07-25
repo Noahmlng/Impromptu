@@ -1,9 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/lib/store'
+import { useOptionalAuth } from '@/lib/hooks/useAuth'
 import { 
   Heart, 
   Users, 
@@ -18,6 +20,34 @@ import {
 
 export default function LandingPage() {
   const { language } = useAppStore()
+  const router = useRouter()
+  const { isAuthenticated, isLoading } = useOptionalAuth()
+
+  // Redirect to /home if user is authenticated
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.push('/home')
+    }
+  }, [isAuthenticated, isLoading, router])
+
+  // Show loading or redirect if authenticated
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300">
+            {language === 'zh' ? '加载中...' : 'Loading...'}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // Don't render landing page if user is authenticated (will redirect)
+  if (isAuthenticated) {
+    return null
+  }
 
   const features = [
     {
