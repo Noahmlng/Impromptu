@@ -119,8 +119,8 @@ export default function LoginPage() {
             subscription: 'free'
           })
           
-          // Redirect to profile setup
-          router.push('/profile')
+          // Redirect to onboarding for new users
+          router.push('/onboarding')
         } else {
           setError(response.message)
         }

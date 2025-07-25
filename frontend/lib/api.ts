@@ -1,7 +1,7 @@
 // API Client for Comprehensive Matching System
 import { supabase } from './supabase'
 
-// Base URL for the backend API
+// Base URL for the backend API (only for AI operations like tag generation and matching)
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5003'
 
 // Types based on backend API documentation
@@ -258,37 +258,188 @@ class ApiClient {
     return this.handleResponse<ApiResponse<UserInfo>>(response)
   }
 
-  // Metadata APIs
+  // Metadata APIs - 直接使用Supabase
   async createMetadata(data: MetadataEntry): Promise<ApiResponse<any>> {
-    const response = await fetch(`${this.baseUrl}/api/profile/metadata`, {
-      method: 'POST',
-      headers: await this.getSupabaseHeaders(),
-      body: JSON.stringify(data),
-    })
-    
-    return this.handleResponse<ApiResponse<any>>(response)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('User not authenticated')
+
+      // 获取用户的user_id
+      const { data: profile } = await supabase
+        .from('user_profile')
+        .select('user_id')
+        .eq('auth_user_id', user.id)
+        .single()
+
+      if (!profile) throw new Error('User profile not found')
+
+      // 检查是否已存在相同的metadata
+      const { data: existing } = await supabase
+        .from('user_metadata')
+        .select('id')
+        .eq('user_id', profile.user_id)
+        .eq('section_type', data.section_type)
+        .eq('section_key', data.section_key)
+        .single()
+
+      if (existing) {
+        // 更新现有记录
+        const { data: updated, error } = await supabase
+          .from('user_metadata')
+          .update({
+            content: data.content,
+            data_type: data.data_type || 'nested_object',
+            display_order: data.display_order || 1,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existing.id)
+          .select()
+          .single()
+
+        if (error) throw error
+
+        return {
+          success: true,
+          message: 'Metadata updated successfully',
+          data: updated
+        }
+      } else {
+        // 创建新记录
+        const { data: created, error } = await supabase
+          .from('user_metadata')
+          .insert({
+            user_id: profile.user_id,
+            section_type: data.section_type,
+            section_key: data.section_key,
+            content: data.content,
+            data_type: data.data_type || 'nested_object',
+            display_order: data.display_order || 1
+          })
+          .select()
+          .single()
+
+        if (error) throw error
+
+        return {
+          success: true,
+          message: 'Metadata created successfully',
+          data: created
+        }
+      }
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message
+      }
+    }
   }
 
   async getUserMetadata(): Promise<MetadataResponse> {
-    const response = await fetch(`${this.baseUrl}/api/profile/metadata`, {
-      method: 'GET',
-      headers: await this.getSupabaseHeaders(),
-    })
-    
-    return this.handleResponse<MetadataResponse>(response)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('User not authenticated')
+
+      // 获取用户的user_id
+      const { data: profile } = await supabase
+        .from('user_profile')
+        .select('user_id')
+        .eq('auth_user_id', user.id)
+        .single()
+
+      if (!profile) throw new Error('User profile not found')
+
+      // 获取所有metadata
+      const { data: metadata, error } = await supabase
+        .from('user_metadata')
+        .select('*')
+        .eq('user_id', profile.user_id)
+        .eq('is_active', true)
+        .order('section_type')
+        .order('display_order')
+
+      if (error) throw error
+
+      // 组织数据结构
+      const organizedData: any = {}
+      
+      if (metadata) {
+        metadata.forEach((item: any) => {
+          if (!organizedData[item.section_type]) {
+            organizedData[item.section_type] = {}
+          }
+          
+          organizedData[item.section_type][item.section_key] = {
+            content: item.content,
+            data_type: item.data_type,
+            display_order: item.display_order,
+            created_at: item.created_at,
+            updated_at: item.updated_at
+          }
+        })
+      }
+
+      return {
+        success: true,
+        data: organizedData
+      }
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.message,
+        data: {}
+      }
+    }
   }
 
   async batchUpdateMetadata(data: { metadata_entries: MetadataEntry[] }): Promise<ApiResponse<any>> {
-    const response = await fetch(`${this.baseUrl}/api/profile/metadata/batch`, {
-      method: 'POST',
-      headers: await this.getSupabaseHeaders(),
-      body: JSON.stringify(data),
-    })
-    
-    return this.handleResponse<ApiResponse<any>>(response)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('User not authenticated')
+
+      // 获取用户的user_id
+      const { data: profile } = await supabase
+        .from('user_profile')
+        .select('user_id')
+        .eq('auth_user_id', user.id)
+        .single()
+
+      if (!profile) throw new Error('User profile not found')
+
+      const results = []
+      const errors = []
+
+      for (const entry of data.metadata_entries) {
+        try {
+          const result = await this.createMetadata(entry)
+          if (result.success) {
+            results.push(result.data)
+          } else {
+            errors.push({ entry, error: result.error })
+          }
+        } catch (error: any) {
+          errors.push({ entry, error: error.message })
+        }
+      }
+
+      return {
+        success: true,
+        message: `Successfully processed ${results.length} entries`,
+        data: {
+          success_count: results.length,
+          error_count: errors.length,
+          results,
+          errors
+        }
+      }
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message
+      }
+    }
   }
 
-  // Tags APIs
+  // Tags APIs - 生成标签使用后端API，获取标签使用Supabase
   async generateTags(data: GenerateTagsRequest): Promise<GenerateTagsResponse> {
     const response = await fetch(`${this.baseUrl}/api/tags/generate`, {
       method: 'POST',
@@ -310,15 +461,55 @@ class ApiClient {
   }
 
   async getUserTags(): Promise<ApiResponse<UserTag[]>> {
-    const response = await fetch(`${this.baseUrl}/api/tags/user`, {
-      method: 'GET',
-      headers: await this.getSupabaseHeaders(),
-    })
-    
-    return this.handleResponse<ApiResponse<UserTag[]>>(response)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('User not authenticated')
+
+      // 获取用户的user_id
+      const { data: profile } = await supabase
+        .from('user_profile')
+        .select('user_id')
+        .eq('auth_user_id', user.id)
+        .single()
+
+      if (!profile) throw new Error('User profile not found')
+
+      // 获取用户标签
+      const { data: tags, error } = await supabase
+        .from('user_tags')
+        .select('*')
+        .eq('user_id', profile.user_id)
+        .eq('is_active', true)
+        .order('confidence_score', { ascending: false })
+
+      if (error) throw error
+
+      // 转换为前端需要的格式
+      const formattedTags: UserTag[] = (tags || []).map((tag: any) => ({
+        id: tag.id,
+        user_id: tag.user_id,
+        tag_name: tag.tag_name,
+        tag_category: tag.tag_category || 'generated',
+        confidence_score: parseFloat(tag.confidence_score || 0),
+        tag_source: tag.tag_source,
+        created_at: tag.created_at,
+        is_active: tag.is_active
+      }))
+
+      return {
+        success: true,
+        data: formattedTags
+      }
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.message,
+        data: []
+      }
+    }
   }
 
-  // Matching APIs
+  // Matching APIs - 使用后端API进行AI匹配
   async searchMatches(data: MatchSearchRequest): Promise<MatchSearchResponse> {
     const response = await fetch(`${this.baseUrl}/api/match/search`, {
       method: 'POST',
@@ -437,16 +628,53 @@ export const auth = {
       }
       
       if (data.user) {
-        return {
-          success: true,
-          message: '注册成功',
-          data: {
-            user_id: data.user.id,
-            email: data.user.email!,
-            display_name: displayName,
-            avatar_url: avatarUrl,
-            token: data.session?.access_token || null,
-            needs_confirmation: !data.user.email_confirmed_at
+        // 创建用户档案记录
+        try {
+          const userId = `user_${Date.now()}`
+          const { data: profile, error: profileError } = await supabase
+            .from('user_profile')
+            .insert({
+              user_id: userId,
+              auth_user_id: data.user.id,
+              email: data.user.email!,
+              display_name: displayName,
+              avatar_url: avatarUrl,
+              status: 'active'
+            })
+            .select()
+            .single()
+
+          if (profileError) {
+            console.error('Error creating user profile:', profileError)
+            // 不阻塞注册，但记录错误
+          }
+
+          return {
+            success: true,
+            message: '注册成功',
+            data: {
+              user_id: userId,
+              email: data.user.email!,
+              display_name: displayName,
+              avatar_url: avatarUrl,
+              token: data.session?.access_token || null,
+              needs_confirmation: !data.user.email_confirmed_at
+            }
+          }
+        } catch (profileError: any) {
+          console.error('Error creating user profile:', profileError)
+          // 返回基本的注册成功信息，即使profile创建失败
+          return {
+            success: true,
+            message: '注册成功',
+            data: {
+              user_id: data.user.id,
+              email: data.user.email!,
+              display_name: displayName,
+              avatar_url: avatarUrl,
+              token: data.session?.access_token || null,
+              needs_confirmation: !data.user.email_confirmed_at
+            }
           }
         }
       }
