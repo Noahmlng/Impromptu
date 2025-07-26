@@ -332,4 +332,41 @@ async def update_my_credits(credits_change: int, current_user: Dict = Depends(ge
             
     except Exception as e:
         print(f"更新积分错误: {e}")
-        raise HTTPException(status_code=500, detail=f"更新积分失败: {str(e)}") 
+        raise HTTPException(status_code=500, detail=f"更新积分失败: {str(e)}")
+
+@router.put("/me/profile", response_model=UserResponse)
+async def update_my_profile(
+    profile_data: Dict,
+    current_user: Dict = Depends(get_current_user)
+):
+    """更新当前用户的基本档案信息"""
+    try:
+        user_id = current_user['user_id']
+        
+        # 准备更新数据，只包含允许更新的字段（移除age字段，因为数据库表中没有这个字段）
+        allowed_fields = ['display_name', 'phone', 'location', 'bio']
+        update_data = {}
+        
+        for field in allowed_fields:
+            if field in profile_data:
+                update_data[field] = profile_data[field]
+        
+        # 如果前端发送了age字段，我们暂时忽略它（后续可以存储到metadata中）
+        if 'age' in profile_data:
+            print(f"警告：忽略age字段更新，值为: {profile_data['age']}")
+        
+        # 更新用户档案
+        updated_profile = await user_profile_db.update(user_id, update_data)
+        
+        if updated_profile:
+            return UserResponse(
+                success=True,
+                message="个人档案更新成功",
+                data=updated_profile
+            )
+        else:
+            raise HTTPException(status_code=500, detail="个人档案更新失败")
+            
+    except Exception as e:
+        print(f"更新个人档案错误: {e}")
+        raise HTTPException(status_code=500, detail=f"更新个人档案失败: {str(e)}") 

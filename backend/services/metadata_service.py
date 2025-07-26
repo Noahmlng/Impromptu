@@ -35,8 +35,8 @@ class BatchMetadataRequest(BaseModel):
 
 class MetadataResponse(BaseModel):
     success: bool
-    message: str
-    data: Optional[Dict] = None
+    message: Optional[str] = None
+    data: Optional[Any] = None
 
 @router.post("/", response_model=MetadataResponse)
 async def create_or_update_metadata(

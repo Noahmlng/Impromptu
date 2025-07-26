@@ -182,28 +182,65 @@ class UserMetadataDB:
     async def upsert_metadata(self, user_id: str, section_type: str, section_key: str, content: Any) -> Optional[Dict]:
         """插入或更新元数据"""
         try:
+            print(f"📝 [UserMetadataDB] 更新元数据: {user_id} - {section_type}.{section_key}")
+            
+            # 验证用户是否存在
+            user_profile = self.client.table('user_profile').select('id').eq('id', user_id).single().execute()
+            if not user_profile.data:
+                print(f"❌ [UserMetadataDB] 找不到用户档案: {user_id}")
+                return None
+            
+            print(f"✅ [UserMetadataDB] 用户验证成功: {user_id}")
+            
             # 检查是否已存在
             existing = self.client.table(self.table).select('id').eq('user_id', user_id).eq('section_type', section_type).eq('section_key', section_key).execute()
+            
+            # 确保content是正确的格式：JSONB字段应该直接存储对象
+            if isinstance(content, str):
+                try:
+                    # 如果传入的是JSON字符串，尝试解析为对象
+                    content = json.loads(content)
+                except json.JSONDecodeError:
+                    # 如果不是有效的JSON，包装成对象
+                    content = {"value": content}
+            elif not isinstance(content, (dict, list)):
+                # 如果不是dict或list，包装成对象
+                content = {"value": content}
             
             metadata_entry = {
                 'user_id': user_id,
                 'section_type': section_type,
                 'section_key': section_key,
-                'content': json.dumps(content, ensure_ascii=False) if isinstance(content, (dict, list)) else content,
+                'content': content,  # 直接存储对象，不转换为JSON字符串
+                'data_type': 'nested_object',
+                'display_order': 1,
                 'updated_at': datetime.datetime.utcnow().isoformat()
             }
             
+            print(f"📊 [UserMetadataDB] 元数据条目: {metadata_entry}")
+            
             if existing.data:
                 # 更新
+                print(f"🔄 [UserMetadataDB] 更新现有元数据: {existing.data[0]['id']}")
                 response = self.client.table(self.table).update(metadata_entry).eq('id', existing.data[0]['id']).execute()
             else:
                 # 插入
+                print(f"➕ [UserMetadataDB] 插入新元数据")
                 metadata_entry['created_at'] = datetime.datetime.utcnow().isoformat()
                 response = self.client.table(self.table).insert(metadata_entry).execute()
             
-            return response.data[0] if response.data else None
+            if response.data:
+                print(f"✅ [UserMetadataDB] 元数据操作成功")
+                return response.data[0]
+            else:
+                print(f"❌ [UserMetadataDB] 元数据操作失败：响应为空")
+                print(f"🔍 [UserMetadataDB] 响应详情: {response}")
+                return None
+                
         except Exception as e:
-            print(f"插入/更新元数据失败: {e}")
+            print(f"❌ [UserMetadataDB] 插入/更新元数据失败: {e}")
+            import traceback
+            print(f"详细错误: {traceback.format_exc()}")
             return None
 
 class UserTagsDB:
@@ -226,7 +263,18 @@ class UserTagsDB:
                      confidence_score: float = 1.0, tag_source: str = 'manual') -> Optional[Dict]:
         """添加用户标签"""
         try:
+            print(f"🏷️ [UserTagsDB] 为用户 {user_id} 添加标签: {tag_name}")
+            
+            # 验证用户是否存在
+            user_profile = self.client.table('user_profile').select('id').eq('id', user_id).single().execute()
+            if not user_profile.data:
+                print(f"❌ [UserTagsDB] 找不到用户档案: {user_id}")
+                return None
+            
+            print(f"✅ [UserTagsDB] 用户验证成功: {user_id}")
+            
             # 删除旧的同名标签
+            print(f"🧹 [UserTagsDB] 删除旧的同名标签: {tag_name}")
             self.client.table(self.table).delete().eq('user_id', user_id).eq('tag_name', tag_name).execute()
             
             tag_entry = {
@@ -238,10 +286,21 @@ class UserTagsDB:
                 'created_at': datetime.datetime.utcnow().isoformat()
             }
             
+            print(f"💾 [UserTagsDB] 插入标签数据: {tag_entry}")
             response = self.client.table(self.table).insert(tag_entry).execute()
-            return response.data[0] if response.data else None
+            
+            if response.data:
+                print(f"✅ [UserTagsDB] 标签插入成功")
+                return response.data[0]
+            else:
+                print(f"❌ [UserTagsDB] 标签插入失败：响应为空")
+                print(f"🔍 [UserTagsDB] 响应详情: {response}")
+                return None
+                
         except Exception as e:
-            print(f"添加用户标签失败: {e}")
+            print(f"❌ [UserTagsDB] 添加用户标签失败: {e}")
+            import traceback
+            print(f"详细错误: {traceback.format_exc()}")
             return None
     
     async def remove_tag(self, user_id: str, tag_name: str) -> bool:
