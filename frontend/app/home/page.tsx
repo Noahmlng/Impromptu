@@ -98,17 +98,22 @@ export default function HomePage() {
 
       {/* Start Matching Button */}
       <div className="text-center">
-        <Button
-          onClick={() => setIsSearchOpen(true)}
-          size="lg"
-          className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-lg px-8 py-4"
-        >
-          <Search className="h-5 w-5 mr-2" />
-          {language === 'zh' ? '开始匹配' : 'Start Matching'}
-          <ArrowRight className="h-5 w-5 ml-2" />
-        </Button>
-        <p className="text-sm text-muted-foreground mt-2">
+        <div className="mb-4">
+          <Button
+            onClick={() => setIsSearchOpen(true)}
+            size="lg"
+            className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-lg px-8 py-4 shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            <Search className="h-5 w-5 mr-2" />
+            {language === 'zh' ? '开始匹配' : 'Start Matching'}
+            <ArrowRight className="h-5 w-5 ml-2" />
+          </Button>
+        </div>
+        <p className="text-sm text-muted-foreground">
           {language === 'zh' ? '描述您的需求，找到最合适的伙伴' : 'Describe your needs and find the perfect match'}
+        </p>
+        <p className="text-xs text-muted-foreground/70 mt-1">
+          {language === 'zh' ? '点击按钮即可体验智能匹配功能' : 'Click to experience intelligent matching'}
         </p>
       </div>
 

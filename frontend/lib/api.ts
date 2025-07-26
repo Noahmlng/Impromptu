@@ -112,9 +112,12 @@ export interface MatchSearchRequest {
 
 export interface MatchSearchResponse {
   success: boolean
-  data: MatchUser[]
-  total: number
-  query: MatchSearchRequest
+  message: string
+  data: {
+    matched_users: MatchUser[]
+    total: number
+    query: MatchSearchRequest
+  }
 }
 
 export interface CompatibilityAnalysisRequest {
