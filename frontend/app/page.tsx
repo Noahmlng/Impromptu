@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/lib/store'
-import { useOptionalAuth } from '@/lib/hooks/useAuth'
+import { useOptionalAuth } from '@/hooks/useAuth'
 import { 
   Heart, 
   Users, 

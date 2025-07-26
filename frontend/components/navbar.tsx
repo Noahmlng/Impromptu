@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useAppStore } from '@/lib/store'
-import { useOptionalAuth } from '@/lib/hooks/useAuth'
+import { useOptionalAuth } from '@/hooks/useAuth'
 import { Heart, Users, Moon, Sun, Globe, Crown, Coins, LogOut } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import SubscribeModal from './SubscribeModal'

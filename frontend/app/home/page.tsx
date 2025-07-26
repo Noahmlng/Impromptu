@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import MatchSearch from '@/components/match-search'
 import { useAppStore } from '@/lib/store'
-import { useRequireAuth } from '@/lib/hooks/useAuth'
+import { useRequireAuth } from '@/hooks/useAuth'
 import { tags, profile } from '@/lib/api'
 import { UserTag } from '@/lib/types'
 import { 
