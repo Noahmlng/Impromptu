@@ -2,6 +2,58 @@
 
 import { useState, useEffect, useRef } from 'react'
 
+// 类型声明
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean
+  interimResults: boolean
+  lang: string
+  start(): void
+  stop(): void
+  abort(): void
+  onstart: ((this: SpeechRecognition, ev: Event) => any) | null
+  onresult: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => any) | null
+  onerror: ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => any) | null
+  onend: ((this: SpeechRecognition, ev: Event) => any) | null
+}
+
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList
+  resultIndex: number
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string
+  message?: string
+}
+
+interface SpeechRecognitionResultList {
+  readonly length: number
+  item(index: number): SpeechRecognitionResult
+  [index: number]: SpeechRecognitionResult
+}
+
+interface SpeechRecognitionResult {
+  readonly length: number
+  readonly isFinal: boolean
+  item(index: number): SpeechRecognitionAlternative
+  [index: number]: SpeechRecognitionAlternative
+}
+
+interface SpeechRecognitionAlternative {
+  readonly transcript: string
+  readonly confidence: number
+}
+
+declare var SpeechRecognition: {
+  prototype: SpeechRecognition
+  new (): SpeechRecognition
+}
+
+declare var webkitSpeechRecognition: {
+  prototype: SpeechRecognition
+  new (): SpeechRecognition
+}
+
 export function useSpeech(language: 'zh' | 'en') {
   const [isRecording, setIsRecording] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -34,8 +86,8 @@ export function useSpeech(language: 'zh' | 'en') {
       return
     }
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-    const recognition = new SpeechRecognition()
+    const SpeechRecognitionClass = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    const recognition = new SpeechRecognitionClass() as SpeechRecognition
     
     recognition.continuous = false
     recognition.interimResults = false
@@ -46,12 +98,12 @@ export function useSpeech(language: 'zh' | 'en') {
       setTranscript('')
     }
 
-    recognition.onresult = (event) => {
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       const result = event.results[0][0].transcript
       setTranscript(result)
     }
 
-    recognition.onerror = (event) => {
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       console.error('Speech recognition error:', event.error)
       setIsRecording(false)
     }
@@ -149,13 +201,5 @@ export function useSpeech(language: 'zh' | 'en') {
     stopRecording,
     speak,
     stopSpeaking
-  }
-}
-
-// 扩展Window接口以包含WebKit前缀的API
-declare global {
-  interface Window {
-    webkitSpeechRecognition: typeof SpeechRecognition
-    SpeechRecognition: typeof SpeechRecognition
   }
 } 
