@@ -8,7 +8,14 @@ import { useAppStore } from '@/lib/store'
 import { useRequireAuth } from '@/hooks/useAuth'
 import { profile } from '@/lib/api'
 import { User, UserMetadata, Language } from '@/lib/types'
-import { User as UserIcon, Mail, Phone, MapPin, Calendar, Camera, Save, Edit3, Upload, AlertCircle, CheckCircle } from 'lucide-react'
+import { User as UserIcon, Mail, Phone, MapPin, Calendar, Camera, Save, Edit3, Upload, AlertCircle, CheckCircle, Plus, ExternalLink, Trash2, Link } from 'lucide-react'
+
+interface SocialLink {
+  id: string
+  platform: string
+  url: string
+  label: string
+}
 
 export default function ProfilePage() {
   // Auth check
@@ -30,6 +37,9 @@ export default function ProfilePage() {
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([])
+  const [newLink, setNewLink] = useState({ platform: '', url: '', label: '' })
+  const [isAddingLink, setIsAddingLink] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [profileData, setProfileData] = useState({
     name: '',
@@ -45,6 +55,19 @@ export default function ProfilePage() {
       emailNotifications: true
     }
   })
+
+  // 预定义的社媒平台
+  const socialPlatforms = [
+    { value: 'wechat', label: language === 'zh' ? '微信' : 'WeChat' },
+    { value: 'weibo', label: language === 'zh' ? '微博' : 'Weibo' },
+    { value: 'linkedin', label: 'LinkedIn' },
+    { value: 'twitter', label: 'Twitter/X' },
+    { value: 'instagram', label: 'Instagram' },
+    { value: 'facebook', label: 'Facebook' },
+    { value: 'github', label: 'GitHub' },
+    { value: 'website', label: language === 'zh' ? '个人网站' : 'Website' },
+    { value: 'other', label: language === 'zh' ? '其他' : 'Other' }
+  ]
 
   // Load user data on mount
   useEffect(() => {
@@ -63,8 +86,10 @@ export default function ProfilePage() {
           const profileSection = metadataResponse.success ? metadataResponse.data.profile || {} : {}
           const contactData = profileSection.contact?.content || {}
           const preferencesData = profileSection.preferences?.content || {}
+          const socialLinksData = profileSection.social_links?.content || []
           
           setUserMetadata(metadataResponse.success ? metadataResponse.data : {})
+          setSocialLinks(socialLinksData)
           
           setProfileData({
             name: userData.display_name || '',
@@ -107,7 +132,7 @@ export default function ProfilePage() {
         age: profileData.age
       })
 
-      // Save other metadata (contact info and preferences)
+      // Save other metadata (contact info, preferences, and social links)
       const metadataEntries = [
         {
           section_type: 'profile',
@@ -125,6 +150,11 @@ export default function ProfilePage() {
             public_profile: profileData.preferences.publicProfile,
             email_notifications: profileData.preferences.emailNotifications
           }
+        },
+        {
+          section_type: 'profile',
+          section_key: 'social_links',
+          content: socialLinks
         }
       ]
 
@@ -142,6 +172,36 @@ export default function ProfilePage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Social Links Management Functions
+  const addSocialLink = () => {
+    if (!newLink.platform || !newLink.url) {
+      setError(language === 'zh' ? '请填写平台和链接' : 'Please fill in platform and URL')
+      return
+    }
+
+    const link: SocialLink = {
+      id: Date.now().toString(),
+      platform: newLink.platform,
+      url: newLink.url,
+      label: newLink.label || newLink.platform
+    }
+
+    setSocialLinks(prev => [...prev, link])
+    setNewLink({ platform: '', url: '', label: '' })
+    setIsAddingLink(false)
+    setError(null)
+  }
+
+  const removeSocialLink = (id: string) => {
+    setSocialLinks(prev => prev.filter(link => link.id !== id))
+  }
+
+  const updateSocialLink = (id: string, updatedLink: Partial<SocialLink>) => {
+    setSocialLinks(prev => prev.map(link => 
+      link.id === id ? { ...link, ...updatedLink } : link
+    ))
   }
 
   const handleAvatarUpload = () => {
@@ -522,6 +582,164 @@ export default function ProfilePage() {
                   disabled={!isEditing}
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Social Links */}
+          <div className="bg-card rounded-lg p-6 space-y-4">
+            <h3 className="text-xl font-semibold">
+              {language === 'zh' ? '社媒链接' : 'Social Links'}
+            </h3>
+            <div className="space-y-3">
+              {socialLinks.map(link => (
+                <div key={link.id} className="space-y-2">
+                  {isEditing ? (
+                    <div className="bg-muted/50 p-3 rounded-md space-y-3">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                        <select
+                          value={link.platform}
+                          onChange={(e) => updateSocialLink(link.id, { platform: e.target.value })}
+                          className="px-3 py-2 border border-input rounded-md bg-background text-sm"
+                        >
+                          {socialPlatforms.map(platform => (
+                            <option key={platform.value} value={platform.value}>
+                              {platform.label}
+                            </option>
+                          ))}
+                        </select>
+                        <input
+                          type="text"
+                          placeholder={language === 'zh' ? '显示名称' : 'Display Name'}
+                          value={link.label}
+                          onChange={(e) => updateSocialLink(link.id, { label: e.target.value })}
+                          className="px-3 py-2 border border-input rounded-md bg-background text-sm"
+                        />
+                        <input
+                          type="url"
+                          placeholder={language === 'zh' ? '链接地址' : 'URL'}
+                          value={link.url}
+                          onChange={(e) => updateSocialLink(link.id, { url: e.target.value })}
+                          className="px-3 py-2 border border-input rounded-md bg-background text-sm"
+                        />
+                      </div>
+                      <div className="flex justify-end">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeSocialLink(link.id)}
+                          className="text-destructive hover:text-destructive/80"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          {language === 'zh' ? '删除' : 'Delete'}
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between bg-muted/50 p-3 rounded-md">
+                      <div className="flex items-center space-x-3">
+                        <Link className="h-5 w-5 text-muted-foreground" />
+                        <span className="font-medium">{link.label}</span>
+                        <span className="text-sm text-muted-foreground">
+                          ({socialPlatforms.find(p => p.value === link.platform)?.label || link.platform})
+                        </span>
+                      </div>
+                      <a 
+                        href={link.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-primary hover:text-primary/80 flex items-center space-x-1"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        <span className="text-sm">
+                          {language === 'zh' ? '访问' : 'Visit'}
+                        </span>
+                      </a>
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {/* Add New Link Form */ }
+              {isEditing && isAddingLink && (
+                <div className="bg-muted/30 p-4 rounded-md border-2 border-dashed border-muted-foreground/30 space-y-3">
+                  <h4 className="font-medium text-sm">
+                    {language === 'zh' ? '添加新链接' : 'Add New Link'}
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    <select
+                      value={newLink.platform}
+                      onChange={(e) => setNewLink(prev => ({ ...prev, platform: e.target.value }))}
+                      className="px-3 py-2 border border-input rounded-md bg-background text-sm"
+                    >
+                      <option value="">
+                        {language === 'zh' ? '选择平台' : 'Select Platform'}
+                      </option>
+                      {socialPlatforms.map(platform => (
+                        <option key={platform.value} value={platform.value}>
+                          {platform.label}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="text"
+                      placeholder={language === 'zh' ? '显示名称' : 'Display Name'}
+                      value={newLink.label}
+                      onChange={(e) => setNewLink(prev => ({ ...prev, label: e.target.value }))}
+                      className="px-3 py-2 border border-input rounded-md bg-background text-sm"
+                    />
+                    <input
+                      type="url"
+                      placeholder={language === 'zh' ? '链接地址' : 'URL'}
+                      value={newLink.url}
+                      onChange={(e) => setNewLink(prev => ({ ...prev, url: e.target.value }))}
+                      className="px-3 py-2 border border-input rounded-md bg-background text-sm"
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setIsAddingLink(false)
+                        setNewLink({ platform: '', url: '', label: '' })
+                      }}
+                    >
+                      {language === 'zh' ? '取消' : 'Cancel'}
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={addSocialLink}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      {language === 'zh' ? '添加' : 'Add'}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Add Link Button */}
+              {isEditing && !isAddingLink && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsAddingLink(true)}
+                  className="w-full"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  {language === 'zh' ? '添加社媒链接' : 'Add Social Link'}
+                </Button>
+              )}
+
+              {/* Empty State */}
+              {socialLinks.length === 0 && !isEditing && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Link className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p className="text-sm">
+                    {language === 'zh' ? '暂无社媒链接' : 'No social links yet'}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
