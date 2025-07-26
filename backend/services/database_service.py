@@ -12,8 +12,30 @@ from supabase import create_client, Client
 import json
 import datetime
 
+# 加载环境变量
+try:
+    from dotenv import load_dotenv
+    import os
+    
+    # 尝试从多个位置加载.env.local文件
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.join(current_dir, '..', '..')
+    
+    # 优先加载项目根目录的.env.local
+    load_dotenv(os.path.join(project_root, '.env.local'))
+    load_dotenv(os.path.join(current_dir, '..', '.env.local'))  # backend目录
+    load_dotenv('.env.local')  # 当前目录
+    load_dotenv()  # 默认.env文件
+    
+    print(f"环境变量加载状态:")
+    print(f"SUPABASE_SERVICE_ROLE_KEY: {'已设置' if os.getenv('SUPABASE_SERVICE_ROLE_KEY') else '未设置'}")
+except ImportError:
+    pass  # 如果没有安装python-dotenv，继续使用系统环境变量
+
 # Supabase配置
 SUPABASE_URL = os.getenv('SUPABASE_URL', 'https://anxbbsrnjgmotxzysqwf.supabase.co')
+# 使用service role key来绕过RLS策略
+SUPABASE_SERVICE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
 SUPABASE_KEY = os.getenv('SUPABASE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFueGJic3Juamdtb3R4enlzcXdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MDY0OTIsImV4cCI6MjA2NTk4MjQ5Mn0.a0t-pgH-Z2Fbs6JuMNWX8_kpqkQsBag3-COAUZVF6-0')
 
 # 全局Supabase客户端
@@ -23,7 +45,13 @@ async def init_database():
     """初始化数据库连接"""
     global supabase
     try:
-        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        # 使用service role key来绕过RLS策略，允许后端直接操作数据库
+        if SUPABASE_SERVICE_KEY:
+            supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+            print("✅ 使用Service Role Key连接数据库")
+        else:
+            supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+            print("⚠️ 使用Anon Key连接数据库（建议使用Service Role Key）")
         print("✅ Supabase数据库连接初始化成功")
     except Exception as e:
         print(f"❌ 数据库连接初始化失败: {e}")

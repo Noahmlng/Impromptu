@@ -19,7 +19,7 @@ import uuid
 # 添加项目根目录到Python路径
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
-from backend.services.database_service import get_supabase, user_profile_db
+from backend.services.database_service import get_supabase, get_database_services
 
 router = APIRouter()
 
@@ -73,6 +73,9 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
         raise HTTPException(status_code=401, detail="未提供认证token")
     
     try:
+        # 获取数据库服务实例
+        db_service, user_profile_db, user_metadata_db, user_tags_db = get_database_services()
+        
         # 移除 'Bearer ' 前缀
         if authorization.startswith('Bearer '):
             token = authorization[7:]
@@ -116,6 +119,9 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
 async def register(request: RegisterRequest):
     """用户注册"""
     try:
+        # 获取数据库服务实例
+        db_service, user_profile_db, user_metadata_db, user_tags_db = get_database_services()
+        
         # 检查邮箱是否已存在
         existing_user = await user_profile_db.get_by_email(request.email)
         if existing_user:
@@ -124,17 +130,18 @@ async def register(request: RegisterRequest):
         # 加密密码
         hashed_password = hash_password(request.password)
         
-        # 创建用户档案数据
+        # 创建用户档案数据 - 只包含必需字段
         profile_data = {
             'email': request.email.lower().strip(),
             'password': hashed_password,
             'display_name': request.display_name.strip(),
-            'avatar_url': request.avatar_url,
             'is_active': True,
-            'credits': 1000,
-            'subscription_type': 'free',
-            'last_login_at': datetime.datetime.utcnow().isoformat()
+            'subscription_type': 'free'
         }
+        
+        # 添加可选字段
+        if request.avatar_url:
+            profile_data['avatar_url'] = request.avatar_url
         
         # 在user_profile表中创建用户
         user_profile = await user_profile_db.create(profile_data)
@@ -167,6 +174,9 @@ async def register(request: RegisterRequest):
 async def login(request: LoginRequest):
     """用户登录"""
     try:
+        # 获取数据库服务实例
+        db_service, user_profile_db, user_metadata_db, user_tags_db = get_database_services()
+        
         # 根据邮箱查找用户
         user_profile = await user_profile_db.get_by_email(request.email)
         
