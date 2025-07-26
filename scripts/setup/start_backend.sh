@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "🚀 启动 Impromptu 匹配系统 API 服务"
-echo "================================="
+echo "🚀 启动 Impromptu 后端API服务 (FastAPI)"
+echo "======================================"
 
 # 检查是否在项目根目录
 if [ ! -f "setup.py" ]; then
@@ -42,8 +42,8 @@ if lsof -Pi :5000 -sTCP:LISTEN -t >/dev/null ; then
     sleep 2
 fi
 
-# 启动API服务器
-echo "🌐 启动API服务器 (端口 5000)..."
+# 启动FastAPI服务器
+echo "🌐 启动FastAPI服务器 (端口 5000)..."
 echo "访问地址: http://localhost:5000"
 echo "API文档: http://localhost:5000/docs"
 echo "前端界面: http://localhost:3000 (需要单独启动前端服务器)"

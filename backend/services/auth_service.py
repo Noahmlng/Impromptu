@@ -13,6 +13,8 @@ import jwt
 import datetime
 import os
 import sys
+import bcrypt
+import uuid
 
 # 添加项目根目录到Python路径
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -40,6 +42,31 @@ class AuthResponse(BaseModel):
 # JWT密钥（在生产环境中应该使用环境变量）
 JWT_SECRET = os.getenv('JWT_SECRET', 'your-secret-key-here')
 
+def hash_password(password: str) -> str:
+    """加密密码"""
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed.decode('utf-8')
+
+def verify_password(password: str, hashed_password: str) -> bool:
+    """验证密码"""
+    return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
+
+def create_access_token(user_data: Dict) -> str:
+    """生成JWT访问令牌"""
+    payload = {
+        'sub': user_data['id'],  # user_profile.id
+        'email': user_data['email'],
+        'user_metadata': {
+            'display_name': user_data.get('display_name'),
+            'avatar_url': user_data.get('avatar_url')
+        },
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7),
+        'iat': datetime.datetime.utcnow(),
+        'iss': 'impromptu-app'
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm='HS256')
+
 async def get_current_user(authorization: Optional[str] = Header(None)):
     """获取当前用户的依赖函数"""
     if not authorization:
@@ -52,49 +79,33 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
         else:
             token = authorization
         
-        # 解码JWT token
-        decoded_token = jwt.decode(token, options={"verify_signature": False})
-        auth_user_id = decoded_token.get('sub')
+        # 解码JWT token（使用我们自己的密钥）
+        decoded_token = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+        user_id = decoded_token.get('sub')  # user_profile.id
         user_email = decoded_token.get('email')
         
-        if not auth_user_id:
+        if not user_id:
             raise HTTPException(status_code=401, detail="无效的认证token")
         
         # 获取用户档案信息
-        user_profile = await user_profile_db.get_by_auth_id(auth_user_id)
+        user_profile = await user_profile_db.get_by_id(user_id)
         
         if not user_profile:
-            # 自动创建用户档案
-            display_name = decoded_token.get('user_metadata', {}).get('display_name') or user_email.split('@')[0]
-            avatar_url = decoded_token.get('user_metadata', {}).get('avatar_url')
-            
-            profile_data = {
-                'auth_user_id': auth_user_id,
-                'email': user_email,
-                'display_name': display_name,
-                'avatar_url': avatar_url,
-                'last_login_at': datetime.datetime.utcnow().isoformat(),
-                'is_active': True,
-                'credits': 1000,
-                'subscription_type': 'free'
-            }
-            
-            user_profile = await user_profile_db.create(profile_data)
-            if not user_profile:
-                raise HTTPException(status_code=500, detail="用户档案创建失败")
-        else:
-            # 更新最后登录时间
-            await user_profile_db.update(user_profile['id'], {
-                'last_login_at': datetime.datetime.utcnow().isoformat()
-            })
+            raise HTTPException(status_code=401, detail="用户不存在")
+        
+        # 更新最后登录时间
+        await user_profile_db.update(user_profile['id'], {
+            'last_login_at': datetime.datetime.utcnow().isoformat()
+        })
         
         return {
             'user_id': user_profile['id'],
-            'auth_user_id': auth_user_id,
-            'email': user_email,
+            'email': user_profile['email'],
             'profile': user_profile
         }
         
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token已过期")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="无效的token")
     except Exception as e:
@@ -105,92 +116,103 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
 async def register(request: RegisterRequest):
     """用户注册"""
     try:
-        supabase = get_supabase()
+        # 检查邮箱是否已存在
+        existing_user = await user_profile_db.get_by_email(request.email)
+        if existing_user:
+            raise HTTPException(status_code=400, detail="该邮箱已被注册")
         
-        # 使用Supabase Auth注册用户
-        auth_response = supabase.auth.sign_up({
-            "email": request.email.lower().strip(),
-            "password": request.password,
-            "options": {
-                "data": {
-                    "display_name": request.display_name.strip(),
-                    "avatar_url": request.avatar_url
-                }
+        # 加密密码
+        hashed_password = hash_password(request.password)
+        
+        # 创建用户档案数据
+        profile_data = {
+            'email': request.email.lower().strip(),
+            'password': hashed_password,
+            'display_name': request.display_name.strip(),
+            'avatar_url': request.avatar_url,
+            'is_active': True,
+            'credits': 1000,
+            'subscription_type': 'free',
+            'last_login_at': datetime.datetime.utcnow().isoformat()
+        }
+        
+        # 在user_profile表中创建用户
+        user_profile = await user_profile_db.create(profile_data)
+        
+        if not user_profile:
+            raise HTTPException(status_code=500, detail="用户创建失败")
+        
+        # 生成JWT token
+        access_token = create_access_token(user_profile)
+        
+        return AuthResponse(
+            success=True,
+            message="注册成功",
+            data={
+                "user_id": user_profile['id'],
+                "email": user_profile['email'],
+                "display_name": user_profile['display_name'],
+                "avatar_url": user_profile.get('avatar_url'),
+                "token": access_token
             }
-        })
-        
-        if auth_response.user:
-            return AuthResponse(
-                success=True,
-                message="注册成功",
-                data={
-                    "user_id": auth_response.user.id,
-                    "email": auth_response.user.email,
-                    "display_name": request.display_name,
-                    "token": auth_response.session.access_token if auth_response.session else None,
-                    "needs_confirmation": not auth_response.user.email_confirmed_at
-                }
-            )
-        else:
-            raise HTTPException(status_code=400, detail="注册失败，Supabase响应异常")
+        )
             
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"注册错误: {e}")
-        error_message = str(e)
-        if hasattr(e, 'message'):
-            error_message = e.message
-        elif hasattr(e, 'args') and e.args:
-            error_message = str(e.args[0])
-        
-        raise HTTPException(status_code=500, detail=f"注册失败: {error_message}")
+        raise HTTPException(status_code=500, detail=f"注册失败: {str(e)}")
 
 @router.post("/login", response_model=AuthResponse)
 async def login(request: LoginRequest):
     """用户登录"""
     try:
-        supabase = get_supabase()
+        # 根据邮箱查找用户
+        user_profile = await user_profile_db.get_by_email(request.email)
         
-        # 使用Supabase Auth登录
-        auth_response = supabase.auth.sign_in_with_password({
-            "email": request.email.lower().strip(),
-            "password": request.password
+        if not user_profile:
+            raise HTTPException(status_code=401, detail="邮箱或密码错误")
+        
+        # 验证密码
+        if not verify_password(request.password, user_profile['password']):
+            raise HTTPException(status_code=401, detail="邮箱或密码错误")
+        
+        # 检查用户是否活跃
+        if not user_profile.get('is_active', True):
+            raise HTTPException(status_code=401, detail="账户已被禁用")
+        
+        # 更新最后登录时间
+        await user_profile_db.update(user_profile['id'], {
+            'last_login_at': datetime.datetime.utcnow().isoformat()
         })
         
-        if auth_response.user and auth_response.session:
-            # 获取用户档案信息
-            user_profile = await user_profile_db.get_by_auth_id(auth_response.user.id)
-            
-            return AuthResponse(
-                success=True,
-                message="登录成功",
-                data={
-                    "user_id": user_profile['id'] if user_profile else auth_response.user.id,
-                    "email": auth_response.user.email,
-                    "display_name": user_profile['display_name'] if user_profile else auth_response.user.user_metadata.get('display_name'),
-                    "avatar_url": user_profile['avatar_url'] if user_profile else auth_response.user.user_metadata.get('avatar_url'),
-                    "token": auth_response.session.access_token
-                }
-            )
-        else:
-            raise HTTPException(status_code=401, detail="登录失败，请检查邮箱和密码")
+        # 生成JWT token
+        access_token = create_access_token(user_profile)
         
+        return AuthResponse(
+            success=True,
+            message="登录成功",
+            data={
+                "user_id": user_profile['id'],
+                "email": user_profile['email'],
+                "display_name": user_profile['display_name'],
+                "avatar_url": user_profile.get('avatar_url'),
+                "token": access_token
+            }
+        )
+        
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"登录错误: {e}")
-        error_message = str(e)
-        if hasattr(e, 'message'):
-            error_message = e.message
-        elif hasattr(e, 'args') and e.args:
-            error_message = str(e.args[0])
-        
-        raise HTTPException(status_code=500, detail=f"登录失败: {error_message}")
+        raise HTTPException(status_code=500, detail=f"登录失败: {str(e)}")
 
 @router.post("/logout", response_model=AuthResponse)
 async def logout():
     """用户登出"""
     try:
-        supabase = get_supabase()
-        supabase.auth.sign_out()
-        
+        # 由于我们使用JWT token，登出主要是客户端删除token
+        # 服务端可以记录登出事件，但token本身会在过期时间后自动失效
         return AuthResponse(
             success=True,
             message="登出成功"

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "🌐 启动 Impromptu Web 前端界面"
-echo "=============================="
+echo "🌐 启动 Impromptu 前端界面 (Next.js)"
+echo "===================================="
 
 # 检查是否在项目根目录
 if [ ! -f "setup.py" ]; then
@@ -53,7 +53,7 @@ fi
 
 echo "🚀 启动Next.js开发服务器 (端口 3000)..."
 echo "访问地址: http://localhost:3000"
-echo "确保API服务已启动: bash scripts/setup/start_api.sh"
+echo "确保后端API服务已启动: make backend"
 echo ""
 echo "按 Ctrl+C 停止服务"
 echo ""

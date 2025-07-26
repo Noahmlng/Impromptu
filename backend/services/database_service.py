@@ -95,6 +95,15 @@ class UserProfileDB:
             print(f"获取用户档案失败: {e}")
             return None
     
+    async def get_by_email(self, email: str) -> Optional[Dict]:
+        """根据邮箱获取用户档案"""
+        try:
+            response = self.client.table(self.table).select('*').eq('email', email.lower().strip()).execute()
+            return response.data[0] if response.data else None
+        except Exception as e:
+            print(f"根据邮箱获取用户档案失败: {e}")
+            return None
+    
     async def create(self, profile_data: Dict) -> Optional[Dict]:
         """创建用户档案"""
         try:
