@@ -65,17 +65,38 @@ def get_compatibility_analyzer():
     return _compatibility_analyzer
 
 def get_topic_model():
-    """获取主题建模实例"""
+    """获取主题建模实例，带缓存和错误恢复"""
     global _topic_model
     if _topic_model is None:
         try:
-            from backend.models.topic_modeling import LDATopicModel
-            from configs.config import ConfigManager
+            # 首先尝试使用预训练的全局模型实例
+            from backend.models.topic_modeling import topic_model as global_topic_model
+            if global_topic_model.lda_model is not None:
+                _topic_model = global_topic_model
+                print("✅ 使用预训练的LDA模型")
+                return _topic_model
             
-            config_manager = ConfigManager()
-            _topic_model = LDATopicModel(config_manager.topic_config)
+            # 如果全局模型不可用，尝试手动加载
+            import os
+            production_model_path = "data/models/production_model"
+            if (os.path.exists(f"{production_model_path}_lda") and 
+                os.path.exists(f"{production_model_path}_dict")):
+                global_topic_model.load_model(production_model_path)
+                _topic_model = global_topic_model
+                print("✅ 手动加载生产LDA模型成功")
+            else:
+                # 尝试加载备用模型
+                backup_model_path = "data/models/lda_model"
+                if (os.path.exists(f"{backup_model_path}_lda") and 
+                    os.path.exists(f"{backup_model_path}_dict")):
+                    global_topic_model.load_model(backup_model_path)
+                    _topic_model = global_topic_model
+                    print("✅ 加载备用LDA模型成功")
+                else:
+                    print("⚠️ 未找到预训练模型，LDA功能不可用")
+                    _topic_model = None
         except Exception as e:
-            print(f"主题模型初始化失败: {e}")
+            print(f"❌ 主题模型加载失败: {e}")
             _topic_model = None
     return _topic_model
 
@@ -170,69 +191,124 @@ async def match_users_simple(request: SimpleMatchRequest):
 @router.post("/lda", response_model=MatchResponse)
 async def match_users_lda(request: SearchMatchRequest, current_user: Dict = Depends(get_current_user)):
     """基于LDA模型的智能匹配接口"""
+    import time
+    start_time = time.time()
+    
     try:
         topic_model = get_topic_model()
         if not topic_model:
-            raise HTTPException(status_code=500, detail="主题建模服务不可用")
-        
-        # 获取所有候选用户
-        candidates = await user_profile_db.get_all(exclude_user_id=current_user['user_id'])
-        
-        matched_users = []
-        
-        for candidate in candidates:  # 遍历所有候选用户，而不是只取前几个
-            user_id = candidate['id']
-            
-            # 获取候选用户的元数据和标签
-            metadata_list = await user_metadata_db.get_by_user_id(user_id)
-            user_tags = await user_tags_db.get_by_user_id(user_id)
-            
-            # 构建候选用户的描述文本
-            user_text = build_user_description_text_from_metadata(metadata_list, user_tags)
-            
-            # 如果有查询文本，将其与用户描述结合
-            if request.description.strip():
-                combined_text = f"{request.description} {user_text}"
-            else:
-                combined_text = user_text
-            
-            # 使用LDA模型进行分析
-            lda_result = topic_model.extract_topics_and_tags(combined_text, request.match_type)
-            
-            # 计算匹配度分数
-            match_score = calculate_lda_match_score(
-                request.description, request.tags, request.match_type,
-                metadata_list, user_tags, lda_result
+            print("⚠️ LDA模型不可用，降级到简单搜索模式")
+            # 降级到简单搜索模式
+            simple_request = SearchMatchRequest(
+                description=request.description,
+                tags=request.tags,
+                match_type=request.match_type,
+                limit=request.limit
             )
-            
-            if match_score > 0.3:  # 设置最低匹配阈值
-                user_info = {
-                    'user_id': user_id,
-                    'display_name': candidate['display_name'],
-                    'email': candidate['email'],
-                    'avatar_url': candidate.get('avatar_url'),
-                    'match_score': float(match_score),
-                    'user_tags': [tag['tag_name'] for tag in user_tags],
-                    'topics': [(int(tid), float(weight)) for tid, weight in lda_result.topics],
-                    'extracted_tags': {
-                        tag: float(conf) for tag, conf in sorted(
-                            lda_result.extracted_tags.items(), 
-                            key=lambda x: x[1], 
-                            reverse=True
-                        )[:5]
+            return await search_users(simple_request, current_user)
+        
+        # 获取候选用户，限制数量以提高性能
+        max_candidates = request.limit * 5  # 最多获取limit的5倍用户进行筛选
+        candidates = await user_profile_db.get_all(exclude_user_id=current_user['user_id'], limit=max_candidates)
+        
+        if not candidates:
+            return MatchResponse(
+                success=True,
+                message="暂无其他用户",
+                data={
+                    "matched_users": [],
+                    "total": 0,
+                    "processed_count": 0,
+                    "max_process_count": 0,
+                    "query": {
+                        "description": request.description,
+                        "tags": request.tags,
+                        "match_type": request.match_type
                     }
                 }
-                matched_users.append(user_info)
+            )
+        
+        matched_users = []
+        processed_count = 0
+        max_process_count = min(len(candidates), request.limit * 3)  # 最多处理limit的3倍用户
+        
+        # 批量获取用户元数据和标签，减少数据库查询次数
+        candidate_ids = [candidate['id'] for candidate in candidates[:max_process_count]]
+        metadata_batch = await user_metadata_db.get_by_user_ids(candidate_ids)
+        tags_batch = await user_tags_db.get_by_user_ids(candidate_ids)
+        
+        for candidate in candidates[:max_process_count]:  # 限制处理数量，提高响应速度
+            try:
+                user_id = candidate['id']
+                processed_count += 1
+                
+                # 从批量查询结果中获取数据
+                metadata_list = metadata_batch.get(user_id, [])
+                user_tags = tags_batch.get(user_id, [])
+                
+                # 构建候选用户的描述文本
+                user_text = build_user_description_text_from_metadata(metadata_list, user_tags)
+                
+                # 如果有查询文本，将其与用户描述结合
+                if request.description.strip():
+                    combined_text = f"{request.description} {user_text}"
+                else:
+                    combined_text = user_text
+                
+                # 使用LDA模型进行分析
+                lda_result = topic_model.extract_topics_and_tags(combined_text, request.match_type)
+                
+                # 计算匹配度分数
+                match_score = calculate_lda_match_score(
+                    request.description, request.tags, request.match_type,
+                    metadata_list, user_tags, lda_result
+                )
+                
+                if match_score > 0.15:  # 合理的匹配阈值
+                    user_info = {
+                        'user_id': user_id,
+                        'display_name': candidate['display_name'],
+                        'email': candidate['email'],
+                        'avatar_url': candidate.get('avatar_url'),
+                        'match_score': float(match_score),
+                        'user_tags': [tag['tag_name'] for tag in user_tags],
+                        'topics': [(int(tid), float(weight)) for tid, weight in lda_result.topics],
+                        'extracted_tags': {
+                            tag: float(conf) for tag, conf in sorted(
+                                lda_result.extracted_tags.items(), 
+                                key=lambda x: x[1], 
+                                reverse=True
+                            )[:5]
+                        }
+                    }
+                    matched_users.append(user_info)
+                    
+                    # 早期返回：如果已找到足够多的匹配用户，提前结束
+                    if len(matched_users) >= request.limit * 2:
+                        break
+                        
+            except Exception as e:
+                print(f"处理用户 {candidate.get('id', 'unknown')} 时出错: {e}")
+                continue
         
         # 按匹配度排序
         matched_users.sort(key=lambda x: x['match_score'], reverse=True)
         
+        total_time = time.time() - start_time
+        
         return MatchResponse(
             success=True,
-            message=f"LDA匹配分析完成，找到{len(matched_users)}个匹配用户",
+            message=f"LDA匹配分析完成，处理了{processed_count}个用户，找到{len(matched_users)}个匹配用户，耗时{total_time:.2f}秒",
             data={
                 "matched_users": matched_users[:request.limit],
                 "total": len(matched_users),
+                "processed_count": processed_count,
+                "max_process_count": max_process_count,
+                "performance": {
+                    "total_time_seconds": round(total_time, 3),
+                    "avg_time_per_user": round(total_time / processed_count, 3) if processed_count > 0 else 0,
+                    "users_per_second": round(processed_count / total_time, 2) if total_time > 0 else 0
+                },
                 "query": {
                     "description": request.description,
                     "tags": request.tags,
@@ -248,9 +324,13 @@ async def match_users_lda(request: SearchMatchRequest, current_user: Dict = Depe
 @router.post("/search", response_model=MatchResponse)
 async def search_users(request: SearchMatchRequest, current_user: Dict = Depends(get_current_user)):
     """根据描述和标签搜索匹配用户"""
+    import time
+    start_time = time.time()
+    
     try:
-        # 获取所有用户（除了当前用户）
-        users = await user_profile_db.get_all(exclude_user_id=current_user['user_id'])
+        # 获取用户（除了当前用户），限制数量以提高性能
+        max_users = request.limit * 5  # 最多获取limit的5倍用户进行筛选
+        users = await user_profile_db.get_all(exclude_user_id=current_user['user_id'], limit=max_users)
         
         if not users:
             return MatchResponse(
@@ -263,41 +343,67 @@ async def search_users(request: SearchMatchRequest, current_user: Dict = Depends
             )
         
         matched_users = []
+        processed_count = 0
+        max_process_count = min(len(users), request.limit * 3)  # 最多处理limit的3倍用户
         
-        for user in users:
-            user_id = user['id']
-            
-            # 获取用户的元数据和标签
-            metadata_list = await user_metadata_db.get_by_user_id(user_id)
-            user_tags = await user_tags_db.get_by_user_id(user_id)
-            
-            # 计算匹配度
-            match_score = calculate_search_match_score(
-                request.description, request.tags, request.match_type,
-                metadata_list, user_tags
-            )
-            
-            if match_score > 0.3:  # 设置最低匹配阈值
-                user_info = {
-                    'user_id': user_id,
-                    'display_name': user['display_name'],
-                    'email': user['email'],
-                    'avatar_url': user.get('avatar_url'),
-                    'match_score': match_score,
-                    'user_tags': [tag['tag_name'] for tag in user_tags],
-                    'metadata_summary': extract_metadata_summary(metadata_list)
-                }
-                matched_users.append(user_info)
+        # 批量获取用户元数据和标签，减少数据库查询次数
+        user_ids = [user['id'] for user in users[:max_process_count]]
+        metadata_batch = await user_metadata_db.get_by_user_ids(user_ids)
+        tags_batch = await user_tags_db.get_by_user_ids(user_ids)
+        
+        for user in users[:max_process_count]:  # 限制处理数量，提高响应速度
+            try:
+                user_id = user['id']
+                processed_count += 1
+                
+                # 从批量查询结果中获取数据
+                metadata_list = metadata_batch.get(user_id, [])
+                user_tags = tags_batch.get(user_id, [])
+                
+                # 计算匹配度
+                match_score = calculate_search_match_score(
+                    request.description, request.tags, request.match_type,
+                    metadata_list, user_tags
+                )
+                
+                if match_score > 0.15:  # 合理的匹配阈值
+                    user_info = {
+                        'user_id': user_id,
+                        'display_name': user['display_name'],
+                        'email': user['email'],
+                        'avatar_url': user.get('avatar_url'),
+                        'match_score': match_score,
+                        'user_tags': [tag['tag_name'] for tag in user_tags],
+                        'metadata_summary': extract_metadata_summary(metadata_list)
+                    }
+                    matched_users.append(user_info)
+                    
+                    # 早期返回：如果已找到足够多的匹配用户，提前结束
+                    if len(matched_users) >= request.limit * 2:
+                        break
+                        
+            except Exception as e:
+                print(f"处理用户 {user.get('id', 'unknown')} 时出错: {e}")
+                continue
         
         # 按匹配度排序
         matched_users.sort(key=lambda x: x['match_score'], reverse=True)
         
+        total_time = time.time() - start_time
+        
         return MatchResponse(
             success=True,
-            message=f"搜索完成，找到{len(matched_users)}个匹配用户",
+            message=f"搜索完成，处理了{processed_count}个用户，找到{len(matched_users)}个匹配用户，耗时{total_time:.2f}秒",
             data={
                 "matched_users": matched_users[:request.limit],
                 "total": len(matched_users),
+                "processed_count": processed_count,
+                "max_process_count": max_process_count,
+                "performance": {
+                    "total_time_seconds": round(total_time, 3),
+                    "avg_time_per_user": round(total_time / processed_count, 3) if processed_count > 0 else 0,
+                    "users_per_second": round(processed_count / total_time, 2) if total_time > 0 else 0
+                },
                 "query": {
                     "description": request.description,
                     "tags": request.tags,
@@ -568,6 +674,7 @@ def calculate_search_match_score(description: str, user_tags: List[str], match_t
     score = 0.0
     
     # 标签匹配度 (40%权重)
+    tag_score = 0.0
     if user_tags and target_tags:
         target_tag_names = [tag['tag_name'] for tag in target_tags]
         common_tags = set(user_tags) & set(target_tag_names)
@@ -575,20 +682,25 @@ def calculate_search_match_score(description: str, user_tags: List[str], match_t
         score += tag_score * 0.4
     
     # 描述匹配度 (30%权重)
+    description_score = 0.0
     if description and target_metadata:
         target_text = extract_text_from_metadata(target_metadata)
         description_score = calculate_text_similarity(description, target_text)
         score += description_score * 0.3
     
     # 类型匹配度 (20%权重)
-    type_score = 0.8 if match_type in extract_request_type_from_metadata(target_metadata) else 0.2
+    target_request_type = extract_request_type_from_metadata(target_metadata)
+    type_score = 0.8 if match_type in target_request_type else 0.2
     score += type_score * 0.2
     
     # 活跃度加分 (10%权重)
     activity_score = 0.5 + (len(target_tags) * 0.1)  # 有更多标签的用户活跃度更高
-    score += min(activity_score, 1.0) * 0.1
+    final_activity_score = min(activity_score, 1.0)
+    score += final_activity_score * 0.1
     
-    return min(score, 1.0)
+    final_score = min(score, 1.0)
+    
+    return final_score
 
 def calculate_basic_compatibility_score(user_tags: List[str], match_type: str,
                                        target_metadata: List[Dict], target_tags: List[Dict]) -> float:
@@ -891,14 +1003,25 @@ def extract_request_type_from_metadata(metadata_list: List[Dict]) -> str:
     return '找队友'
 
 def calculate_text_similarity(text1: str, text2: str) -> float:
-    """简单的文本相似度计算"""
-    words1 = set(text1.lower().split())
-    words2 = set(text2.lower().split())
+    """优化的文本相似度计算"""
+    if not text1 or not text2:
+        return 0.0
+    
+    # 预处理文本，移除过短的词汇
+    words1 = set(word.lower() for word in text1.split() if len(word) > 1)
+    words2 = set(word.lower() for word in text2.split() if len(word) > 1)
     
     if not words1 or not words2:
         return 0.0
     
+    # Jaccard相似度
     intersection = words1 & words2
     union = words1 | words2
     
-    return len(intersection) / len(union) if union else 0.0 
+    jaccard = len(intersection) / len(union) if union else 0.0
+    
+    # 考虑文本长度相似性的加权
+    length_factor = min(len(words1), len(words2)) / max(len(words1), len(words2)) if max(len(words1), len(words2)) > 0 else 0.0
+    
+    # 综合相似度
+    return (jaccard * 0.8 + length_factor * 0.2) 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/lib/store'
 import { matching, tags } from '@/lib/api'
@@ -37,55 +37,22 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState('')
 
-  const handleSearch = async () => {
-    if (!searchDescription.trim()) {
-      setError(language === 'zh' ? '请输入搜索描述' : 'Please enter search description')
-      return
-    }
-
-    setIsMatchingLoading(true)
-    setError(null)
+  // 监控搜索结果状态变化
+  useEffect(() => {
+    console.log('🔄 搜索结果状态变化:', {
+      搜索结果数量: searchResults.length,
+      是否正在搜索: isMatchingLoading,
+      错误信息: error,
+      成功信息: successMessage,
+      搜索描述: searchDescription.trim(),
+      选中标签: selectedTags,
+      匹配类型: selectedMatchType
+    })
     
-    try {
-      // 模拟匹配过程，让loading弹窗显示一段时间
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      try {
-        const response = await matching.search(
-          searchDescription,
-          selectedTags,
-          selectedMatchType,
-          20
-        )
-        
-        if (response.success && response.data) {
-          const matchedUsers = response.data.matched_users || []
-          setSearchResults(matchedUsers)
-          setSuccessMessage(
-            language === 'zh' 
-              ? `找到 ${matchedUsers.length} 个匹配用户` 
-              : `Found ${matchedUsers.length} matching users`
-          )
-          setTimeout(() => setSuccessMessage(''), 3000)
-        }
-      } catch (apiError: any) {
-        // 如果API调用失败，使用模拟数据
-        console.log('API调用失败，使用模拟数据:', apiError)
-        const mockUsers = generateMockUsers(searchDescription, selectedMatchType)
-        setSearchResults(mockUsers)
-        setSuccessMessage(
-          language === 'zh' 
-            ? `找到 ${mockUsers.length} 个匹配用户（演示数据）` 
-            : `Found ${mockUsers.length} matching users (demo data)`
-        )
-        setTimeout(() => setSuccessMessage(''), 3000)
-      }
-    } catch (error: any) {
-      setError(error.message || (language === 'zh' ? '搜索失败，请重试' : 'Search failed, please try again'))
-    } finally {
-      setIsMatchingLoading(false)
+    if (searchResults.length > 0) {
+      console.log('📊 当前搜索结果详情:', searchResults)
     }
-  }
+  }, [searchResults, isMatchingLoading, error, successMessage, searchDescription, selectedTags, selectedMatchType])
 
   // 生成模拟匹配用户数据
   const generateMockUsers = (description: string, matchType: string) => {
@@ -165,6 +132,138 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
     return mockUsers
   }
 
+  const handleSearch = async () => {
+    if (!searchDescription.trim()) {
+      setError(language === 'zh' ? '请输入搜索描述' : 'Please enter search description')
+      return
+    }
+
+    setIsMatchingLoading(true)
+    setError(null)
+    setSearchResults([]) // 清空之前的结果
+    
+    try {
+      console.log('🔍 开始搜索匹配用户...', {
+        description: searchDescription,
+        tags: selectedTags,
+        matchType: selectedMatchType
+      })
+      
+      // 检查认证状态
+      console.log('🔑 检查认证状态...')
+      
+      const startTime = Date.now()
+      
+      const response = await matching.search(
+        searchDescription,
+        selectedTags,
+        selectedMatchType,
+        20
+      )
+      
+      const duration = Date.now() - startTime
+      console.log(`✅ 搜索完成，耗时: ${duration}ms`)
+      
+      console.log('🔍 API响应数据:', response)
+      
+      if (response.success && response.data) {
+        const matchedUsers = response.data.matched_users || []
+        const performance = response.data.performance
+        
+        console.log('✅ 匹配成功，原始数据:', {
+          总数: matchedUsers.length,
+          匹配用户: matchedUsers,
+          性能数据: performance,
+          响应数据: response.data
+        })
+        
+        // 在控制台输出性能信息
+        if (performance) {
+          console.log('🚀 匹配性能统计:', {
+            总耗时: `${performance.total_time_seconds}秒`,
+            处理用户数: response.data.processed_count,
+            平均每用户耗时: `${performance.avg_time_per_user}秒`,
+            处理速度: `${performance.users_per_second}用户/秒`
+          })
+        }
+        
+        // 清除之前的错误状态
+        setError(null)
+        
+        console.log('📋 准备设置搜索结果:', matchedUsers)
+        setSearchResults(matchedUsers)
+        
+        console.log('🎯 搜索结果已设置，当前状态:', {
+          搜索结果数量: matchedUsers.length,
+          结果详情: matchedUsers
+        })
+        
+        setSuccessMessage(
+          language === 'zh' 
+            ? `找到 ${matchedUsers.length} 个匹配用户 (${duration}ms)` 
+            : `Found ${matchedUsers.length} matching users (${duration}ms)`
+        )
+        setTimeout(() => setSuccessMessage(''), 3000)
+      } else {
+        console.log('❌ 搜索失败或返回空结果:', response)
+        setError(language === 'zh' ? '搜索返回空结果' : 'Search returned empty results')
+      }
+    } catch (error: any) {
+      console.error('❌ 搜索失败:', error)
+      
+      let shouldUseMockData = false
+      
+      // 显示具体的错误信息并决定是否使用模拟数据
+      if (error.message?.includes('网络请求超时')) {
+        setError(language === 'zh' 
+          ? '请求超时，服务器处理时间过长，请稍后重试' 
+          : 'Request timeout, server taking too long, please try again later'
+        )
+        shouldUseMockData = true
+      } else if (error.message?.includes('Failed to fetch')) {
+        setError(language === 'zh' 
+          ? '网络连接失败，请检查网络连接' 
+          : 'Network connection failed, please check your connection'
+        )
+        shouldUseMockData = true
+      } else if (error.message?.includes('无效的token') || error.message?.includes('Invalid token') || error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+        setError(language === 'zh' 
+          ? '认证已过期，请重新登录' 
+          : 'Authentication expired, please login again'
+        )
+        shouldUseMockData = true
+      } else if (error.message?.includes('403') || error.message?.includes('Forbidden')) {
+        setError(language === 'zh' 
+          ? '没有访问权限' 
+          : 'Access denied'
+        )
+        shouldUseMockData = true
+      } else {
+        setError(error.message || (language === 'zh' ? '搜索失败，请重试' : 'Search failed, please try again'))
+        shouldUseMockData = true
+      }
+      
+      // 在开发环境或遇到认证/网络问题时使用模拟数据
+      if (shouldUseMockData) {
+        console.log('🔧 使用模拟数据，原因:', error.message)
+        const mockUsers = generateMockUsers(searchDescription, selectedMatchType)
+        console.log('🎭 生成的模拟用户数据:', mockUsers)
+        
+        setSearchResults(mockUsers)
+        setSuccessMessage(
+          language === 'zh' 
+            ? `找到 ${mockUsers.length} 个匹配用户 (模拟数据)` 
+            : `Found ${mockUsers.length} matching users (mock data)`
+        )
+        setTimeout(() => setSuccessMessage(''), 3000)
+        
+        console.log('✅ 模拟数据已设置，搜索结果数量:', mockUsers.length)
+      }
+    } finally {
+      setIsMatchingLoading(false)
+    }
+  }
+
   const toggleTag = (tagName: string) => {
     setSelectedTags(prev => 
       prev.includes(tagName) 
@@ -174,6 +273,7 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
   }
 
   const clearSearch = () => {
+    console.log('🧹 清空搜索被调用')
     setSearchDescription('')
     setSelectedTags([])
     setSearchResults([])
@@ -307,6 +407,23 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
                 {language === 'zh' ? '开始搜索' : 'Start Search'}
               </Button>
               
+              {process.env.NODE_ENV === 'development' && (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    console.log('🧪 测试按钮：直接设置模拟数据')
+                    const mockUsers = generateMockUsers(searchDescription || '测试', selectedMatchType)
+                    console.log('🎭 测试模拟数据:', mockUsers)
+                    setSearchResults(mockUsers)
+                    setError(null)
+                    setSuccessMessage('测试数据已加载')
+                  }}
+                  className="text-xs"
+                >
+                  测试
+                </Button>
+              )}
+              
               <Button variant="outline" onClick={clearSearch}>
                 {language === 'zh' ? '清空' : 'Clear'}
               </Button>
@@ -334,6 +451,15 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
           )}
 
           {/* Search Results */}
+          {(() => {
+            console.log('🔍 检查搜索结果显示条件:', {
+              搜索结果长度: searchResults.length,
+              搜索结果数组: searchResults,
+              是否大于0: searchResults.length > 0,
+              当前正在加载: isMatchingLoading
+            })
+            return null
+          })()}
           {searchResults.length > 0 && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -434,6 +560,16 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
           )}
 
           {/* Empty State */}
+          {(() => {
+            console.log('🔍 检查空状态显示条件:', {
+              搜索结果长度: searchResults.length,
+              搜索结果为0: searchResults.length === 0,
+              非加载状态: !isMatchingLoading,
+              有搜索描述: !!searchDescription.trim(),
+              显示空状态: searchResults.length === 0 && !isMatchingLoading && !!searchDescription.trim()
+            })
+            return null
+          })()}
           {searchResults.length === 0 && !isMatchingLoading && searchDescription.trim() && (
             <div className="text-center py-12">
               <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />

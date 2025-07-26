@@ -150,12 +150,14 @@ class UserProfileDB:
             print(f"更新用户档案失败: {e}")
             return None
     
-    async def get_all(self, exclude_user_id: Optional[str] = None) -> List[Dict]:
-        """获取所有用户档案"""
+    async def get_all(self, exclude_user_id: Optional[str] = None, limit: Optional[int] = None) -> List[Dict]:
+        """获取所有用户档案，支持限制数量以提高性能"""
         try:
             query = self.client.table(self.table).select('*')
             if exclude_user_id:
                 query = query.neq('id', exclude_user_id)
+            if limit:
+                query = query.limit(limit)
             
             response = query.execute()
             return response.data if response.data else []
@@ -178,6 +180,30 @@ class UserMetadataDB:
         except Exception as e:
             print(f"获取用户元数据失败: {e}")
             return []
+    
+    async def get_by_user_ids(self, user_ids: List[str]) -> Dict[str, List[Dict]]:
+        """批量获取多个用户的元数据"""
+        try:
+            response = self.client.table(self.table).select('*').in_('user_id', user_ids).execute()
+            data = response.data if response.data else []
+            
+            # 按用户ID分组
+            result = {}
+            for item in data:
+                user_id = item['user_id']
+                if user_id not in result:
+                    result[user_id] = []
+                result[user_id].append(item)
+            
+            # 确保所有用户ID都在结果中
+            for user_id in user_ids:
+                if user_id not in result:
+                    result[user_id] = []
+            
+            return result
+        except Exception as e:
+            print(f"批量获取用户元数据失败: {e}")
+            return {user_id: [] for user_id in user_ids}
     
     async def upsert_metadata(self, user_id: str, section_type: str, section_key: str, content: Any) -> Optional[Dict]:
         """插入或更新元数据"""
@@ -258,6 +284,30 @@ class UserTagsDB:
         except Exception as e:
             print(f"获取用户标签失败: {e}")
             return []
+    
+    async def get_by_user_ids(self, user_ids: List[str]) -> Dict[str, List[Dict]]:
+        """批量获取多个用户的标签"""
+        try:
+            response = self.client.table(self.table).select('*').in_('user_id', user_ids).order('confidence_score', desc=True).execute()
+            data = response.data if response.data else []
+            
+            # 按用户ID分组
+            result = {}
+            for item in data:
+                user_id = item['user_id']
+                if user_id not in result:
+                    result[user_id] = []
+                result[user_id].append(item)
+            
+            # 确保所有用户ID都在结果中
+            for user_id in user_ids:
+                if user_id not in result:
+                    result[user_id] = []
+            
+            return result
+        except Exception as e:
+            print(f"批量获取用户标签失败: {e}")
+            return {user_id: [] for user_id in user_ids}
     
     async def add_tag(self, user_id: str, tag_name: str, tag_category: str = 'manual', 
                      confidence_score: float = 1.0, tag_source: str = 'manual') -> Optional[Dict]:
