@@ -380,8 +380,134 @@ class UserTagsDB:
         
         return saved_tags
 
+class ConversationDB:
+    """对话记录数据库操作"""
+    
+    def __init__(self):
+        self.client = get_supabase()
+        self.table = 'conversations'
+    
+    async def save_conversation(self, user_id: str, conversation_data: Dict) -> Optional[Dict]:
+        """保存完整的对话记录"""
+        try:
+            print(f"💬 [ConversationDB] 保存用户 {user_id} 的对话记录")
+            
+            # 验证用户是否存在
+            user_profile = self.client.table('user_profile').select('id').eq('id', user_id).single().execute()
+            if not user_profile.data:
+                print(f"❌ [ConversationDB] 找不到用户档案: {user_id}")
+                return None
+            
+            conversation_entry = {
+                'user_id': user_id,
+                'theme_mode': conversation_data.get('theme_mode', 'romantic'),
+                'language': conversation_data.get('language', 'zh'),
+                'conversation_history': conversation_data.get('history', []),
+                'session_id': conversation_data.get('session_id'),
+                'status': conversation_data.get('status', 'completed'),  # 'active', 'completed', 'terminated'
+                'created_at': datetime.datetime.utcnow().isoformat(),
+                'updated_at': datetime.datetime.utcnow().isoformat()
+            }
+            
+            response = self.client.table(self.table).insert(conversation_entry).execute()
+            result = response.data[0] if response.data else None
+            
+            if result:
+                print(f"✅ [ConversationDB] 对话记录保存成功，ID: {result.get('id')}")
+            
+            return result
+            
+        except Exception as e:
+            print(f"❌ [ConversationDB] 保存对话记录失败: {e}")
+            return None
+    
+    async def get_user_conversations(self, user_id: str, limit: int = 10) -> List[Dict]:
+        """获取用户的对话记录"""
+        try:
+            response = self.client.table(self.table)\
+                .select('*')\
+                .eq('user_id', user_id)\
+                .order('created_at', desc=True)\
+                .limit(limit)\
+                .execute()
+            
+            return response.data if response.data else []
+            
+        except Exception as e:
+            print(f"❌ [ConversationDB] 获取对话记录失败: {e}")
+            return []
+    
+    async def get_conversation_by_id(self, conversation_id: str) -> Optional[Dict]:
+        """根据ID获取特定对话记录"""
+        try:
+            response = self.client.table(self.table)\
+                .select('*')\
+                .eq('id', conversation_id)\
+                .single()\
+                .execute()
+            
+            return response.data if response.data else None
+            
+        except Exception as e:
+            print(f"❌ [ConversationDB] 获取对话记录失败: {e}")
+            return None
+    
+    async def update_conversation_status(self, conversation_id: str, status: str) -> bool:
+        """更新对话状态"""
+        try:
+            response = self.client.table(self.table)\
+                .update({
+                    'status': status,
+                    'updated_at': datetime.datetime.utcnow().isoformat()
+                })\
+                .eq('id', conversation_id)\
+                .execute()
+            
+            return bool(response.data)
+            
+        except Exception as e:
+            print(f"❌ [ConversationDB] 更新对话状态失败: {e}")
+            return False
+    
+    async def extract_conversation_text(self, user_id: str, theme_mode: str = None) -> str:
+        """提取用户对话记录的文本内容用于标签生成"""
+        try:
+            query = self.client.table(self.table)\
+                .select('conversation_history, theme_mode')\
+                .eq('user_id', user_id)\
+                .eq('status', 'completed')
+            
+            if theme_mode:
+                query = query.eq('theme_mode', theme_mode)
+            
+            response = query.order('created_at', desc=True).limit(5).execute()
+            
+            if not response.data:
+                return ""
+            
+            text_parts = []
+            for conversation in response.data:
+                history = conversation.get('conversation_history', [])
+                for message in history:
+                    if message.get('role') == 'user':
+                        content = message.get('content', '')
+                        if content.strip():
+                            text_parts.append(content)
+            
+            combined_text = ' '.join(text_parts)
+            print(f"📝 [ConversationDB] 从 {len(response.data)} 次对话中提取了 {len(combined_text)} 字符的文本")
+            
+            return combined_text
+            
+        except Exception as e:
+            print(f"❌ [ConversationDB] 提取对话文本失败: {e}")
+            return ""
+
 # 创建全局实例供其他模块使用
 db_service = DatabaseService()
 user_profile_db = UserProfileDB()
 user_metadata_db = UserMetadataDB()
 user_tags_db = UserTagsDB() 
+
+# 创建全局实例
+conversation_db = ConversationDB() 

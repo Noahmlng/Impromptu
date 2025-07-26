@@ -16,7 +16,7 @@ import sys
 # 添加项目根目录到Python路径
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
-from backend.services.database_service import user_metadata_db, user_tags_db
+from backend.services.database_service import user_metadata_db, user_tags_db, conversation_db
 from backend.services.auth_service import get_current_user
 
 router = APIRouter()
@@ -32,6 +32,7 @@ class BatchTagRequest(BaseModel):
 
 class GenerateTagsRequest(BaseModel):
     request_type: Optional[str] = '找队友'  # '找对象' 或 '找队友'
+    include_conversation: Optional[bool] = False  # 是否包含对话记录
 
 class TagResponse(BaseModel):
     success: bool
@@ -100,9 +101,17 @@ async def generate_user_tags(
     current_user: Dict = Depends(get_current_user)
 ):
     """基于用户元数据生成标签"""
+    return await generate_user_tags_with_conversation(request, current_user)
+
+async def generate_user_tags_with_conversation(
+    request: GenerateTagsRequest,
+    current_user: Dict
+) -> TagResponse:
+    """基于用户元数据和对话记录生成标签"""
     try:
         user_id = current_user['user_id']
         print(f"🏷️ [TagService] 开始为用户 {user_id} 生成标签，请求类型: {request.request_type}")
+        print(f"🏷️ [TagService] 包含对话记录: {request.include_conversation}")
         
         # 获取主题建模实例
         topic_model = get_topic_model()
@@ -116,34 +125,46 @@ async def generate_user_tags(
         metadata_list = await user_metadata_db.get_by_user_id(user_id)
         print(f"📊 [TagService] 获取到 {len(metadata_list) if metadata_list else 0} 条元数据")
         
-        if not metadata_list:
-            print("❌ [TagService] 用户元数据为空")
-            raise HTTPException(status_code=400, detail="用户元数据为空，请先完善个人信息")
-        
         # 构建用户文本描述
         text_parts = []
-        for i, item in enumerate(metadata_list):
-            print(f"📄 [TagService] 处理元数据项 {i+1}: {item.get('section_type', 'unknown')}.{item.get('section_key', 'unknown')}")
-            content = item['content']
+        
+        # 1. 处理元数据
+        if metadata_list:
+            for i, item in enumerate(metadata_list):
+                print(f"📄 [TagService] 处理元数据项 {i+1}: {item.get('section_type', 'unknown')}.{item.get('section_key', 'unknown')}")
+                content = item['content']
+                
+                if isinstance(content, str):
+                    try:
+                        content = json.loads(content)
+                        print(f"📝 [TagService] 成功解析JSON内容")
+                    except json.JSONDecodeError:
+                        text_parts.append(content)
+                        print(f"📝 [TagService] 添加字符串内容: {content[:50]}...")
+                        continue
+                
+                # 提取文本内容
+                if isinstance(content, dict):
+                    for key, value in content.items():
+                        if isinstance(value, str):
+                            text_parts.append(value)
+                        elif isinstance(value, list):
+                            text_parts.extend([str(v) for v in value])
+                elif isinstance(content, list):
+                    text_parts.extend([str(item) for item in content])
+        
+        # 2. 处理对话记录（如果请求包含）
+        conversation_text = ""
+        if request.include_conversation:
+            print("💬 [TagService] 开始提取对话记录...")
+            theme_mode = request.request_type if request.request_type in ['romantic', 'team'] else None
+            conversation_text = await conversation_db.extract_conversation_text(user_id, theme_mode)
             
-            if isinstance(content, str):
-                try:
-                    content = json.loads(content)
-                    print(f"📝 [TagService] 成功解析JSON内容")
-                except json.JSONDecodeError:
-                    text_parts.append(content)
-                    print(f"📝 [TagService] 添加字符串内容: {content[:50]}...")
-                    continue
-            
-            # 提取文本内容
-            if isinstance(content, dict):
-                for key, value in content.items():
-                    if isinstance(value, str):
-                        text_parts.append(value)
-                    elif isinstance(value, list):
-                        text_parts.extend([str(v) for v in value])
-            elif isinstance(content, list):
-                text_parts.extend([str(item) for item in content])
+            if conversation_text:
+                text_parts.append(conversation_text)
+                print(f"💬 [TagService] 添加对话文本: {len(conversation_text)} 字符")
+            else:
+                print("💬 [TagService] 未找到相关对话记录")
         
         user_text = ' '.join(text_parts)
         print(f"📝 [TagService] 合并后文本长度: {len(user_text)} 字符")
@@ -151,7 +172,10 @@ async def generate_user_tags(
         
         if not user_text.strip():
             print("❌ [TagService] 提取的文本为空")
-            raise HTTPException(status_code=400, detail="无法从元数据中提取有效文本")
+            error_msg = "无法从元数据中提取有效文本"
+            if request.include_conversation:
+                error_msg += "，且未找到对话记录"
+            raise HTTPException(status_code=400, detail=error_msg)
         
         # 使用主题建模生成标签
         print("🤖 [TagService] 开始主题建模分析...")
@@ -176,6 +200,8 @@ async def generate_user_tags(
         # 保存生成的标签到数据库
         print("💾 [TagService] 保存新生成的标签...")
         saved_tags = []
+        tag_source = 'topic_modeling_with_chat' if request.include_conversation and conversation_text else 'topic_modeling'
+        
         for tag_name, confidence in topic_result.extracted_tags.items():
             try:
                 result = await user_tags_db.add_tag(
@@ -183,7 +209,7 @@ async def generate_user_tags(
                     tag_name=tag_name,
                     tag_category='generated',
                     confidence_score=confidence,
-                    tag_source='topic_modeling'
+                    tag_source=tag_source
                 )
                 if result:
                     saved_tags.append(result)
@@ -195,12 +221,15 @@ async def generate_user_tags(
         
         return TagResponse(
             success=True,
-            message=f"成功生成{len(saved_tags)}个标签",
+            message=f"成功生成{len(saved_tags)}个标签" + ("（包含对话记录分析）" if request.include_conversation and conversation_text else ""),
             data={
                 "generated_tags": saved_tags,
                 "topics": [(int(tid), float(weight)) for tid, weight in topic_result.topics],
                 "user_text_length": len(user_text),
-                "request_type": request.request_type
+                "conversation_text_length": len(conversation_text) if conversation_text else 0,
+                "request_type": request.request_type,
+                "included_conversation": request.include_conversation and bool(conversation_text),
+                "tag_source": tag_source
             }
         )
         
@@ -440,6 +469,16 @@ async def batch_update_tags(
     except Exception as e:
         print(f"批量更新标签错误: {e}")
         raise HTTPException(status_code=500, detail=f"批量更新标签失败: {str(e)}")
+
+@router.post("/generate/with-conversation", response_model=TagResponse)
+async def generate_tags_with_conversation(
+    request: GenerateTagsRequest,
+    current_user: Dict = Depends(get_current_user)
+):
+    """基于用户元数据和对话记录生成标签的专用接口"""
+    # 强制启用对话记录包含
+    request.include_conversation = True
+    return await generate_user_tags_with_conversation(request, current_user)
 
 @router.get("/trending/{category}")
 async def get_trending_tags(category: str = 'all'):

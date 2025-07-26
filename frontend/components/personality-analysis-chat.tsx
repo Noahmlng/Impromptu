@@ -96,7 +96,7 @@ export function PersonalityAnalysisChat({ onStageChange, currentStage }: Persona
         ? (language === 'zh' 
             ? `你好！我是Linker，你的AI人格分析助手。我会通过一系列问题来深入了解你的性格特征、价值观和偏好，从而为你提供更精准的恋爱匹配建议。
 
-这个过程大约需要3-15分钟，你可以选择用文字回答或者点击麦克风图标进行语音交流（待开发）。
+这个过程大约需要3-15分钟，你可以选择用文字回答或者点击麦克风图标进行语音交流（敬请期待）。
 
 让我们开始吧！首先请告诉我，你在寻找恋爱伙伴时，最看重对方的哪些特质？`
             : `Hello! I'm Linker, your AI personality analysis assistant. I'll understand your personality traits, values, and preferences through a series of questions to provide you with more accurate romantic matching suggestions.
