@@ -69,8 +69,14 @@ export const useAppStore = create<ExtendedAppState>((set, get) => ({
   setUser: (user) => set({ user }),
   
   // Auth actions
-  setAuthToken: (token) => set({ authToken: token, isAuthenticated: !!token }),
-  setBackendUser: (user) => set({ backendUser: user }),
+  setAuthToken: (token) => set({ 
+    authToken: token, 
+    isAuthenticated: !!token 
+  }),
+  setBackendUser: (user) => set({ 
+    backendUser: user, 
+    isAuthenticated: !!user 
+  }),
   setIsAuthenticated: (authenticated) => set({ isAuthenticated: authenticated }),
   
   // User data actions

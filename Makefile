@@ -1,6 +1,6 @@
 # Impromptu 匹配系统 Makefile
 
-.PHONY: help install setup train demo api web test clean check
+.PHONY: help install setup train demo api web test clean check backend frontend dev-all stop status logs
 
 help: ## 显示帮助信息
 	@echo "Impromptu - AI社交匹配算法系统"
@@ -27,14 +27,86 @@ demo: ## 运行命令行演示
 	@echo "📱 启动命令行演示..."
 	python scripts/demo/main.py
 
-api: ## 启动API服务
-	@echo "🌐 启动API服务..."
-	bash scripts/setup/start_api.sh
+# ===================
+# 后端服务命令
+# ===================
+backend: ## 启动后端API服务 (FastAPI)
+	@echo "🌐 启动后端API服务..."
+	bash scripts/setup/start_backend.sh
 
-web: ## 启动Web界面
-	@echo "💻 启动Web界面..."
-	bash scripts/setup/start_web.sh
+api: backend ## 启动API服务（backend的别名）
 
+backend-simple: ## 启动简单后端服务
+	@echo "🔧 启动简单后端服务..."
+	cd backend && python main.py simple
+
+# ===================
+# 前端服务命令  
+# ===================
+frontend: ## 启动前端服务 (Next.js)
+	@echo "💻 启动前端服务..."
+	bash scripts/setup/start_frontend.sh
+
+web: frontend ## 启动Web界面（frontend的别名）
+
+frontend-build: ## 构建前端生产版本
+	@echo "🏗️ 构建前端..."
+	cd frontend && npm run build
+
+frontend-prod: ## 启动前端生产服务
+	@echo "🚀 启动前端生产服务..."
+	cd frontend && npm run start
+
+# ===================
+# 开发模式命令
+# ===================
+dev-all: ## 开发模式 - 同时启动前端和后端 (自动清理端口)
+	@echo "🚀 开发模式启动 - 前端和后端"
+	@echo "🧹 自动清理端口冲突..."
+	@bash scripts/setup/manage_ports.sh clean || true
+	@sleep 1
+	@echo "🔍 检查数据库连接和启动后端服务..."
+	@bash scripts/setup/start_backend.sh --background
+	@sleep 3
+	@echo "正在启动前端服务..."
+	@bash scripts/setup/start_frontend.sh
+
+dev: ## 开发模式（自动清理端口+启动服务+健康检查）
+	@echo "⚡ 开发模式快速启动（含端口清理和健康检查）"
+	@make clean-ports
+	@make dev-all
+
+dev-backend: ## 仅开发模式启动后端 (含数据库检查+端口清理)
+	@echo "🌐 开发模式 - 仅后端（含数据库检查+端口清理）..."
+	@bash scripts/setup/manage_ports.sh clean || true
+	@sleep 1
+	@bash scripts/setup/start_backend.sh
+
+dev-frontend: ## 仅开发模式启动前端 (含端口清理)
+	@echo "💻 开发模式 - 仅前端（含端口清理）..."
+	@bash scripts/setup/manage_ports.sh clean || true
+	@sleep 1  
+	@bash scripts/setup/start_frontend.sh
+
+# 新增命令
+dev-quick: ## 快速开发模式（跳过依赖检查，仅启动服务）
+	@echo "⚡ 快速开发模式（跳过检查）"
+	@bash scripts/setup/manage_ports.sh clean || true
+	@sleep 1
+	@SKIP_DEPENDENCY_CHECK=1 bash scripts/setup/start_backend.sh --background
+	@sleep 3
+	@bash scripts/setup/start_frontend.sh
+
+health-check: ## 检查所有服务健康状态
+	@echo "🏥 服务健康检查..."
+	@echo "📊 后端API健康状态:"
+	@curl -s http://localhost:8000/health | python3 -m json.tool 2>/dev/null || echo "❌ 后端服务未响应"
+	@echo "\n📊 前端服务状态:"
+	@curl -s http://localhost:3000/ >/dev/null 2>&1 && echo "✅ 前端服务正常" || echo "❌ 前端服务未响应"
+
+# ===================
+# 测试命令
+# ===================
 test: ## 运行测试
 	@echo "🧪 运行测试..."
 	python -m pytest tests/ -v
@@ -42,6 +114,39 @@ test: ## 运行测试
 test-api: ## 测试API接口
 	@echo "🔍 测试API接口..."
 	python scripts/demo/test_api_client.py
+
+# ===================
+# 管理命令
+# ===================
+clean-ports: ## 清理端口冲突（安全方式）
+	@echo "🧹 清理端口冲突..."
+	@bash scripts/setup/manage_ports.sh clean
+	@echo "✅ 端口清理完成"
+
+stop: ## 停止所有服务
+	@echo "🛑 停止所有服务..."
+	@pkill -f "uvicorn.*main_api" || true
+	@pkill -f "python.*backend.*main" || true
+	@pkill -f "next.*dev" || true
+	@pkill -f "node.*next.*dev" || true
+	@pkill -f "npm.*run.*dev" || true
+	@echo "✅ 服务已停止"
+
+kill-ports: ## 强制清理所有相关端口（危险操作）
+	@echo "💥 强制清理所有开发端口..."
+	@echo "⚠️  这将终止3000、5000、8000、8001端口的所有进程"
+	@lsof -ti :3000 2>/dev/null | xargs kill -9 2>/dev/null || true
+	@lsof -ti :8000 2>/dev/null | xargs kill -9 2>/dev/null || true  
+	@lsof -ti :8001 2>/dev/null | xargs kill -9 2>/dev/null || true
+	@echo "✅ 强制清理完成"
+
+status: ## 检查服务状态
+	@echo "📊 服务状态检查..."
+	@bash scripts/setup/manage_ports.sh status
+
+logs: ## 查看日志
+	@echo "📋 最近日志:"
+	@find . -name "*.log" -type f -exec ls -lt {} + 2>/dev/null | head -5 || echo "  无日志文件"
 
 clean: ## 清理临时文件
 	@echo "🧹 清理临时文件..."
@@ -55,30 +160,29 @@ clean: ## 清理临时文件
 	rm -rf .pytest_cache/
 	rm -rf .coverage
 	rm -rf htmlcov/
+	rm -rf frontend/.next/
+	rm -rf frontend/node_modules/.cache/
 
-dev: ## 开发模式 - 启动API和Web服务
-	@echo "🚀 开发模式启动..."
-	@echo "启动API服务 (后台运行)..."
-	@bash scripts/setup/start_api.sh &
+# ===================
+# 快速命令
+# ===================
+quick-start: ## 快速启动（检查+安装+清理端口+开发模式）
+	@echo "⚡ 快速启动流程..."
+	@make check
+	@make install
+	@make dev
+
+restart: ## 重启所有服务（含端口清理）
+	@echo "🔄 重启所有服务..."
+	@make clean-ports
+	@sleep 2
+	@make dev-all
+
+force-restart: ## 强制重启（清理所有+重新启动）
+	@echo "💪 强制重启所有服务..."
+	@make stop
+	@make clean-ports
 	@sleep 3
-	@echo "启动Web界面..."
-	@bash scripts/setup/start_web.sh
-
-stop: ## 停止所有服务
-	@echo "🛑 停止所有服务..."
-	@pkill -f "python.*api_server" || true
-	@pkill -f "python.*http.server" || true
-	@echo "✅ 服务已停止"
-
-status: ## 检查服务状态
-	@echo "📊 服务状态检查..."
-	@echo "API服务 (端口5000):"
-	@lsof -Pi :5000 -sTCP:LISTEN >/dev/null && echo "  ✅ 运行中" || echo "  ❌ 未运行"
-	@echo "Web服务 (端口8000):"
-	@lsof -Pi :8000 -sTCP:LISTEN >/dev/null && echo "  ✅ 运行中" || echo "  ❌ 未运行"
-
-logs: ## 查看日志
-	@echo "📋 最近日志:"
-	@find . -name "*.log" -type f -exec ls -lt {} + 2>/dev/null | head -5 || echo "  无日志文件"
+	@make dev-all
 
 .DEFAULT_GOAL := help 

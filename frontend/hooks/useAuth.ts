@@ -8,6 +8,7 @@ export function useAuth(requireAuth: boolean = true) {
   const router = useRouter()
   const {
     isAuthenticated,
+    authToken,
     backendUser,
     setBackendUser,
     setUser,
@@ -22,7 +23,13 @@ export function useAuth(requireAuth: boolean = true) {
       setIsAuthLoading(true)
       
       try {
-        // 获取当前Supabase session
+        // 首先检查store中是否已有认证信息（来自登录页面）
+        if (authToken && backendUser) {
+          setIsAuthLoading(false)
+          return
+        }
+
+        // 然后检查Supabase session
         const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {
@@ -58,7 +65,7 @@ export function useAuth(requireAuth: boolean = true) {
             }
           }
         } else if (requireAuth) {
-          // 没有session但需要认证，跳转到登录页
+          // 没有session也没有后端token，但需要认证
           router.push('/login')
         }
       } catch (error) {
@@ -107,7 +114,7 @@ export function useAuth(requireAuth: boolean = true) {
     return () => {
       subscription.unsubscribe()
     }
-  }, [requireAuth, router, setAuthToken, setBackendUser, setUser, setIsAuthLoading, logout])
+  }, [requireAuth, router, setAuthToken, setBackendUser, setUser, setIsAuthLoading, logout, authToken, backendUser])
 
   const handleLogout = async () => {
     await auth.logout()
@@ -116,7 +123,7 @@ export function useAuth(requireAuth: boolean = true) {
   }
 
   return {
-    isAuthenticated,
+    isAuthenticated: isAuthenticated || !!(authToken && backendUser),
     user: backendUser,
     logout: handleLogout,
     isLoading: useAppStore(state => state.isAuthLoading)

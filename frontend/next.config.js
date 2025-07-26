@@ -4,7 +4,7 @@ const nextConfig = {
     domains: ['localhost', '127.0.0.1', 'example.com'],
   },
   env: {
-    NEXT_PUBLIC_API_URL: 'http://127.0.0.1:5003',
+    NEXT_PUBLIC_API_URL: 'http://127.0.0.1:8000',
   },
 }
 
