@@ -6,8 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { useAppStore } from '@/lib/store'
 import { useRequireAuth } from '@/hooks/useAuth'
-import { profile, auth } from '@/lib/api'
-import { User, UserMetadata, Language } from '@/lib/types'
+import { profile, auth, tags } from '@/lib/api'
+import { User, UserMetadata, Language, UserTag } from '@/lib/types'
 import { User as UserIcon, Mail, Phone, MapPin, Calendar, Camera, Save, Edit3, Upload, AlertCircle, CheckCircle, RefreshCw, Plus, ExternalLink, Trash2, Link } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
@@ -55,7 +55,9 @@ export default function ProfilePage() {
     setError,
     error,
     isLoading,
-    clearError
+    clearError,
+    userTags,
+    setUserTags
   } = useAppStore()
   
   const [isEditing, setIsEditing] = useState(false)
@@ -65,6 +67,8 @@ export default function ProfilePage() {
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([])
   const [newLink, setNewLink] = useState({ platform: '', url: '', label: '' })
   const [isAddingLink, setIsAddingLink] = useState(false)
+  const [generatedTags, setGeneratedTags] = useState<string[]>([])
+  const [isGeneratingTags, setIsGeneratingTags] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [profileData, setProfileData] = useState({
     name: '',
@@ -143,9 +147,9 @@ export default function ProfilePage() {
         })
         
         // 设置标签 - 确保是数组格式
-        const userTags = Array.isArray(userData.tags) ? userData.tags : []
-        setUserTags(userTags)
-        setGeneratedTags(userTags.map((tag: any) => tag.tag_name || ''))
+        const userTagsData = Array.isArray(userData.tags) ? userData.tags : []
+        setUserTags(userTagsData)
+        setGeneratedTags(userTagsData.map((tag: UserTag) => tag.tag_name || ''))
         
         // 设置到store中
         setUserMetadata(metadata)
@@ -171,16 +175,14 @@ export default function ProfilePage() {
         // Load metadata from Supabase directly
         const metadataResponse = await profile.getMetadata()
         if (metadataResponse.success) {
-          setUserMetadata(metadataResponse.data)
-          
           // Load additional metadata for preferences and contact info
-          const metadataResponse = await profile.getMetadata()
-          const profileSection = metadataResponse.success ? metadataResponse.data.profile || {} : {}
+          const profileSection = metadataResponse.data.profile || {}
+          const personalData = profileSection.personal?.content || {}
           const contactData = profileSection.contact?.content || {}
           const preferencesData = profileSection.preferences?.content || {}
           const socialLinksData = profileSection.social_links?.content || []
           
-          setUserMetadata(metadataResponse.success ? metadataResponse.data : {})
+          setUserMetadata(metadataResponse.data)
           setSocialLinks(socialLinksData)
           
           setProfileData({
@@ -203,7 +205,7 @@ export default function ProfilePage() {
         const tagsResponse = await tags.getUserTags()
         if (tagsResponse.success && tagsResponse.data) {
           setUserTags(tagsResponse.data)
-          setGeneratedTags(tagsResponse.data.map(tag => tag.tag_name))
+          setGeneratedTags(tagsResponse.data.map((tag: UserTag) => tag.tag_name))
         }
       }
       
@@ -430,10 +432,10 @@ export default function ProfilePage() {
           
           if (tagGenerationResponse.success) {
             setUserTags(tagGenerationResponse.data.generated_tags)
-            setGeneratedTags(tagGenerationResponse.data.generated_tags.map(tag => tag.tag_name))
+            setGeneratedTags(tagGenerationResponse.data.generated_tags.map((tag: UserTag) => tag.tag_name))
             console.log('✅ [ProfilePage.handleSave] Tags generated successfully:', {
               tagsCount: tagGenerationResponse.data.generated_tags.length,
-              tagNames: tagGenerationResponse.data.generated_tags.map(tag => tag.tag_name).slice(0, 5)
+              tagNames: tagGenerationResponse.data.generated_tags.map((tag: UserTag) => tag.tag_name).slice(0, 5)
             })
           } else {
             console.warn('⚠️ [ProfilePage.handleSave] Tag generation failed:', tagGenerationResponse.message)
@@ -563,14 +565,14 @@ export default function ProfilePage() {
   const generateTags = async (requestType: '找队友' | '找对象') => {
     if (!authUser) return
     
-    setIsLoading(true)
+    setIsGeneratingTags(true)
     setError(null)
     
     try {
       const response = await tags.generate(requestType)
       if (response.success) {
         setUserTags(response.data.generated_tags)
-        setGeneratedTags(response.data.generated_tags.map(tag => tag.tag_name))
+        setGeneratedTags(response.data.generated_tags.map((tag: UserTag) => tag.tag_name))
         setSaveSuccess(true)
         setTimeout(() => setSaveSuccess(false), 3000)
       }
