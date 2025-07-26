@@ -540,28 +540,49 @@ Please return a JSON object in the following format:
             ? 'from-pink-50 to-purple-50 dark:from-pink-900/10 dark:to-purple-900/10 border-pink-200/50' 
             : 'from-blue-50 to-cyan-50 dark:from-blue-900/10 dark:to-cyan-900/10 border-blue-200/50'
         } backdrop-blur-sm`}>
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center space-x-3">
-              <div className={`p-2 rounded-full ${
-                themeMode === 'romantic' ? 'bg-pink-500/10' : 'bg-blue-500/10'
-              }`}>
-                <Brain className={`h-5 w-5 ${
-                  themeMode === 'romantic' ? 'text-pink-600' : 'text-blue-600'
-                }`} />
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg">
-                  {language === 'zh' ? '分析进度' : 'Analysis Progress'}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {language === 'zh' ? 'AI正在深入了解你的个性特征' : 'AI is getting to know your personality traits'}
-                </p>
-              </div>
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-center flex-1">
+              <h3 className="font-semibold text-lg">
+                {language === 'zh' ? '分析进度' : 'Analysis Progress'}
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {language === 'zh' ? 'AI正在深入了解你的个性特征' : 'AI is getting to know your personality traits'}
+              </p>
             </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold">{Math.round(analysisProgress)}%</div>
-              <div className="text-xs text-muted-foreground">
-                {language === 'zh' ? '已完成' : 'Completed'}
+            {/* Circular Progress Indicator */}
+            <div className="relative">
+              <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 36 36">
+                {/* Background circle */}
+                <path
+                  className="stroke-muted/30"
+                  strokeWidth="3"
+                  fill="none"
+                  d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                />
+                {/* Progress circle */}
+                <path
+                  className={`transition-all duration-1000 ease-out ${
+                    themeMode === 'romantic'
+                      ? 'stroke-pink-500'
+                      : 'stroke-blue-500'
+                  }`}
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  fill="none"
+                  strokeDasharray={`${analysisProgress}, 100`}
+                  d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                />
+              </svg>
+              {/* Text overlay */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <div className="text-lg font-bold">{Math.round(analysisProgress)}%</div>
+                <div className="text-xs text-muted-foreground">
+                  {language === 'zh' ? '已完成' : 'Completed'}
+                </div>
               </div>
             </div>
           </div>
@@ -587,24 +608,19 @@ Please return a JSON object in the following format:
       {finalAnalysis && currentStage === 'complete' && (
         <div className="p-6 border-b bg-gradient-to-r from-green-50 via-emerald-50 to-teal-50 dark:from-green-900/20 dark:via-emerald-900/20 dark:to-teal-900/20 border-green-200/50">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-green-500/10 rounded-full">
-                <Brain className="h-8 w-8 text-green-600" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-green-800 dark:text-green-200 flex items-center space-x-2">
-                  <span>
-                    {language === 'zh' ? '人格分析完成！' : 'Personality Analysis Complete!'}
-                  </span>
-                  <Sparkles className="h-5 w-5 text-green-600" />
-                </h3>
-                <p className="text-green-700 dark:text-green-300 text-sm">
-                  {language === 'zh' 
-                    ? '你的个性档案已生成，匹配精度将大幅提升' 
-                    : 'Your personality profile has been generated, matching accuracy will be greatly improved'
-                  }
-                </p>
-              </div>
+            <div>
+              <h3 className="text-xl font-bold text-green-800 dark:text-green-200 flex items-center space-x-2">
+                <span>
+                  {language === 'zh' ? '人格分析完成！' : 'Personality Analysis Complete!'}
+                </span>
+                <Sparkles className="h-5 w-5 text-green-600" />
+              </h3>
+              <p className="text-green-700 dark:text-green-300 text-sm">
+                {language === 'zh' 
+                  ? '你的个性档案已生成，匹配精度将大幅提升' 
+                  : 'Your personality profile has been generated, matching accuracy will be greatly improved'
+                }
+              </p>
             </div>
             <Button
               onClick={downloadAnalysisReport}
