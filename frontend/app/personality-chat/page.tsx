@@ -135,7 +135,7 @@ export default function PersonalityChatPage() {
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           {themeMode === 'romantic' 
             ? (language === 'zh' 
-                ? '通过智能对话深度了解你的人格特征，为你匹配最合适的恋爱伙伴。支持语音和文字交流，让分析更加准确和自然。'
+                ? '通过智能对话深度了解你的人格特征，为你匹配最合适的恋爱对象。支持语音和文字交流，让分析更加准确和自然。'
                 : 'Deeply understand your personality through intelligent conversation to match you with the most suitable romantic partners. Support voice and text communication for more accurate and natural analysis.')
             : (language === 'zh' 
                 ? '通过智能对话深度了解你的专业技能和合作风格，为你匹配最合适的团队伙伴。支持语音和文字交流，让分析更加准确和自然。'
