@@ -550,37 +550,76 @@ export const apiClient = new ApiClient()
 export const auth = {
   login: async (email: string, password: string) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // 添加超时控制
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('登录请求超时，请检查网络连接')), 30000)
+      })
+
+      const signInPromise = supabase.auth.signInWithPassword({
         email,
         password,
       })
+
+      const { data, error } = await Promise.race([signInPromise, timeoutPromise]) as any
       
-      if (error) throw error
+      if (error) {
+        let errorMessage = '登录失败';
+        
+        if (error.message.includes('Invalid login credentials')) {
+          errorMessage = '邮箱或密码错误';
+        } else if (error.message.includes('Email not confirmed')) {
+          errorMessage = '请先确认邮箱，检查收件箱并点击确认链接';
+        } else if (error.message.includes('rate limit') || error.message.includes('429')) {
+          errorMessage = '登录请求过于频繁，请稍后再试';
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        throw new Error(errorMessage);
+      }
       
       if (data.user && data.session) {
         // 获取用户档案信息
-        const { data: profile, error: profileError } = await supabase
-          .from('user_profile')
-          .select('*')
-          .eq('auth_user_id', data.user.id)
-          .single()
-        
-        return {
-          success: true,
-          message: '登录成功',
-          data: {
-            user_id: profile?.user_id || data.user.id,
-            email: data.user.email!,
-            display_name: profile?.display_name || data.user.user_metadata?.display_name,
-            avatar_url: profile?.avatar_url || data.user.user_metadata?.avatar_url,
-            subscription_type: profile?.subscription_type || 'free',
-            token: data.session.access_token
+        try {
+          const { data: profile, error: profileError } = await supabase
+            .from('user_profile')
+            .select('*')
+            .eq('auth_user_id', data.user.id)
+            .single()
+          
+          return {
+            success: true,
+            message: '登录成功',
+            data: {
+              user_id: profile?.user_id || data.user.id,
+              email: data.user.email!,
+              display_name: profile?.display_name || data.user.user_metadata?.display_name,
+              avatar_url: profile?.avatar_url || data.user.user_metadata?.avatar_url,
+              subscription_type: profile?.subscription_type || 'free',
+              token: data.session.access_token
+            }
+          }
+        } catch (profileError: any) {
+          console.error('Error fetching user profile:', profileError)
+          // 即使获取档案失败，也返回基本的登录信息
+          return {
+            success: true,
+            message: '登录成功',
+            data: {
+              user_id: data.user.id,
+              email: data.user.email!,
+              display_name: data.user.user_metadata?.display_name || '用户',
+              avatar_url: data.user.user_metadata?.avatar_url,
+              subscription_type: 'free',
+              token: data.session.access_token
+            }
           }
         }
       }
       
       throw new Error('登录失败')
     } catch (error: any) {
+      console.error('Login error:', error)
       return {
         success: false,
         message: error.message || '登录失败',
@@ -591,7 +630,12 @@ export const auth = {
   
   register: async (email: string, password: string, displayName: string, avatarUrl?: string) => {
     try {
-      const { data, error } = await supabase.auth.signUp({
+      // 添加超时控制
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('注册请求超时，请检查网络连接')), 30000)
+      })
+
+      const signUpPromise = supabase.auth.signUp({
         email,
         password,
         options: {
@@ -601,6 +645,8 @@ export const auth = {
           }
         }
       })
+
+      const { data, error } = await Promise.race([signUpPromise, timeoutPromise]) as any
       
       if (error) {
         // Handle specific error cases with better Chinese messages
@@ -614,6 +660,10 @@ export const auth = {
           errorMessage = '密码至少需要6个字符';
         } else if (error.message.includes('Invalid email')) {
           errorMessage = '邮箱格式不正确';
+        } else if (error.message.includes('confirmation')) {
+          errorMessage = '注册成功！请检查邮箱并点击确认链接完成注册';
+        } else if (error.message.includes('Error sending confirmation email')) {
+          errorMessage = '注册成功！但由于邮件服务暂时不可用，请稍后检查邮箱或联系管理员';
         } else if (error.message) {
           errorMessage = error.message;
         }
@@ -644,31 +694,42 @@ export const auth = {
             // 不阻塞注册，但记录错误
           }
 
+          // 检查是否需要邮箱确认
+          const needsConfirmation = !data.user.email_confirmed_at
+          const message = needsConfirmation 
+            ? '注册成功！请检查邮箱并点击确认链接完成注册。如果未收到邮件，请检查垃圾邮件文件夹。'
+            : '注册成功！'
+
           return {
             success: true,
-            message: '注册成功',
+            message: message,
             data: {
               user_id: userId,
               email: data.user.email!,
               display_name: displayName,
               avatar_url: avatarUrl,
               token: data.session?.access_token || null,
-              needs_confirmation: !data.user.email_confirmed_at
+              needs_confirmation: needsConfirmation
             }
           }
         } catch (profileError: any) {
           console.error('Error creating user profile:', profileError)
           // 返回基本的注册成功信息，即使profile创建失败
+          const needsConfirmation = !data.user.email_confirmed_at
+          const message = needsConfirmation 
+            ? '注册成功！请检查邮箱并点击确认链接完成注册。如果未收到邮件，请检查垃圾邮件文件夹。'
+            : '注册成功！'
+
           return {
             success: true,
-            message: '注册成功',
+            message: message,
             data: {
               user_id: data.user.id,
               email: data.user.email!,
               display_name: displayName,
               avatar_url: avatarUrl,
               token: data.session?.access_token || null,
-              needs_confirmation: !data.user.email_confirmed_at
+              needs_confirmation: needsConfirmation
             }
           }
         }
@@ -676,6 +737,7 @@ export const auth = {
       
       throw new Error('注册失败')
     } catch (error: any) {
+      console.error('Registration error:', error)
       return {
         success: false,
         message: error.message || '注册失败',
