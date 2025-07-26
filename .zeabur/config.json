@@ -1,15 +1,8 @@
 {
   "service": {
-    "type": "python",
-    "buildCommand": "pip install -r requirements.txt",
-    "startCommand": "python main.py",
-    "port": 8000,
-    "env": {
-      "PORT": "8000",
-      "HOST": "0.0.0.0"
-    }
-  },
-  "build": {
-    "dockerfile": "Dockerfile"
+    "type": "static",
+    "buildCommand": "cd frontend && npm ci && npm run build",
+    "outputDir": "frontend/out",
+    "framework": "nextjs"
   }
 } 
