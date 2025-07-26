@@ -163,7 +163,7 @@ export function Navbar() {
                 style={{minWidth: '2.25rem', minHeight: '2.25rem'}}
               >
                 <span className="font-semibold text-sm">
-                  {language === 'zh' ? 'En' : '中'}
+                  {language === 'zh' ? '中' : 'En'}
                 </span>
                 <span className="sr-only">Toggle language</span>
               </button>
