@@ -19,7 +19,7 @@ import uuid
 # 添加项目根目录到Python路径
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
-from backend.services.database_service import get_supabase, get_database_services
+from backend.services.database_service import get_supabase
 
 router = APIRouter()
 
@@ -74,7 +74,7 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
     
     try:
         # 获取数据库服务实例
-        db_service, user_profile_db, user_metadata_db, user_tags_db = get_database_services()
+        supabase = get_supabase()
         
         # 移除 'Bearer ' 前缀
         if authorization.startswith('Bearer '):
@@ -91,20 +91,20 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
             raise HTTPException(status_code=401, detail="无效的认证token")
         
         # 获取用户档案信息
-        user_profile = await user_profile_db.get_by_id(user_id)
+        user_profile = await supabase.table('user_profile').select('*').eq('id', user_id).single()
         
-        if not user_profile:
+        if not user_profile.data:
             raise HTTPException(status_code=401, detail="用户不存在")
         
         # 更新最后登录时间
-        await user_profile_db.update(user_profile['id'], {
+        await supabase.table('user_profile').update({
             'last_login_at': datetime.datetime.utcnow().isoformat()
-        })
+        }).eq('id', user_id)
         
         return {
-            'user_id': user_profile['id'],
-            'email': user_profile['email'],
-            'profile': user_profile
+            'user_id': user_profile.data['id'],
+            'email': user_profile.data['email'],
+            'profile': user_profile.data
         }
         
     except jwt.ExpiredSignatureError:
@@ -120,11 +120,11 @@ async def register(request: RegisterRequest):
     """用户注册"""
     try:
         # 获取数据库服务实例
-        db_service, user_profile_db, user_metadata_db, user_tags_db = get_database_services()
+        supabase = get_supabase()
         
         # 检查邮箱是否已存在
-        existing_user = await user_profile_db.get_by_email(request.email)
-        if existing_user:
+        existing_user = await supabase.table('user_profile').select('*').eq('email', request.email.lower().strip()).single()
+        if existing_user.data:
             raise HTTPException(status_code=400, detail="该邮箱已被注册")
         
         # 加密密码
@@ -144,22 +144,22 @@ async def register(request: RegisterRequest):
             profile_data['avatar_url'] = request.avatar_url
         
         # 在user_profile表中创建用户
-        user_profile = await user_profile_db.create(profile_data)
+        user_profile = await supabase.table('user_profile').insert(profile_data).select().single()
         
-        if not user_profile:
+        if not user_profile.data:
             raise HTTPException(status_code=500, detail="用户创建失败")
         
         # 生成JWT token
-        access_token = create_access_token(user_profile)
+        access_token = create_access_token(user_profile.data)
         
         return AuthResponse(
             success=True,
             message="注册成功",
             data={
-                "user_id": user_profile['id'],
-                "email": user_profile['email'],
-                "display_name": user_profile['display_name'],
-                "avatar_url": user_profile.get('avatar_url'),
+                "user_id": user_profile.data['id'],
+                "email": user_profile.data['email'],
+                "display_name": user_profile.data['display_name'],
+                "avatar_url": user_profile.data.get('avatar_url'),
                 "token": access_token
             }
         )
@@ -175,38 +175,38 @@ async def login(request: LoginRequest):
     """用户登录"""
     try:
         # 获取数据库服务实例
-        db_service, user_profile_db, user_metadata_db, user_tags_db = get_database_services()
+        supabase = get_supabase()
         
         # 根据邮箱查找用户
-        user_profile = await user_profile_db.get_by_email(request.email)
+        user_profile = await supabase.table('user_profile').select('*').eq('email', request.email.lower().strip()).single()
         
-        if not user_profile:
+        if not user_profile.data:
             raise HTTPException(status_code=401, detail="邮箱或密码错误")
         
         # 验证密码
-        if not verify_password(request.password, user_profile['password']):
+        if not verify_password(request.password, user_profile.data['password']):
             raise HTTPException(status_code=401, detail="邮箱或密码错误")
         
         # 检查用户是否活跃
-        if not user_profile.get('is_active', True):
+        if not user_profile.data.get('is_active', True):
             raise HTTPException(status_code=401, detail="账户已被禁用")
         
         # 更新最后登录时间
-        await user_profile_db.update(user_profile['id'], {
+        await supabase.table('user_profile').update({
             'last_login_at': datetime.datetime.utcnow().isoformat()
-        })
+        }).eq('id', user_profile.data['id'])
         
         # 生成JWT token
-        access_token = create_access_token(user_profile)
+        access_token = create_access_token(user_profile.data)
         
         return AuthResponse(
             success=True,
             message="登录成功",
             data={
-                "user_id": user_profile['id'],
-                "email": user_profile['email'],
-                "display_name": user_profile['display_name'],
-                "avatar_url": user_profile.get('avatar_url'),
+                "user_id": user_profile.data['id'],
+                "email": user_profile.data['email'],
+                "display_name": user_profile.data['display_name'],
+                "avatar_url": user_profile.data.get('avatar_url'),
                 "token": access_token
             }
         )

@@ -19,23 +19,60 @@ fi
 echo "🔄 激活虚拟环境..."
 source venv/bin/activate
 
-# 检查依赖
-echo "🔍 检查依赖..."
-echo "📦 安装项目包（开发模式）..."
-pip install -e . --no-deps --timeout 30 || {
-    echo "⚠️  项目包安装失败，尝试仅安装requirements.txt依赖..."
-    pip install -r requirements.txt --timeout 30
-}
+# 检查依赖（可通过环境变量跳过）
+if [ "$SKIP_DEPENDENCY_CHECK" != "1" ]; then
+    echo "🔍 检查依赖..."
+    echo "📦 安装项目包（开发模式）..."
+    pip install -e . --no-deps --timeout 30 || {
+        echo "⚠️  项目包安装失败，尝试仅安装requirements.txt依赖..."
+        pip install -r requirements.txt --timeout 30
+    }
 
-# 安装FastAPI相关依赖
-echo "📦 确保安装FastAPI依赖..."
-pip install fastapi uvicorn --timeout 30
+    # 安装FastAPI相关依赖
+    echo "📦 确保安装FastAPI依赖..."
+    pip install fastapi uvicorn --timeout 30
+else
+    echo "⏩ 跳过依赖检查（快速模式）"
+fi
 
 # 设置环境变量
 export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 
 # 端口配置 - 使用不同的默认端口避免冲突
 BACKEND_PORT=${BACKEND_PORT:-8000}
+
+# 预启动数据库连接检查
+check_database_connection() {
+    echo "🔍 检查数据库连接..."
+    python3 -c "
+import sys
+import os
+sys.path.append('.')
+try:
+    from backend.services.database_service import init_database, get_supabase
+    import asyncio
+    
+    async def test_db():
+        await init_database()
+        client = get_supabase()
+        # 简单测试查询
+        response = client.table('user_profile').select('id', count='exact').limit(1).execute()
+        print('✅ 数据库连接测试成功')
+        return True
+    
+    result = asyncio.run(test_db())
+    if not result:
+        raise Exception('数据库连接失败')
+except Exception as e:
+    print(f'❌ 数据库连接测试失败: {e}')
+    print('💡 请检查环境变量和数据库配置')
+    sys.exit(1)
+"
+    if [ $? -ne 0 ]; then
+        echo "❌ 数据库连接测试失败，停止启动"
+        exit 1
+    fi
+}
 
 # 检查服务是否已经运行
 check_service_running() {
@@ -105,6 +142,32 @@ check_and_clean_port() {
     fi
 }
 
+# 服务健康检查
+wait_for_service() {
+    local port=$1
+    local max_attempts=30
+    local attempt=1
+    
+    echo "⏳ 等待服务启动..."
+    while [ $attempt -le $max_attempts ]; do
+        if curl -s http://localhost:${port}/health >/dev/null 2>&1 || curl -s http://localhost:${port}/ >/dev/null 2>&1; then
+            echo "✅ 服务启动成功！"
+            echo "🌐 访问地址: http://localhost:${port}"
+            echo "📖 API文档: http://localhost:${port}/docs"
+            return 0
+        fi
+        echo "   尝试 $attempt/$max_attempts - 等待服务响应..."
+        sleep 2
+        attempt=$((attempt + 1))
+    done
+    
+    echo "❌ 服务启动超时，请检查日志"
+    return 1
+}
+
+# 执行预检查
+check_database_connection
+
 # 检查和清理端口
 check_and_clean_port $BACKEND_PORT
 
@@ -118,5 +181,22 @@ echo "💡 使用不同端口: BACKEND_PORT=8001 $0"
 echo "按 Ctrl+C 停止服务"
 echo ""
 
-# 使用统一的启动方式
-python backend/main.py comprehensive --port ${BACKEND_PORT} 
+# 使用统一的启动方式，并添加后台运行选项
+if [ "$1" = "--background" ]; then
+    echo "🚀 后台启动服务..."
+    nohup python backend/main.py comprehensive --port ${BACKEND_PORT} > backend.log 2>&1 &
+    echo $! > backend.pid
+    sleep 3
+    wait_for_service $BACKEND_PORT
+    if [ $? -eq 0 ]; then
+        echo "✅ 后端服务已在后台启动，PID: $(cat backend.pid)"
+        echo "📋 查看日志: tail -f backend.log"
+        echo "🛑 停止服务: kill $(cat backend.pid) && rm backend.pid"
+    else
+        echo "❌ 后端服务启动失败"
+        exit 1
+    fi
+else
+    # 前台启动
+    python backend/main.py comprehensive --port ${BACKEND_PORT}
+fi 

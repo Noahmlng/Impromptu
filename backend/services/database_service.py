@@ -36,35 +36,32 @@ SUPABASE_URL = os.getenv('SUPABASE_URL', 'https://anxbbsrnjgmotxzysqwf.supabase.
 SUPABASE_SERVICE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
 SUPABASE_KEY = os.getenv('SUPABASE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFueGJic3Juamdtb3R4enlzcXdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MDY0OTIsImV4cCI6MjA2NTk4MjQ5Mn0.a0t-pgH-Z2Fbs6JuMNWX8_kpqkQsBag3-COAUZVF6-0')
 
-# 全局Supabase客户端
-supabase: Optional[Client] = None
-
-async def init_database():
-    """初始化数据库连接"""
-    global supabase
+def get_supabase() -> Client:
+    """获取Supabase客户端实例 - 简化版本，无需初始化"""
     try:
         # 使用service role key来绕过RLS策略，允许后端直接操作数据库
         if SUPABASE_SERVICE_KEY:
-            supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-            print("✅ 使用Service Role Key连接数据库")
+            return create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
         else:
-            supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-            print("⚠️ 使用Anon Key连接数据库（建议使用Service Role Key）")
-        print("✅ Supabase数据库连接初始化成功")
+            return create_client(SUPABASE_URL, SUPABASE_KEY)
     except Exception as e:
-        print(f"❌ 数据库连接初始化失败: {e}")
+        print(f"❌ 数据库连接失败: {e}")
+        raise e
+
+# 为了兼容性，保留这些函数但简化实现
+async def init_database():
+    """保留兼容性 - 实际上Supabase客户端不需要显式初始化"""
+    try:
+        client = get_supabase()
+        print("✅ Supabase数据库连接验证成功")
+        return client
+    except Exception as e:
+        print(f"❌ 数据库连接验证失败: {e}")
         raise e
 
 async def close_database():
-    """关闭数据库连接"""
-    # Supabase客户端无需显式关闭
+    """保留兼容性 - Supabase客户端无需显式关闭"""
     print("✅ 数据库连接已关闭")
-
-def get_supabase() -> Client:
-    """获取Supabase客户端实例"""
-    if supabase is None:
-        raise Exception("数据库未初始化，请先调用 init_database()")
-    return supabase
 
 class DatabaseService:
     """数据库服务基类"""
@@ -272,22 +269,4 @@ class UserTagsDB:
             if result:
                 saved_tags.append(result)
         
-        return saved_tags
-
-# 数据库服务实例 - 延迟初始化
-db_service = None
-user_profile_db = None
-user_metadata_db = None
-user_tags_db = None
-
-def get_database_services():
-    """获取数据库服务实例，如果不存在则创建"""
-    global db_service, user_profile_db, user_metadata_db, user_tags_db
-    
-    if db_service is None:
-        db_service = DatabaseService()
-        user_profile_db = UserProfileDB()
-        user_metadata_db = UserMetadataDB()
-        user_tags_db = UserTagsDB()
-    
-    return db_service, user_profile_db, user_metadata_db, user_tags_db 
+        return saved_tags 

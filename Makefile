@@ -65,19 +65,19 @@ dev-all: ## 开发模式 - 同时启动前端和后端 (自动清理端口)
 	@echo "🧹 自动清理端口冲突..."
 	@bash scripts/setup/manage_ports.sh clean || true
 	@sleep 1
-	@echo "正在启动后端服务 (后台运行)..."
-	@bash scripts/setup/start_backend.sh &
-	@sleep 5
+	@echo "🔍 检查数据库连接和启动后端服务..."
+	@bash scripts/setup/start_backend.sh --background
+	@sleep 3
 	@echo "正在启动前端服务..."
 	@bash scripts/setup/start_frontend.sh
 
-dev: ## 开发模式（自动清理端口+启动服务）
-	@echo "⚡ 开发模式快速启动（含端口清理）"
+dev: ## 开发模式（自动清理端口+启动服务+健康检查）
+	@echo "⚡ 开发模式快速启动（含端口清理和健康检查）"
 	@make clean-ports
 	@make dev-all
 
-dev-backend: ## 仅开发模式启动后端 (含端口清理)
-	@echo "🌐 开发模式 - 仅后端（含端口清理）..."
+dev-backend: ## 仅开发模式启动后端 (含数据库检查+端口清理)
+	@echo "🌐 开发模式 - 仅后端（含数据库检查+端口清理）..."
 	@bash scripts/setup/manage_ports.sh clean || true
 	@sleep 1
 	@bash scripts/setup/start_backend.sh
@@ -87,6 +87,22 @@ dev-frontend: ## 仅开发模式启动前端 (含端口清理)
 	@bash scripts/setup/manage_ports.sh clean || true
 	@sleep 1  
 	@bash scripts/setup/start_frontend.sh
+
+# 新增命令
+dev-quick: ## 快速开发模式（跳过依赖检查，仅启动服务）
+	@echo "⚡ 快速开发模式（跳过检查）"
+	@bash scripts/setup/manage_ports.sh clean || true
+	@sleep 1
+	@SKIP_DEPENDENCY_CHECK=1 bash scripts/setup/start_backend.sh --background
+	@sleep 3
+	@bash scripts/setup/start_frontend.sh
+
+health-check: ## 检查所有服务健康状态
+	@echo "🏥 服务健康检查..."
+	@echo "📊 后端API健康状态:"
+	@curl -s http://localhost:8000/health | python3 -m json.tool 2>/dev/null || echo "❌ 后端服务未响应"
+	@echo "\n📊 前端服务状态:"
+	@curl -s http://localhost:3000/ >/dev/null 2>&1 && echo "✅ 前端服务正常" || echo "❌ 前端服务未响应"
 
 # ===================
 # 测试命令

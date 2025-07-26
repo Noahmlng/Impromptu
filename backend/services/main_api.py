@@ -13,6 +13,7 @@ import uvicorn
 import os
 import sys
 from contextlib import asynccontextmanager
+import datetime
 
 # 添加项目根目录到Python路径
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -27,14 +28,23 @@ from backend.services.database_service import init_database, close_database
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """应用生命周期管理"""
-    # 启动时初始化
+    """应用生命周期管理 - 简化版本"""
+    # 启动时验证
     print("🚀 启动社交匹配系统API服务器")
     print("=" * 50)
-    await init_database()
+    
+    # 简单验证数据库连接（可选）
+    try:
+        from backend.services.database_service import get_supabase
+        client = get_supabase()
+        print("✅ 数据库连接验证成功")
+    except Exception as e:
+        print(f"⚠️ 数据库连接验证失败: {e}")
+        # 不中断启动，让服务继续运行
+    
     yield
-    # 关闭时清理
-    await close_database()
+    
+    # 关闭时清理（实际上Supabase客户端不需要显式清理）
     print("👋 API服务器已关闭")
 
 # 创建FastAPI应用
@@ -44,6 +54,38 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+# 健康检查端点
+@app.get("/health")
+async def health_check():
+    """健康检查端点"""
+    try:
+        from backend.services.database_service import get_supabase
+        client = get_supabase()
+        # 简单的数据库连接测试
+        response = client.table('user_profile').select('id', count='exact').limit(1).execute()
+        return {
+            "status": "healthy",
+            "database": "connected",
+            "timestamp": datetime.datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        return {
+            "status": "unhealthy", 
+            "database": "disconnected",
+            "error": str(e),
+            "timestamp": datetime.datetime.utcnow().isoformat()
+        }
+
+@app.get("/")
+async def root():
+    """根路径"""
+    return {
+        "message": "Impromptu 社交匹配系统API",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "health": "/health"
+    }
 
 # 配置CORS
 app.add_middleware(
@@ -60,20 +102,6 @@ app.include_router(user_router, prefix="/api/users", tags=["用户"])
 app.include_router(tag_router, prefix="/api/tags", tags=["标签"])
 app.include_router(matching_router, prefix="/api/match", tags=["匹配"])
 app.include_router(metadata_router, prefix="/api/metadata", tags=["元数据"])
-
-# 根路径健康检查
-@app.get("/")
-async def root():
-    return {"message": "社交匹配系统API正在运行", "version": "1.0.0"}
-
-@app.get("/health")
-async def health_check():
-    """系统健康检查"""
-    return {
-        "status": "healthy",
-        "message": "社交匹配系统API运行正常",
-        "version": "1.0.0"
-    }
 
 # 全局异常处理
 @app.exception_handler(Exception)
