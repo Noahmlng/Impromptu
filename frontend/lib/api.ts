@@ -116,6 +116,13 @@ export interface MatchSearchResponse {
   data: {
     matched_users: MatchUser[]
     total: number
+    processed_count?: number
+    max_process_count?: number
+    performance?: {
+      total_time_seconds: number
+      avg_time_per_user: number
+      users_per_second: number
+    }
     query: MatchSearchRequest
   }
 }
@@ -149,7 +156,7 @@ export interface ApiResponse<T> {
 export class ApiClient {
   private baseURL: string
   private token: string | null = null
-  private defaultTimeout = 10000 // 10秒超时
+  private defaultTimeout = 30000 // 30秒超时，适应复杂匹配分析
 
   constructor() {
     // 根据环境设置API基础URL
