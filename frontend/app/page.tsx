@@ -1046,12 +1046,15 @@ export default function LandingPage() {
               </div>
               
               {/* 右侧：多维度分析图表 - 替换为GIF */}
-              <div className="rounded-3xl aspect-[4/3] overflow-hidden">
-                <img 
-                  src="/loading.gif" 
-                  alt={language === 'zh' ? '多维度分析演示' : 'Multi-dimensional Analysis Demo'}
-                  className="w-full h-full object-cover rounded-3xl"
-                />
+              <div className="inline-block">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg" style={{boxShadow: '0 10px 25px rgba(59, 130, 246, 0.15)'}}>
+                  <img 
+                    src="/loading.gif" 
+                    alt={language === 'zh' ? '多维度分析演示' : 'Multi-dimensional Analysis Demo'}
+                    className="max-w-full h-auto"
+                    style={{borderRadius: '20px', clipPath: 'inset(2px)'}}
+                  />
+                </div>
               </div>
             </div>
 
