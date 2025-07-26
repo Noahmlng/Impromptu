@@ -7,7 +7,7 @@
 """
 
 from fastapi import APIRouter, HTTPException, Depends, Header
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import Optional, Dict
 import jwt
 import datetime
@@ -25,13 +25,13 @@ router = APIRouter()
 
 # Pydantic模型
 class RegisterRequest(BaseModel):
-    email: EmailStr
+    email: str
     password: str
     display_name: str
     avatar_url: Optional[str] = None
 
 class LoginRequest(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 class AuthResponse(BaseModel):

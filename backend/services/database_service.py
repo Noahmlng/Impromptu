@@ -248,8 +248,20 @@ class UserTagsDB:
         
         return saved_tags
 
-# 数据库服务实例
-db_service = DatabaseService()
-user_profile_db = UserProfileDB()
-user_metadata_db = UserMetadataDB()
-user_tags_db = UserTagsDB() 
+# 数据库服务实例 - 延迟初始化
+db_service = None
+user_profile_db = None
+user_metadata_db = None
+user_tags_db = None
+
+def get_database_services():
+    """获取数据库服务实例，如果不存在则创建"""
+    global db_service, user_profile_db, user_metadata_db, user_tags_db
+    
+    if db_service is None:
+        db_service = DatabaseService()
+        user_profile_db = UserProfileDB()
+        user_metadata_db = UserMetadataDB()
+        user_tags_db = UserTagsDB()
+    
+    return db_service, user_profile_db, user_metadata_db, user_tags_db 
