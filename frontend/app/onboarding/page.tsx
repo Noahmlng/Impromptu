@@ -138,11 +138,11 @@ export default function OnboardingPage() {
       )
       
       if (response.success) {
-        setSearchResults(response.data)
+        setSearchResults(response.data.matched_users)
         setSuccessMessage(
           language === 'zh' 
-            ? `找到${response.data.length}个匹配用户！` 
-            : `Found ${response.data.length} matching users!`
+            ? `找到${response.data.matched_users.length}个匹配用户！` 
+            : `Found ${response.data.matched_users.length} matching users!`
         )
         
         setTimeout(() => setSuccessMessage(''), 3000)

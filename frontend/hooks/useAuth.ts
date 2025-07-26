@@ -86,6 +86,14 @@ export function useAuth(requireAuth: boolean = true) {
       console.log('🔍 [useAuth] backendUser data:', backendUser)
       console.log('🔍 [useAuth] isInitialized:', isInitialized.current)
       
+      // 对于可选认证模式，如果没有token，直接结束loading状态
+      if (!requireAuth && !authToken && !backendUser) {
+        console.log('ℹ️ [useAuth] Optional auth mode and no auth state found, skipping verification')
+        setIsAuthLoading(false)
+        isInitialized.current = true
+        return
+      }
+      
       setIsAuthLoading(true)
       
       try {
@@ -100,7 +108,7 @@ export function useAuth(requireAuth: boolean = true) {
             // 使用快速验证，只检查JWT token有效性
             const fastVerificationPromise = auth.verifyTokenFast()
             const timeoutPromise = new Promise((_, reject) => {
-              setTimeout(() => reject(new Error('Fast verification timeout')), 5000) // 5秒超时
+              setTimeout(() => reject(new Error('Fast verification timeout')), 3000) // 缩短超时时间到3秒
             })
             
             const fastResponse = await Promise.race([
@@ -147,46 +155,44 @@ export function useAuth(requireAuth: boolean = true) {
           } catch (error: any) {
             console.error('❌ [useAuth] Fast verification error:', error)
             
-            // 检查是否是超时错误
-            if (error.message && error.message.includes('timeout')) {
-              console.log('⏰ [useAuth] Fast verification timeout, falling back to full verification')
-              
-              // 快速验证超时，回退到完整验证（但有更短的超时时间）
-              try {
-                const fullVerificationPromise = auth.getCurrentUser()
-                const shortTimeoutPromise = new Promise((_, reject) => {
-                  setTimeout(() => reject(new Error('Full verification timeout')), 8000) // 8秒超时
-                })
+            // 对于可选认证模式，验证失败时不应该阻塞用户
+            if (!requireAuth) {
+              console.log('ℹ️ [useAuth] Optional auth mode - verification failed but allowing access')
+              logout() // 清除无效的认证状态
+              // 不跳转到登录页面
+            } else {
+              // 检查是否是超时错误
+              if (error.message && error.message.includes('timeout')) {
+                console.log('⏰ [useAuth] Fast verification timeout, falling back to full verification')
                 
-                const response = await Promise.race([
-                  fullVerificationPromise,
-                  shortTimeoutPromise
-                ]) as any
-                
-                if (response.success && response.data) {
-                  console.log('✅ [useAuth] Fallback verification successful')
-                  setBackendUser(response.data)
-                } else {
-                  console.log('❌ [useAuth] Fallback verification failed')
-                  logout()
+                // 快速验证超时，回退到完整验证（但有更短的超时时间）
+                try {
+                  const fullVerificationPromise = auth.getCurrentUser()
+                  const shortTimeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Full verification timeout')), 5000) // 5秒超时
+                  })
                   
-                  if (requireAuth) {
+                  const response = await Promise.race([
+                    fullVerificationPromise,
+                    shortTimeoutPromise
+                  ]) as any
+                  
+                  if (response.success && response.data) {
+                    console.log('✅ [useAuth] Fallback verification successful')
+                    setBackendUser(response.data)
+                  } else {
+                    console.log('❌ [useAuth] Fallback verification failed')
+                    logout()
                     router.push('/login')
                   }
-                }
-              } catch (fallbackError: any) {
-                console.error('❌ [useAuth] Fallback verification also failed:', fallbackError)
-                logout()
-                
-                if (requireAuth) {
+                } catch (fallbackError: any) {
+                  console.error('❌ [useAuth] Fallback verification also failed:', fallbackError)
+                  logout()
                   router.push('/login')
                 }
-              }
-            } else {
-              // 其他错误，清除认证状态
-              logout()
-              
-              if (requireAuth) {
+              } else {
+                // 其他错误，清除认证状态
+                logout()
                 router.push('/login')
               }
             }
@@ -201,23 +207,28 @@ export function useAuth(requireAuth: boolean = true) {
       } catch (error: any) {
         console.error('❌ [useAuth] Auth check failed:', error)
         
-        // 提供更具体的错误信息
-        let errorMessage = '认证检查失败'
-        if (error?.message) {
-          if (error.message.includes('Network') || error.message.includes('网络')) {
-            errorMessage = '网络连接失败，请检查网络设置'
-          } else if (error.message.includes('timeout') || error.message.includes('超时')) {
-            errorMessage = '连接超时，请稍后重试'
-          } else if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-            errorMessage = '登录已过期，正在跳转到登录页面'
-          } else if (error.message.includes('500')) {
-            errorMessage = '服务器错误，请稍后重试'
+        // 对于可选认证模式，即使出错也应该允许访问
+        if (!requireAuth) {
+          console.log('ℹ️ [useAuth] Optional auth mode - error occurred but allowing access')
+          logout() // 清除可能有问题的认证状态
+          // 不显示错误信息，不跳转到登录页面
+        } else {
+          // 提供更具体的错误信息
+          let errorMessage = '认证检查失败'
+          if (error?.message) {
+            if (error.message.includes('Network') || error.message.includes('网络')) {
+              errorMessage = '网络连接失败，请检查网络设置'
+            } else if (error.message.includes('timeout') || error.message.includes('超时')) {
+              errorMessage = '连接超时，请稍后重试'
+            } else if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+              errorMessage = '登录已过期，正在跳转到登录页面'
+            } else if (error.message.includes('500')) {
+              errorMessage = '服务器错误，请稍后重试'
+            }
           }
-        }
-        
-        setError(errorMessage)
-        
-        if (requireAuth) {
+          
+          setError(errorMessage)
+          
           console.log('🔄 [useAuth] Redirecting to login (auth check error)')
           // 对于401错误，立即跳转；其他错误延迟跳转给用户时间看到错误信息
           const delay = (error?.message && (error.message.includes('401') || error.message.includes('Unauthorized'))) ? 100 : 2000

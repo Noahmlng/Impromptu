@@ -54,21 +54,23 @@ export default function LandingPage() {
     }
   }, [isAuthenticated, isLoading, router])
 
-  // Show loading during auth check
-  if (isLoading) {
+  // 优化loading显示逻辑：只有在明确检查认证状态时才显示loading
+  // 对于可选认证模式，不应该因为loading而阻塞页面显示
+  if (isLoading && isAuthenticated) {
+    // 只有在已认证但还在loading时才显示loading（准备跳转）
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-300">
-            {language === 'zh' ? '加载中...' : 'Loading...'}
+            {language === 'zh' ? '正在跳转...' : 'Redirecting...'}
           </p>
         </div>
       </div>
     )
   }
 
-  // 如果已认证，显示简单的跳转提示而不是完整页面
+  // 如果用户已认证但页面还没跳转，显示跳转提示
   if (isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -81,6 +83,9 @@ export default function LandingPage() {
       </div>
     )
   }
+
+  // 对于未认证用户或loading状态下，直接显示landing page内容
+  // 这确保了即使在loading时，用户也能看到页面内容
 
   const features = [
     {
@@ -1196,7 +1201,7 @@ export default function LandingPage() {
                   ))}
                 </div>
                 <p className="text-gray-600 dark:text-gray-300 mb-6 italic">
-                  "{testimonial.content}"
+                  &ldquo;{testimonial.content}&rdquo;
                 </p>
                 <div>
                   <div className="font-semibold text-gray-900 dark:text-white">
