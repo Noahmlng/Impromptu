@@ -3,11 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/lib/store'
-<<<<<<< HEAD
 import { Heart, Users, Search, Plus, ArrowRight, Clock, CheckCircle, Youtube, Linkedin, Instagram } from 'lucide-react'
-=======
-import { Heart, Users, Search, Plus, ArrowRight, Clock, CheckCircle } from 'lucide-react'
->>>>>>> origin/main
 
 export default function HomePage() {
   const { themeMode, language, user, setUser } = useAppStore()
@@ -25,7 +21,6 @@ export default function HomePage() {
   }, [user, setUser])
 
   return (
-<<<<<<< HEAD
     <div className="flex flex-col min-h-screen">
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center space-x-3">
@@ -48,25 +43,11 @@ export default function HomePage() {
               />
             </svg>
           </span>
-=======
-    <div className="max-w-6xl mx-auto space-y-8">
-      <div className="text-center space-y-4">
-        <div className="flex items-center justify-center space-x-3">
-          {themeMode === 'romantic' ? (
-            <Heart className="h-12 w-12 text-romantic-pink-500" />
-          ) : (
-            <Users className="h-12 w-12 text-miami-blue-500" />
-          )}
->>>>>>> origin/main
           <h1 className="text-4xl font-bold">
             {language === 'zh' ? '智能匹配中心' : 'AI Matching Center'}
           </h1>
         </div>
-<<<<<<< HEAD
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto mt-[-20px]">
-=======
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
->>>>>>> origin/main
           {language === 'zh' 
             ? '通过先进的AI算法，为您找到最合适的伙伴。'
             : 'Find your perfect match with advanced AI algorithms.'
@@ -74,11 +55,7 @@ export default function HomePage() {
         </p>
       </div>
 
-<<<<<<< HEAD
       <div className="flex gap-4 items-center justify-between mt-[50px] mb-5">
-=======
-      <div className="flex gap-4 items-center justify-between">
->>>>>>> origin/main
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
@@ -112,7 +89,6 @@ export default function HomePage() {
           </Button>
         </div>
       </div>
-<<<<<<< HEAD
       <footer className="w-full mt-auto border-t bg-background text-foreground">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-start py-12 gap-8 justify-between">
           {/* 左侧logo和社交icon */}
@@ -178,8 +154,6 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
-=======
->>>>>>> origin/main
     </div>
   )
 } 
