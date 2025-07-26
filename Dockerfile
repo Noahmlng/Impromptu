@@ -1,22 +1,4 @@
-# 多阶段构建：第一阶段构建前端
-FROM node:18-alpine AS frontend-builder
-
-# 设置工作目录
-WORKDIR /app/frontend
-
-# 复制前端包管理文件
-COPY frontend/package*.json ./
-
-# 安装前端依赖
-RUN npm ci --only=production
-
-# 复制前端代码
-COPY frontend/ .
-
-# 构建前端（创建静态HTML页面）
-RUN npm run build 2>/dev/null || echo "前端构建跳过"
-
-# 第二阶段：Python应用
+# 使用官方 Python 3.9 镜像
 FROM python:3.9-slim
 
 # 设置工作目录
@@ -43,12 +25,8 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # 复制项目文件
 COPY . .
 
-# 创建前端目录
-RUN mkdir -p frontend
-
-# 从第一阶段复制构建好的前端文件（如果存在）
-COPY --from=frontend-builder /app/frontend/public ./frontend/public/
-COPY --from=frontend-builder /app/frontend/out ./frontend/out/
+# 创建必要的前端目录结构
+RUN mkdir -p frontend/public frontend/out
 
 # 创建必要的目录
 RUN mkdir -p data/models data/processed data/results logs

@@ -37,9 +37,11 @@ docs/
 CURSOR_PUSH_GUIDE.md
 QUICK_START.md
 
-# 前端相关（后端部署不需要）
-frontend/
+# Node.js 相关
 node_modules/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
 
 # 构建产物
 *.egg-info/
