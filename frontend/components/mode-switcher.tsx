@@ -22,11 +22,13 @@ export function ModeSwitcher() {
   }
 
   const handleRomanticClick = () => {
+    console.log('Switching to romantic mode') // Debug log
     setThemeMode('romantic')
     router.push('/home')
   }
 
   const handleTeamClick = () => {
+    console.log('Switching to team mode') // Debug log
     setThemeMode('team')
     router.push('/home')
   }

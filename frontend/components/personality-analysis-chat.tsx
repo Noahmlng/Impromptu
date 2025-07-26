@@ -4,11 +4,12 @@ import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Card, CardContent } from '@/components/ui/card'
 import { useAppStore } from '@/lib/store'
 import { useOpenAI } from '@/hooks/useOpenAI'
 import { useSpeech } from '@/hooks/useSpeech'
 import { profile } from '@/lib/api'
-import { Send, Mic, MicOff, Volume2, VolumeX, Brain, Loader2, Download } from 'lucide-react'
+import { Send, Mic, MicOff, Volume2, VolumeX, Brain, Loader2, Download, Sparkles, User, Bot } from 'lucide-react'
 
 interface Message {
   id: string
@@ -34,11 +35,22 @@ interface PersonalityAnalysis {
   communication_style: string
   values: string[]
   interests: string[]
-  ideal_partner_traits: string[]
-  match_preferences: {
+  // Romantic mode specific fields
+  ideal_partner_traits?: string[]
+  match_preferences?: {
     age_range: string
     personality_compatibility: string
     shared_interests_importance: number
+  }
+  // Team mode specific fields
+  professional_skills?: string[]
+  work_experience_level?: string
+  ideal_teammate_traits?: string[]
+  collaboration_preferences?: {
+    project_type: string
+    team_size_preference: string
+    leadership_style: string
+    communication_preference: string
   }
   analysis_summary: string
   recommendations: string[]
@@ -46,6 +58,9 @@ interface PersonalityAnalysis {
 
 export function PersonalityAnalysisChat({ onStageChange, currentStage }: PersonalityAnalysisChatProps) {
   const { language, user, themeMode } = useAppStore()
+  
+  // Debug log to confirm themeMode
+  console.log('PersonalityAnalysisChat - themeMode:', themeMode)
   const [messages, setMessages] = useState<Message[]>([])
   const [inputText, setInputText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -299,8 +314,9 @@ Please continue the conversation based on the user's response, diving deeper int
     setAnalysisProgress(95)
 
     try {
-      const analysisPrompt = language === 'zh' 
-        ? `基于以下对话历史，请生成一个详细的人格分析报告，格式为JSON：
+      const analysisPrompt = themeMode === 'romantic' 
+        ? (language === 'zh' 
+            ? `基于以下对话历史，请生成一个详细的恋爱人格分析报告，格式为JSON：
 
 对话历史：
 ${history.join('\n')}
@@ -317,16 +333,16 @@ ${history.join('\n')}
   "communication_style": "简要描述用户的沟通风格",
   "values": ["价值观1", "价值观2", "价值观3"],
   "interests": ["兴趣1", "兴趣2", "兴趣3"],
-  "ideal_partner_traits": ["理想伙伴特质1", "理想伙伴特质2", "理想伙伴特质3"],
+  "ideal_partner_traits": ["理想恋爱伙伴特质1", "理想恋爱伙伴特质2", "理想恋爱伙伴特质3"],
   "match_preferences": {
     "age_range": "年龄偏好范围",
     "personality_compatibility": "性格兼容性偏好",
     "shared_interests_importance": 数值(1-10)
   },
-  "analysis_summary": "详细的人格分析总结",
-  "recommendations": ["匹配建议1", "匹配建议2", "匹配建议3"]
+  "analysis_summary": "详细的恋爱人格分析总结",
+  "recommendations": ["恋爱匹配建议1", "恋爱匹配建议2", "恋爱匹配建议3"]
 }`
-        : `Based on the following conversation history, please generate a detailed personality analysis report in JSON format:
+            : `Based on the following conversation history, please generate a detailed romantic personality analysis report in JSON format:
 
 Conversation History:
 ${history.join('\n')}
@@ -343,15 +359,74 @@ Please return a JSON object in the following format:
   "communication_style": "Brief description of user's communication style",
   "values": ["value1", "value2", "value3"],
   "interests": ["interest1", "interest2", "interest3"],
-  "ideal_partner_traits": ["ideal trait1", "ideal trait2", "ideal trait3"],
+  "ideal_partner_traits": ["ideal romantic partner trait1", "ideal romantic partner trait2", "ideal romantic partner trait3"],
   "match_preferences": {
     "age_range": "preferred age range",
     "personality_compatibility": "personality compatibility preference",
     "shared_interests_importance": number(1-10)
   },
-  "analysis_summary": "Detailed personality analysis summary",
-  "recommendations": ["recommendation1", "recommendation2", "recommendation3"]
+  "analysis_summary": "Detailed romantic personality analysis summary",
+  "recommendations": ["romantic matching recommendation1", "romantic matching recommendation2", "romantic matching recommendation3"]
+}`)
+        : (language === 'zh' 
+            ? `基于以下对话历史，请生成一个详细的团队合作技能分析报告，格式为JSON：
+
+对话历史：
+${history.join('\n')}
+
+请返回以下格式的JSON对象：
+{
+  "personality_traits": {
+    "openness": 数值(1-10),
+    "conscientiousness": 数值(1-10),
+    "extraversion": 数值(1-10),
+    "agreeableness": 数值(1-10),
+    "neuroticism": 数值(1-10)
+  },
+  "communication_style": "简要描述用户的沟通风格",
+  "values": ["价值观1", "价值观2", "价值观3"],
+  "interests": ["兴趣1", "兴趣2", "兴趣3"],
+  "professional_skills": ["专业技能1", "专业技能2", "专业技能3"],
+  "work_experience_level": "工作经验水平描述",
+  "ideal_teammate_traits": ["理想队友特质1", "理想队友特质2", "理想队友特质3"],
+  "collaboration_preferences": {
+    "project_type": "偏好的项目类型",
+    "team_size_preference": "偏好的团队规模",
+    "leadership_style": "领导风格偏好",
+    "communication_preference": "沟通方式偏好"
+  },
+  "analysis_summary": "详细的团队合作技能分析总结",
+  "recommendations": ["团队匹配建议1", "团队匹配建议2", "团队匹配建议3"]
 }`
+            : `Based on the following conversation history, please generate a detailed team collaboration skills analysis report in JSON format:
+
+Conversation History:
+${history.join('\n')}
+
+Please return a JSON object in the following format:
+{
+  "personality_traits": {
+    "openness": number(1-10),
+    "conscientiousness": number(1-10),
+    "extraversion": number(1-10),
+    "agreeableness": number(1-10),
+    "neuroticism": number(1-10)
+  },
+  "communication_style": "Brief description of user's communication style",
+  "values": ["value1", "value2", "value3"],
+  "interests": ["interest1", "interest2", "interest3"],
+  "professional_skills": ["professional skill1", "professional skill2", "professional skill3"],
+  "work_experience_level": "Description of work experience level",
+  "ideal_teammate_traits": ["ideal teammate trait1", "ideal teammate trait2", "ideal teammate trait3"],
+  "collaboration_preferences": {
+    "project_type": "preferred project type",
+    "team_size_preference": "preferred team size",
+    "leadership_style": "leadership style preference",
+    "communication_preference": "communication method preference"
+  },
+  "analysis_summary": "Detailed team collaboration skills analysis summary",
+  "recommendations": ["team matching recommendation1", "team matching recommendation2", "team matching recommendation3"]
+}`)
 
       const analysisResponse = await sendMessage(analysisPrompt)
       
@@ -367,9 +442,13 @@ Please return a JSON object in the following format:
           
           const completionMessage: Message = {
             id: (Date.now() + 2).toString(),
-            content: language === 'zh' 
-              ? '太棒了！我已经完成了对你的人格分析。分析报告已经生成，你可以查看详细结果并下载报告。这些信息将帮助我们为你提供更精准的匹配建议。'
-              : 'Excellent! I have completed your personality analysis. The analysis report has been generated, and you can view the detailed results and download the report. This information will help us provide you with more accurate matching suggestions.',
+            content: themeMode === 'romantic' 
+              ? (language === 'zh' 
+                  ? '太棒了！我已经完成了对你的恋爱人格分析。分析报告已经生成，包含了你的性格特征、理想伙伴特质和恋爱偏好等信息。你可以查看详细结果并下载报告。这些信息将帮助我们为你提供更精准的恋爱匹配建议。'
+                  : 'Excellent! I have completed your romantic personality analysis. The analysis report has been generated, including your personality traits, ideal partner qualities, and romantic preferences. You can view the detailed results and download the report. This information will help us provide you with more accurate romantic matching suggestions.')
+              : (language === 'zh' 
+                  ? '太棒了！我已经完成了对你的团队合作技能分析。分析报告已经生成，包含了你的专业技能、工作风格、理想队友特质和合作偏好等信息。你可以查看详细结果并下载报告。这些信息将帮助我们为你提供更精准的团队匹配建议。'
+                  : 'Excellent! I have completed your team collaboration skills analysis. The analysis report has been generated, including your professional skills, work style, ideal teammate traits, and collaboration preferences. You can view the detailed results and download the report. This information will help us provide you with more accurate team matching suggestions.'),
             sender: 'ai',
             timestamp: new Date(),
             type: 'text'
@@ -449,167 +528,288 @@ Please return a JSON object in the following format:
   }
 
   return (
-    <div className="flex flex-col h-full max-h-[700px] bg-background">
-      {/* Progress Bar */}
+    <div className="flex flex-col h-full bg-gradient-to-br from-background via-background to-muted/20">
+      {/* Enhanced Progress Bar */}
       {currentStage === 'analysis' && (
-        <div className="p-4 border-b bg-muted/30">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">
-              {language === 'zh' ? '分析进度' : 'Analysis Progress'}
-            </span>
-            <span className="text-sm text-muted-foreground">
-              {Math.round(analysisProgress)}%
-            </span>
+        <div className={`p-6 border-b bg-gradient-to-r ${
+          themeMode === 'romantic' 
+            ? 'from-pink-50 to-purple-50 dark:from-pink-900/10 dark:to-purple-900/10 border-pink-200/50' 
+            : 'from-blue-50 to-cyan-50 dark:from-blue-900/10 dark:to-cyan-900/10 border-blue-200/50'
+        } backdrop-blur-sm`}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-3">
+              <div className={`p-2 rounded-full ${
+                themeMode === 'romantic' ? 'bg-pink-500/10' : 'bg-blue-500/10'
+              }`}>
+                <Brain className={`h-5 w-5 ${
+                  themeMode === 'romantic' ? 'text-pink-600' : 'text-blue-600'
+                }`} />
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg">
+                  {language === 'zh' ? '分析进度' : 'Analysis Progress'}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {language === 'zh' ? 'AI正在深入了解你的个性特征' : 'AI is getting to know your personality traits'}
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold">{Math.round(analysisProgress)}%</div>
+              <div className="text-xs text-muted-foreground">
+                {language === 'zh' ? '已完成' : 'Completed'}
+              </div>
+            </div>
           </div>
-          <div className="w-full bg-muted rounded-full h-2">
-            <div 
-              className={`h-2 rounded-full transition-all duration-500 ${themeMode === 'romantic' ? 'bg-romantic-pink-500' : 'bg-miami-blue-500'}`}
-              style={{ width: `${analysisProgress}%` }}
-            />
+          <div className="relative">
+            <div className="w-full bg-muted/50 rounded-full h-3 overflow-hidden">
+              <div 
+                className={`h-full rounded-full transition-all duration-1000 ease-out ${
+                  themeMode === 'romantic' 
+                    ? 'bg-gradient-to-r from-pink-500 to-purple-500' 
+                    : 'bg-gradient-to-r from-blue-500 to-cyan-500'
+                } shadow-sm`}
+                style={{ width: `${analysisProgress}%` }}
+              />
+            </div>
+            <Sparkles className={`absolute top-1/2 -translate-y-1/2 h-4 w-4 ${
+              themeMode === 'romantic' ? 'text-pink-500' : 'text-blue-500'
+            } animate-pulse`} style={{ left: `${Math.max(analysisProgress - 5, 0)}%` }} />
           </div>
         </div>
       )}
 
-      {/* Analysis Report */}
+      {/* Enhanced Analysis Complete Banner */}
       {finalAnalysis && currentStage === 'complete' && (
-        <div className="p-4 border-b bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20">
+        <div className="p-6 border-b bg-gradient-to-r from-green-50 via-emerald-50 to-teal-50 dark:from-green-900/20 dark:via-emerald-900/20 dark:to-teal-900/20 border-green-200/50">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Brain className="h-5 w-5 text-green-600" />
-              <span className="font-medium text-green-800 dark:text-green-200">
-                {language === 'zh' ? '人格分析完成！' : 'Personality Analysis Complete!'}
-              </span>
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-green-500/10 rounded-full">
+                <Brain className="h-8 w-8 text-green-600" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-green-800 dark:text-green-200 flex items-center space-x-2">
+                  <span>
+                    {language === 'zh' ? '人格分析完成！' : 'Personality Analysis Complete!'}
+                  </span>
+                  <Sparkles className="h-5 w-5 text-green-600" />
+                </h3>
+                <p className="text-green-700 dark:text-green-300 text-sm">
+                  {language === 'zh' 
+                    ? '你的个性档案已生成，匹配精度将大幅提升' 
+                    : 'Your personality profile has been generated, matching accuracy will be greatly improved'
+                  }
+                </p>
+              </div>
             </div>
             <Button
               onClick={downloadAnalysisReport}
-              size="sm"
-              variant="outline"
-              className="text-green-700 border-green-300 hover:bg-green-50"
+              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg"
             >
-              <Download className="h-4 w-4 mr-1" />
+              <Download className="h-4 w-4 mr-2" />
               {language === 'zh' ? '下载报告' : 'Download Report'}
             </Button>
           </div>
         </div>
       )}
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => (
+      {/* Messages Area with Enhanced Design */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        {messages.map((message, index) => (
           <div
             key={message.id}
-            className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+            className={`flex items-start ${message.sender === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in-up`}
+            style={{ animationDelay: `${index * 100}ms` }}
           >
-            <div className={`flex items-end space-x-2 max-w-[80%] ${
+            <div className={`flex items-start space-x-3 max-w-[85%] ${
               message.sender === 'user' ? 'flex-row-reverse space-x-reverse' : ''
             }`}>
-              {message.sender === 'ai' && (
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-                    🧠
-                  </AvatarFallback>
-                </Avatar>
-              )}
-              <div
-                className={`rounded-lg px-4 py-2 ${
-                  message.sender === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted'
-                }`}
-              >
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                <div className="flex items-center justify-between mt-1">
-                  <p className="text-xs opacity-70">
-                    {formatTime(message.timestamp)}
-                  </p>
-                  {message.type === 'voice' && (
-                    <Volume2 className="h-3 w-3 opacity-70" />
-                  )}
-                </div>
+              {/* Enhanced Avatar */}
+              <div className="flex-shrink-0">
+                {message.sender === 'ai' ? (
+                  <div className={`p-3 rounded-2xl shadow-lg ${
+                    themeMode === 'romantic' 
+                      ? 'bg-gradient-to-br from-pink-500 to-purple-600' 
+                      : 'bg-gradient-to-br from-blue-500 to-cyan-600'
+                  }`}>
+                    <Bot className="h-6 w-6 text-white" />
+                  </div>
+                ) : (
+                  <div className="p-3 rounded-2xl bg-gradient-to-br from-slate-600 to-slate-700 shadow-lg">
+                    <User className="h-6 w-6 text-white" />
+                  </div>
+                )}
               </div>
+
+              {/* Enhanced Message Bubble */}
+              <Card className={`shadow-xl border-0 ${
+                message.sender === 'user'
+                  ? 'bg-gradient-to-br from-primary to-primary/90 text-primary-foreground'
+                  : 'bg-gradient-to-br from-card to-card/90 border border-border/50'
+              } backdrop-blur-sm`}>
+                <CardContent className="p-4">
+                  <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                    {message.content}
+                  </p>
+                  <div className="flex items-center justify-between mt-3 pt-2 border-t border-current/10">
+                    <div className="text-xs opacity-70 flex items-center space-x-2">
+                      <span>{formatTime(message.timestamp)}</span>
+                      {message.type === 'voice' && (
+                        <div className="flex items-center space-x-1">
+                          <Volume2 className="h-3 w-3" />
+                          <span>{language === 'zh' ? '语音' : 'Voice'}</span>
+                        </div>
+                      )}
+                    </div>
+                    {message.sender === 'ai' && (
+                      <div className="flex items-center space-x-1 text-xs opacity-70">
+                        <Brain className="h-3 w-3" />
+                        <span>AI</span>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         ))}
         
+        {/* Enhanced Loading Indicator */}
         {isLoading && (
-          <div className="flex justify-start">
-            <div className="flex items-end space-x-2">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-                  🧠
-                </AvatarFallback>
-              </Avatar>
-              <div className="bg-muted rounded-lg px-4 py-2">
-                <div className="flex items-center space-x-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span className="text-sm">
-                    {language === 'zh' ? '思考中...' : 'Thinking...'}
-                  </span>
-                </div>
+          <div className="flex justify-start animate-fade-in">
+            <div className="flex items-start space-x-3 max-w-[85%]">
+              <div className={`p-3 rounded-2xl shadow-lg ${
+                themeMode === 'romantic' 
+                  ? 'bg-gradient-to-br from-pink-500 to-purple-600' 
+                  : 'bg-gradient-to-br from-blue-500 to-cyan-600'
+              }`}>
+                <Bot className="h-6 w-6 text-white" />
               </div>
+              <Card className="shadow-xl border-0 bg-gradient-to-br from-card to-card/90 border border-border/50 backdrop-blur-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-3">
+                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                    <span className="text-sm text-muted-foreground">
+                      {language === 'zh' ? 'Linker正在思考...' : 'Linker is thinking...'}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
+      {/* Enhanced Input Area */}
       {currentStage !== 'complete' && (
-        <div className="border-t p-4">
-          <div className="flex items-center space-x-2">
+        <div className={`border-t p-6 bg-gradient-to-r ${
+          themeMode === 'romantic' 
+            ? 'from-background via-pink-50/30 to-background' 
+            : 'from-background via-blue-50/30 to-background'
+        } backdrop-blur-sm`}>
+          <div className="flex items-center space-x-3">
+            {/* Voice Recording Button */}
             <Button
               variant="ghost"
               size="icon"
               onClick={isRecording ? stopRecording : startRecording}
-              className={isRecording ? 'text-red-500 bg-red-50' : ''}
+              className={`relative h-12 w-12 rounded-full transition-all duration-200 ${
+                isRecording 
+                  ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg scale-110' 
+                  : 'hover:bg-muted/50'
+              }`}
               disabled={isLoading}
             >
-              {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              {isRecording ? (
+                <>
+                  <MicOff className="h-5 w-5" />
+                  <div className="absolute inset-0 rounded-full border-2 border-red-300 animate-ping" />
+                </>
+              ) : (
+                <Mic className="h-5 w-5" />
+              )}
             </Button>
             
+            {/* Message Input */}
             <div className="flex-1 relative">
               <Input
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder={language === 'zh' ? '输入你的回答...' : 'Type your response...'}
+                placeholder={language === 'zh' ? '输入你的回答，或点击麦克风语音回复...' : 'Type your response, or click mic for voice...'}
                 disabled={isLoading || isRecording}
+                className="h-12 pr-4 bg-background/50 backdrop-blur-sm border-2 focus:border-primary/50 rounded-xl shadow-sm"
               />
               {isRecording && (
-                <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
                   <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                  <span className="text-sm text-red-500 font-medium">
+                    {language === 'zh' ? '录音中...' : 'Recording...'}
+                  </span>
                 </div>
               )}
             </div>
             
+            {/* Voice Control Button */}
             <Button
               variant="ghost"
               size="icon"
               onClick={isPlaying ? stopSpeaking : undefined}
               disabled={!isPlaying}
+              className="h-12 w-12 rounded-full hover:bg-muted/50"
             >
-              {isPlaying ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+              {isPlaying ? (
+                <VolumeX className="h-5 w-5 text-primary" />
+              ) : (
+                <Volume2 className="h-5 w-5" />
+              )}
             </Button>
             
+            {/* Send Button */}
             <Button
               onClick={() => handleSendMessage()}
               disabled={!inputText.trim() || isLoading || isRecording}
-              size="icon"
+              className={`h-12 w-12 rounded-full shadow-lg transition-all duration-200 ${
+                inputText.trim() && !isLoading && !isRecording
+                  ? 'scale-110 shadow-xl'
+                  : ''
+              } ${
+                themeMode === 'romantic' 
+                  ? 'bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600' 
+                  : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600'
+              }`}
             >
-              <Send className="h-4 w-4" />
+              <Send className="h-5 w-5" />
             </Button>
           </div>
           
-          {/* Connection Status */}
-          <div className="flex items-center justify-center mt-2">
-            <div className={`flex items-center space-x-1 text-xs ${isConnected ? 'text-green-600' : 'text-red-600'}`}>
-              <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
-              <span>
+          {/* Enhanced Connection Status */}
+          <div className="flex items-center justify-center mt-4">
+            <div className={`flex items-center space-x-3 px-4 py-2 rounded-full border ${
+              isConnected 
+                ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' 
+                : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20'
+            } backdrop-blur-sm`}>
+              <div className={`w-2 h-2 rounded-full ${
+                isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'
+              }`} />
+              <span className={`text-xs font-medium ${
+                isConnected ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'
+              }`}>
                 {isConnected 
-                  ? (language === 'zh' ? 'AI已连接' : 'AI Connected')
+                  ? (language === 'zh' ? 'AI已连接 • 加密对话' : 'AI Connected • Encrypted Chat')
                   : (language === 'zh' ? 'AI连接中...' : 'Connecting to AI...')
                 }
               </span>
+              {isConnected && (
+                <Brain className="h-3 w-3 text-green-600" />
+              )}
             </div>
           </div>
         </div>
