@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useAppStore } from '@/lib/store'
-import { useOptionalAuth } from '@/lib/hooks/useAuth'
+import { useOptionalAuth } from '@/hooks/useAuth'
 import { Heart, Users, Moon, Sun, Globe, Crown, Coins, LogOut } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import SubscribeModal from './SubscribeModal'
@@ -131,7 +131,7 @@ export function Navbar() {
 
   return (
     <>
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}

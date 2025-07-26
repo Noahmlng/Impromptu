@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/lib/store'
-import { useRequireAuth } from '@/lib/hooks/useAuth'
+import { useRequireAuth } from '@/hooks/useAuth'
 import { profile, tags, matching } from '@/lib/api'
 import { UserTag, MatchUser } from '@/lib/types'
 import { 
