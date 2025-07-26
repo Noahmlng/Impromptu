@@ -90,7 +90,7 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
         if not user_id:
             raise HTTPException(status_code=401, detail="无效的认证token")
         
-        # 获取用户档案信息
+        # 获取用户档案信息（只读取，不更新last_login_at）
         user_profile = supabase.table('user_profile').select('*').eq('id', user_id).execute()
         
         if not user_profile.data or len(user_profile.data) == 0:
@@ -98,10 +98,12 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
         
         user_data = user_profile.data[0]
         
-        # 更新最后登录时间
-        supabase.table('user_profile').update({
-            'last_login_at': datetime.datetime.utcnow().isoformat()
-        }).eq('id', user_id).execute()
+        # 检查用户是否活跃
+        if not user_data.get('is_active', True):
+            raise HTTPException(status_code=401, detail="账户已被禁用")
+        
+        # 移除了更新last_login_at的操作，提高验证速度
+        # 只在实际登录时更新last_login_at，而不是每次token验证时都更新
         
         return {
             'user_id': user_data['id'],
@@ -268,6 +270,41 @@ async def get_current_user_info(current_user: Dict = Depends(get_current_user)):
     except Exception as e:
         print(f"获取用户信息错误: {e}")
         raise HTTPException(status_code=500, detail=f"获取用户信息失败: {str(e)}")
+
+@router.get("/verify-fast")
+async def verify_token_fast(authorization: Optional[str] = Header(None)):
+    """快速验证token有效性 - 只检查token，不返回用户数据"""
+    if not authorization:
+        raise HTTPException(status_code=401, detail="未提供认证token")
+    
+    try:
+        # 移除 'Bearer ' 前缀
+        if authorization.startswith('Bearer '):
+            token = authorization[7:]
+        else:
+            token = authorization
+        
+        # 只解码JWT token验证其有效性，不查询数据库
+        decoded_token = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+        user_id = decoded_token.get('sub')
+        user_email = decoded_token.get('email')
+        
+        if not user_id or not user_email:
+            raise HTTPException(status_code=401, detail="无效的认证token")
+        
+        return {
+            "valid": True,
+            "user_id": user_id,
+            "email": user_email
+        }
+        
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token已过期")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="无效的token")
+    except Exception as e:
+        print(f"快速认证验证错误: {e}")
+        raise HTTPException(status_code=401, detail="认证失败")
 
 @router.get("/verify")
 async def verify_token(current_user: Dict = Depends(get_current_user)):

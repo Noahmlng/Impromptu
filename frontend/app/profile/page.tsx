@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
@@ -14,8 +14,25 @@ import { supabase } from '@/lib/supabase'
 export default function ProfilePage() {
   console.log('📄 [ProfilePage] Component rendering...')
   
+  // 添加性能监控
+  const authStartTime = useRef<number>(Date.now())
+  const authEndTime = useRef<number>(0)
+  
   // Auth check
   const { user: authUser, isLoading: authLoading } = useRequireAuth()
+  
+  // 监控认证完成时间
+  useEffect(() => {
+    if (!authLoading && authUser) {
+      authEndTime.current = Date.now()
+      const authDuration = authEndTime.current - authStartTime.current
+      console.log(`⏱️ [ProfilePage] Authentication completed in ${authDuration}ms`)
+      
+      if (authDuration > 3000) {
+        console.warn(`⚠️ [ProfilePage] Authentication took longer than expected: ${authDuration}ms`)
+      }
+    }
+  }, [authLoading, authUser])
   
   console.log('📄 [ProfilePage] Auth state:', {
     authUser: authUser ? authUser.email : 'NO_USER',
@@ -193,8 +210,11 @@ export default function ProfilePage() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mb-2">
             {language === 'zh' ? '验证身份中...' : 'Verifying authentication...'}
+          </p>
+          <p className="text-xs text-muted-foreground/60">
+            {language === 'zh' ? '如果长时间无响应，请刷新页面' : 'Refresh if this takes too long'}
           </p>
         </div>
       </div>
