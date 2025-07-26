@@ -122,47 +122,89 @@ export default function HomePage() {
         </p>
       </div>
 
-      {/* AI Personality Analysis */}
-      <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg p-6 border border-purple-200 dark:border-purple-800">
+      {/* Talk to Linker */}
+      <div className={`bg-gradient-to-r ${
+        themeMode === 'romantic' 
+          ? 'from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20 border-pink-200 dark:border-pink-800' 
+          : 'from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-blue-200 dark:border-blue-800'
+      } rounded-lg p-6 border`}>
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center space-x-3 mb-3">
-              <div className="p-2 rounded-lg bg-purple-500/10">
-                <svg className="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className={`p-2 rounded-lg ${
+                themeMode === 'romantic' ? 'bg-pink-500/10' : 'bg-blue-500/10'
+              }`}>
+                <svg className={`h-6 w-6 ${
+                  themeMode === 'romantic' ? 'text-pink-600' : 'text-blue-600'
+                }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-100">
-                  {language === 'zh' ? 'AI人格分析师' : 'AI Personality Analyst'}
-                </h3>
-                <p className="text-sm text-purple-700 dark:text-purple-300">
-                  {language === 'zh' ? '通过智能对话深度了解你的人格特征' : 'Understand your personality through intelligent conversation'}
-                </p>
+                              <h3 className={`text-lg font-semibold ${
+                themeMode === 'romantic' 
+                  ? 'text-pink-900 dark:text-pink-100' 
+                  : 'text-blue-900 dark:text-blue-100'
+              }`}>
+                Talk to Linker
+              </h3>
+              <p className={`text-sm ${
+                themeMode === 'romantic' 
+                  ? 'text-pink-700 dark:text-pink-300' 
+                  : 'text-blue-700 dark:text-blue-300'
+              }`}>
+                {themeMode === 'romantic' 
+                  ? (language === 'zh' ? '通过智能对话深度了解你的人格特征' : 'Understand your personality through intelligent conversation')
+                  : (language === 'zh' ? '通过智能对话深度了解你的专业技能' : 'Understand your professional skills through intelligent conversation')
+                }
+              </p>
               </div>
             </div>
             <div className="flex flex-wrap gap-2 mb-4">
-              <span className="px-3 py-1 bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-200 rounded-full text-xs">
+              <span className={`px-3 py-1 rounded-full text-xs ${
+                themeMode === 'romantic' 
+                  ? 'bg-pink-100 dark:bg-pink-800 text-pink-800 dark:text-pink-200' 
+                  : 'bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200'
+              }`}>
                 {language === 'zh' ? '语音对话' : 'Voice Chat'}
               </span>
-              <span className="px-3 py-1 bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-200 rounded-full text-xs">
-                {language === 'zh' ? '性格分析' : 'Personality Analysis'}
+              <span className={`px-3 py-1 rounded-full text-xs ${
+                themeMode === 'romantic' 
+                  ? 'bg-pink-100 dark:bg-pink-800 text-pink-800 dark:text-pink-200' 
+                  : 'bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200'
+              }`}>
+                {themeMode === 'romantic' 
+                  ? (language === 'zh' ? '人格分析' : 'Personality Analysis')
+                  : (language === 'zh' ? '技能分析' : 'Skills Analysis')
+                }
               </span>
-              <span className="px-3 py-1 bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-200 rounded-full text-xs">
+              <span className={`px-3 py-1 rounded-full text-xs ${
+                themeMode === 'romantic' 
+                  ? 'bg-pink-100 dark:bg-pink-800 text-pink-800 dark:text-pink-200' 
+                  : 'bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200'
+              }`}>
                 {language === 'zh' ? '匹配优化' : 'Match Optimization'}
               </span>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              {language === 'zh' 
-                ? '10-15分钟的智能对话，生成详细的人格分析报告，为你提供更精准的匹配建议。支持语音和文字交流。'
-                : '10-15 minute intelligent conversation to generate detailed personality analysis reports and provide more accurate matching suggestions. Supports voice and text communication.'
+              {themeMode === 'romantic' 
+                ? (language === 'zh' 
+                    ? '10-15分钟的智能对话，生成详细的人格分析报告，为你提供更精准的恋爱匹配建议。支持语音和文字交流。'
+                    : '10-15 minute intelligent conversation to generate detailed personality analysis reports and provide more accurate romantic matching suggestions. Supports voice and text communication.')
+                : (language === 'zh' 
+                    ? '10-15分钟的智能对话，生成详细的技能分析报告，为你提供更精准的团队匹配建议。支持语音和文字交流。'
+                    : '10-15 minute intelligent conversation to generate detailed skills analysis reports and provide more accurate team matching suggestions. Supports voice and text communication.')
               }
             </p>
           </div>
           <div className="ml-4">
             <Button 
               onClick={() => window.location.href = '/personality-chat'}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              className={`bg-gradient-to-r ${
+                themeMode === 'romantic' 
+                  ? 'from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700' 
+                  : 'from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700'
+              }`}
             >
               <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />

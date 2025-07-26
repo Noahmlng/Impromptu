@@ -22,7 +22,7 @@ export default function PersonalityChatPage() {
   const [chatStarted, setChatStarted] = useState(false)
   const [analysisStage, setAnalysisStage] = useState<'intro' | 'analysis' | 'complete'>('intro')
 
-  const analysisFeatures = [
+  const analysisFeatures = themeMode === 'romantic' ? [
     {
       icon: Brain,
       title: language === 'zh' ? '深度人格分析' : 'Deep Personality Analysis',
@@ -34,22 +34,51 @@ export default function PersonalityChatPage() {
       icon: Target,
       title: language === 'zh' ? '精准匹配建议' : 'Precise Matching Suggestions',
       description: language === 'zh' 
-        ? '基于分析结果为你推荐最适合的匹配对象'
-        : 'Recommend the most suitable matches based on analysis results'
+        ? '基于分析结果为你推荐最适合的恋爱对象'
+        : 'Recommend the most suitable romantic matches based on analysis results'
     },
     {
       icon: Sparkles,
       title: language === 'zh' ? '智能对话引导' : 'Intelligent Conversation Guide',
       description: language === 'zh' 
-        ? 'AI会根据你的回答调整问题，让分析更加准确'
-        : 'AI adjusts questions based on your responses for more accurate analysis'
+        ? 'AI会根据你的回答调整问题，让人格分析更加准确'
+        : 'AI adjusts questions based on your responses for more accurate personality analysis'
     },
     {
       icon: BarChart3,
       title: language === 'zh' ? '详细分析报告' : 'Detailed Analysis Report',
       description: language === 'zh' 
-        ? '生成完整的人格分析报告，持续优化匹配效果'
-        : 'Generate comprehensive personality analysis reports for continuous matching optimization'
+        ? '生成完整的人格分析报告，持续优化恋爱匹配效果'
+        : 'Generate comprehensive personality analysis reports for continuous romantic matching optimization'
+    }
+  ] : [
+    {
+      icon: Brain,
+      title: language === 'zh' ? '专业技能分析' : 'Professional Skills Analysis',
+      description: language === 'zh' 
+        ? '通过智能对话了解你的专业技能、工作风格和合作偏好'
+        : 'Understand your professional skills, work style and collaboration preferences through intelligent conversation'
+    },
+    {
+      icon: Target,
+      title: language === 'zh' ? '团队匹配建议' : 'Team Matching Suggestions',
+      description: language === 'zh' 
+        ? '基于分析结果为你推荐最适合的合作伙伴'
+        : 'Recommend the most suitable collaboration partners based on analysis results'
+    },
+    {
+      icon: Sparkles,
+      title: language === 'zh' ? '智能对话引导' : 'Intelligent Conversation Guide',
+      description: language === 'zh' 
+        ? 'AI会根据你的回答调整问题，让技能分析更加准确'
+        : 'AI adjusts questions based on your responses for more accurate skills analysis'
+    },
+    {
+      icon: BarChart3,
+      title: language === 'zh' ? '详细分析报告' : 'Detailed Analysis Report',
+      description: language === 'zh' 
+        ? '生成完整的技能分析报告，持续优化团队匹配效果'
+        : 'Generate comprehensive skills analysis reports for continuous team matching optimization'
     }
   ]
 
@@ -96,17 +125,21 @@ export default function PersonalityChatPage() {
       {/* Header */}
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center space-x-3">
-          <div className={`p-3 rounded-full ${themeMode === 'romantic' ? 'bg-romantic-pink-500/10' : 'bg-miami-blue-500/10'}`}>
-            <Brain className={`h-12 w-12 ${themeMode === 'romantic' ? 'text-romantic-pink-500' : 'text-miami-blue-500'}`} />
+                      <div className={`p-3 rounded-full ${themeMode === 'romantic' ? 'bg-pink-500/10' : 'bg-blue-500/10'}`}>
+            <Brain className={`h-12 w-12 ${themeMode === 'romantic' ? 'text-pink-500' : 'text-blue-500'}`} />
           </div>
           <h1 className="text-4xl font-bold">
-            {language === 'zh' ? 'AI人格分析师' : 'AI Personality Analyst'}
+            Talk to Linker
           </h1>
         </div>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          {language === 'zh' 
-            ? '通过智能对话深度了解你的人格特征，为你匹配最合适的伙伴。支持语音和文字交流，让分析更加准确和自然。'
-            : 'Deeply understand your personality through intelligent conversation to match you with the most suitable partners. Support voice and text communication for more accurate and natural analysis.'
+          {themeMode === 'romantic' 
+            ? (language === 'zh' 
+                ? '通过智能对话深度了解你的人格特征，为你匹配最合适的恋爱伙伴。支持语音和文字交流，让分析更加准确和自然。'
+                : 'Deeply understand your personality through intelligent conversation to match you with the most suitable romantic partners. Support voice and text communication for more accurate and natural analysis.')
+            : (language === 'zh' 
+                ? '通过智能对话深度了解你的专业技能和合作风格，为你匹配最合适的团队伙伴。支持语音和文字交流，让分析更加准确和自然。'
+                : 'Deeply understand your professional skills and collaboration style through intelligent conversation to match you with the most suitable team partners. Support voice and text communication for more accurate and natural analysis.')
           }
         </p>
       </div>
@@ -142,12 +175,19 @@ export default function PersonalityChatPage() {
           
           <div className="space-y-3">
             <h3 className="text-2xl font-bold">
-              {language === 'zh' ? '开始你的人格分析之旅' : 'Start Your Personality Analysis Journey'}
+              {themeMode === 'romantic' 
+                ? (language === 'zh' ? '开始分析人格' : 'Start Your Personality Analysis Journey')
+                : (language === 'zh' ? '开始分析技能' : 'Start Your Skills Analysis Journey')
+              }
             </h3>
             <p className="text-muted-foreground max-w-md mx-auto">
-              {language === 'zh' 
-                ? '大约需要10-15分钟，AI会通过自然对话深入了解你的性格特征和偏好。'
-                : 'Takes about 10-15 minutes. AI will understand your personality traits and preferences through natural conversation.'
+              {themeMode === 'romantic' 
+                ? (language === 'zh' 
+                    ? '大约需要10-15分钟，AI会通过自然对话深入了解你的性格特征和偏好。'
+                    : 'Takes about 10-15 minutes. AI will understand your personality traits and preferences through natural conversation.')
+                : (language === 'zh' 
+                    ? '大约需要10-15分钟，AI会通过自然对话深入了解你的专业技能和合作风格。'
+                    : 'Takes about 10-15 minutes. AI will understand your professional skills and collaboration style through natural conversation.')
               }
             </p>
           </div>
