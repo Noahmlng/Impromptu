@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -14,15 +14,17 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useAppStore } from '@/lib/store'
 import { useOptionalAuth } from '@/hooks/useAuth'
-import { Heart, Users, Moon, Sun, Globe, Crown, Coins, LogOut } from 'lucide-react'
+import { Heart, Users, Moon, Sun, Globe, Crown, Coins, LogOut, User, Award } from 'lucide-react'
 import { useTheme } from 'next-themes'
+import { cn } from '@/lib/utils'
 import SubscribeModal from './SubscribeModal'
 
 export function Navbar() {
-  const { themeMode, language, user, setLanguage } = useAppStore()
+  const { themeMode, language, user, setLanguage, setThemeMode } = useAppStore()
   const { theme, setTheme } = useTheme()
   const { logout } = useOptionalAuth()
   const router = useRouter()
+  const pathname = usePathname()
   const [showSubscribeModal, setShowSubscribeModal] = useState(false)
   const [isPending, setIsPending] = useState(false)
 
@@ -43,6 +45,26 @@ export function Navbar() {
       console.error('Error navigating to login:', error)
     }
   }
+
+  const handleProfileClick = () => {
+    router.push('/profile')
+  }
+
+  const handleRomanticClick = () => {
+    console.log('Switching to romantic mode') // Debug log
+    setThemeMode('romantic')
+    router.push('/home')
+  }
+
+  const handleTeamClick = () => {
+    console.log('Switching to team mode') // Debug log
+    setThemeMode('team')
+    router.push('/home')
+  }
+
+  // Don't show mode switchers on landing page and login/register pages
+  const hiddenPages = ['/', '/login', '/register']
+  const showModeSwitchers = !hiddenPages.includes(pathname)
 
   // 翻译对象
   const t = {
@@ -156,6 +178,37 @@ export function Navbar() {
 
             {/* Right Side Actions */}
             <div className="flex items-center space-x-4">
+              {/* Mode Switchers - Love and Team Mode */}
+              {showModeSwitchers && (
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant={themeMode === 'romantic' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={handleRomanticClick}
+                    className={cn(
+                      "h-9 w-9 rounded-full",
+                      themeMode === 'romantic' && "bg-romantic-pink-500 hover:bg-romantic-pink-600 text-white"
+                    )}
+                    title={language === 'zh' ? '爱情模式' : 'Love Mode'}
+                  >
+                    <Heart className="h-4 w-4" />
+                  </Button>
+                  
+                  <Button
+                    variant={themeMode === 'team' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={handleTeamClick}
+                    className={cn(
+                      "h-9 w-9 rounded-full",
+                      themeMode === 'team' && "bg-miami-blue-500 hover:bg-miami-blue-600 text-white"
+                    )}
+                    title={language === 'zh' ? '团队模式' : 'Team Mode'}
+                  >
+                    <Award className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+
               {/* Language Toggle */}
               <button
                 onClick={toggleLanguage}
@@ -168,15 +221,19 @@ export function Navbar() {
                 <span className="sr-only">Toggle language</span>
               </button>
 
-              {/* Theme Toggle */}
-              <div className="flex items-center bg-muted rounded-full p-1 h-9 w-20 cursor-pointer select-none justify-between" onClick={toggleTheme}>
-                <span className={`flex items-center justify-center h-7 w-7 transition-colors rounded-full ${theme === 'light' ? 'bg-background text-primary shadow' : 'text-muted-foreground'}`}> 
+              {/* Theme Toggle - Single Icon */}
+              <button
+                onClick={toggleTheme}
+                className="h-9 w-9 rounded-full border flex items-center justify-center focus:outline-none bg-muted hover:bg-accent transition-colors"
+                style={{minWidth: '2.25rem', minHeight: '2.25rem'}}
+              >
+                {theme === 'dark' ? (
                   <Sun className="h-4 w-4" />
-                </span>
-                <span className={`flex items-center justify-center h-7 w-7 transition-colors rounded-full ${theme === 'dark' ? 'bg-background text-primary shadow' : 'text-muted-foreground'}`}> 
+                ) : (
                   <Moon className="h-4 w-4" />
-                </span>
-              </div>
+                )}
+                <span className="sr-only">Toggle theme</span>
+              </button>
 
               {/* User Profile */}
               {user ? (
@@ -200,6 +257,10 @@ export function Navbar() {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleProfileClick}>
+                      <User className="mr-2 h-4 w-4" />
+                      <span>{language === 'zh' ? '个人主页' : 'Profile'}</span>
+                    </DropdownMenuItem>
                     <DropdownMenuItem className="flex items-center">
                       <Coins className="mr-2 h-4 w-4" />
                       <span>{language === 'zh' ? '积分余额' : 'Credits'}: {user.credits || 0}</span>

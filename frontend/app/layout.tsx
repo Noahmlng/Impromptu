@@ -2,7 +2,6 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Navbar } from '@/components/navbar'
-import { ModeSwitcher } from '@/components/mode-switcher'
 import { StoreInitializer } from '@/components/store-initializer'
 
 export const metadata: Metadata = {
@@ -25,7 +24,6 @@ export default function RootLayout({
             <main className="container mx-auto px-4 py-8">
               {children}
             </main>
-            <ModeSwitcher />
           </div>
         </ThemeProvider>
       </body>

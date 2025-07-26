@@ -48,21 +48,35 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
     
     try {
       // 模拟匹配过程，让loading弹窗显示一段时间
-      await new Promise(resolve => setTimeout(resolve, 5000))
+      await new Promise(resolve => setTimeout(resolve, 2000))
       
-      const response = await matching.search(
-        searchDescription,
-        selectedTags,
-        selectedMatchType,
-        20
-      )
-      
-      if (response.success) {
-        setSearchResults(response.data)
+      try {
+        const response = await matching.search(
+          searchDescription,
+          selectedTags,
+          selectedMatchType,
+          20
+        )
+        
+        if (response.success && response.data) {
+          const matchedUsers = response.data.matched_users || []
+          setSearchResults(matchedUsers)
+          setSuccessMessage(
+            language === 'zh' 
+              ? `找到 ${matchedUsers.length} 个匹配用户` 
+              : `Found ${matchedUsers.length} matching users`
+          )
+          setTimeout(() => setSuccessMessage(''), 3000)
+        }
+      } catch (apiError: any) {
+        // 如果API调用失败，使用模拟数据
+        console.log('API调用失败，使用模拟数据:', apiError)
+        const mockUsers = generateMockUsers(searchDescription, selectedMatchType)
+        setSearchResults(mockUsers)
         setSuccessMessage(
           language === 'zh' 
-            ? `找到 ${response.data.length} 个匹配用户` 
-            : `Found ${response.data.length} matching users`
+            ? `找到 ${mockUsers.length} 个匹配用户（演示数据）` 
+            : `Found ${mockUsers.length} matching users (demo data)`
         )
         setTimeout(() => setSuccessMessage(''), 3000)
       }
@@ -71,6 +85,84 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
     } finally {
       setIsMatchingLoading(false)
     }
+  }
+
+  // 生成模拟匹配用户数据
+  const generateMockUsers = (description: string, matchType: string) => {
+    const mockUsers = [
+      {
+        user_id: 'user01_alex_chen',
+        display_name: '陈浩 Alex',
+        email: 'alex.chen@example.com',
+        avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=alex',
+        match_score: 0.92,
+        user_tags: ['编程', '技术', '前端开发', 'React', 'JavaScript'],
+        metadata_summary: {
+          profile: {
+            personal: { location: '深圳', age_range: '23-27岁' },
+            professional: { industry: '互联网/技术' }
+          }
+        }
+      },
+      {
+        user_id: 'user02_sophia_wang',
+        display_name: '王索菲亚 Sophia',
+        email: 'sophia.wang@example.com',
+        avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sophia',
+        match_score: 0.88,
+        user_tags: ['UI设计', '用户体验', '前端', '创意', '团队协作'],
+        metadata_summary: {
+          profile: {
+            personal: { location: '北京', age_range: '25-29岁' },
+            professional: { industry: '设计' }
+          }
+        }
+      },
+      {
+        user_id: 'user03_kevin_li',
+        display_name: '李凯文 Kevin',
+        email: 'kevin.li@example.com',
+        avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=kevin',
+        match_score: 0.84,
+        user_tags: ['产品经理', '项目管理', '团队领导', '创新', '技术理解'],
+        metadata_summary: {
+          profile: {
+            personal: { location: '上海', age_range: '28-32岁' },
+            professional: { industry: '互联网' }
+          }
+        }
+      },
+      {
+        user_id: 'user04_luna_zhang',
+        display_name: '张露娜 Luna',
+        email: 'luna.zhang@example.com',
+        avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=luna',
+        match_score: 0.79,
+        user_tags: ['后端开发', 'Python', 'AI', '机器学习', '数据分析'],
+        metadata_summary: {
+          profile: {
+            personal: { location: '杭州', age_range: '26-30岁' },
+            professional: { industry: '人工智能' }
+          }
+        }
+      }
+    ]
+
+    // 根据匹配类型调整用户数据
+    if (matchType === '找对象') {
+      return mockUsers.map(user => ({
+        ...user,
+        user_tags: ['温柔体贴', '兴趣广泛', '热爱生活', '善于沟通', '价值观相近'],
+        metadata_summary: {
+          profile: {
+            personal: { ...user.metadata_summary.profile.personal },
+            professional: { industry: '各行各业' }
+          }
+        }
+      }))
+    }
+
+    return mockUsers
   }
 
   const toggleTag = (tagName: string) => {
@@ -233,6 +325,11 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
             <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center space-x-2">
               <CheckCircle className="h-4 w-4 text-green-600" />
               <span className="text-sm text-green-600">{successMessage}</span>
+              {successMessage.includes('演示数据') && (
+                <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded-full">
+                  {language === 'zh' ? '演示模式' : 'Demo Mode'}
+                </span>
+              )}
             </div>
           )}
 
@@ -311,9 +408,24 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
                     
                     {/* Contact Button */}
                     <div className="mt-3 pt-3 border-t">
-                      <Button size="sm" variant="outline" className="w-full">
-                        {language === 'zh' ? '查看详情' : 'View Details'}
-                      </Button>
+                      <div className="flex space-x-2">
+                        <Button size="sm" variant="outline" className="flex-1">
+                          {language === 'zh' ? '查看详情' : 'View Details'}
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          className={`flex-1 ${
+                            selectedMatchType === '找队友' 
+                              ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                              : 'bg-pink-600 hover:bg-pink-700 text-white'
+                          }`}
+                        >
+                          {selectedMatchType === '找队友' 
+                            ? (language === 'zh' ? '发起合作' : 'Start Collaboration')
+                            : (language === 'zh' ? '开始聊天' : 'Start Chat')
+                          }
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}
