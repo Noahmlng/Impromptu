@@ -75,7 +75,7 @@ export default function HomePage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
-      {/* Stats Cards */}
+      {/* Stats Cards
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat, index) => (
           <div key={index} className="bg-card rounded-lg p-6 border shadow-sm">
@@ -94,7 +94,7 @@ export default function HomePage() {
             </div>
           </div>
         ))}
-      </div>
+      </div> */}
 
       {/* Getting Started - Always Show */}
       <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg p-8 border border-primary/20">

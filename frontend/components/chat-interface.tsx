@@ -26,7 +26,10 @@ export function ChatInterface({ matchId, isAIChat = false }: ChatInterfaceProps)
   const [inputText, setInputText] = useState('')
   const [isRecording, setIsRecording] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [micPermission, setMicPermission] = useState<'granted' | 'denied' | 'prompt' | 'checking'>('checking')
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const recognitionRef = useRef<any>(null)
+  const baseTextOnRecord = useRef('')
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -35,6 +38,88 @@ export function ChatInterface({ matchId, isAIChat = false }: ChatInterfaceProps)
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  // 检查麦克风权限
+  useEffect(() => {
+    const checkMicrophonePermission = async () => {
+      try {
+        if (navigator.permissions) {
+          const permission = await navigator.permissions.query({ name: 'microphone' as PermissionName })
+          setMicPermission(permission.state as 'granted' | 'denied' | 'prompt')
+          
+          permission.onchange = () => {
+            setMicPermission(permission.state as 'granted' | 'denied' | 'prompt')
+          }
+        } else {
+          // 如果不支持权限API，设置为prompt状态
+          setMicPermission('prompt')
+        }
+      } catch (error) {
+        console.error('Error checking microphone permission:', error)
+        setMicPermission('prompt')
+      }
+    }
+
+    checkMicrophonePermission()
+  }, [])
+
+  useEffect(() => {
+    // 检查浏览器是否支持语音识别
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      console.warn("Speech recognition not supported in this browser.")
+      return
+    }
+
+    const recognition = new SpeechRecognition()
+    recognition.continuous = true
+    recognition.interimResults = true
+    recognition.lang = language === 'zh' ? 'zh-CN' : 'en-US'
+
+    recognition.onresult = (event: any) => {
+      let interimTranscript = ''
+      let finalTranscript = ''
+      
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript
+        } else {
+          interimTranscript += event.results[i][0].transcript
+        }
+      }
+      
+      // 更新输入框内容：原有文本 + 最终识别结果 + 临时识别结果
+      setInputText(baseTextOnRecord.current + finalTranscript + interimTranscript)
+    }
+
+    recognition.onstart = () => {
+      console.log('Speech recognition started')
+      setMicPermission('granted') // 成功启动说明权限已获得
+    }
+
+    recognition.onend = () => {
+      console.log('Speech recognition ended')
+      setIsRecording(false)
+    }
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error)
+      setIsRecording(false)
+      
+      // 处理权限相关错误
+      if (event.error === 'not-allowed' || event.error === 'permission-denied') {
+        setMicPermission('denied')
+      }
+    }
+
+    recognitionRef.current = recognition
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop()
+      }
+    }
+  }, [language])
 
   // 模拟初始消息
   useEffect(() => {
@@ -102,9 +187,65 @@ export function ChatInterface({ matchId, isAIChat = false }: ChatInterfaceProps)
     }
   }
 
-  const toggleRecording = () => {
-    setIsRecording(!isRecording)
-    // 这里实现语音录制逻辑
+  const requestMicrophonePermission = async () => {
+    try {
+      // 通过getUserMedia请求麦克风权限
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      // 立即关闭流，我们只需要权限
+      stream.getTracks().forEach(track => track.stop())
+      setMicPermission('granted')
+      return true
+    } catch (error) {
+      console.error('Microphone permission denied:', error)
+      setMicPermission('denied')
+      return false
+    }
+  }
+
+  const toggleRecording = async () => {
+    if (!recognitionRef.current) {
+      console.warn("Speech recognition not available")
+      return
+    }
+
+    if (isRecording) {
+      // 停止录音
+      recognitionRef.current.stop()
+      setIsRecording(false)
+    } else {
+      // 检查权限状态
+      if (micPermission === 'denied') {
+        alert(language === 'zh' 
+          ? '麦克风权限被拒绝，请在浏览器设置中允许麦克风访问' 
+          : 'Microphone permission denied. Please allow microphone access in browser settings')
+        return
+      }
+
+      // 如果权限未知或需要申请，先请求权限
+      if (micPermission === 'prompt' || micPermission === 'checking') {
+        const hasPermission = await requestMicrophonePermission()
+        if (!hasPermission) {
+          return
+        }
+      }
+
+      // 开始录音前保存当前输入的文本
+      baseTextOnRecord.current = inputText ? inputText + ' ' : ''
+      try {
+        recognitionRef.current.start()
+        setIsRecording(true)
+      } catch (error) {
+        console.error('Failed to start speech recognition:', error)
+        setIsRecording(false)
+        
+        // 如果是权限错误，提示用户
+        if (error instanceof Error && error.message.includes('not-allowed')) {
+          alert(language === 'zh' 
+            ? '需要麦克风权限才能使用语音输入功能' 
+            : 'Microphone permission is required for voice input')
+        }
+      }
+    }
   }
 
   const formatTime = (date: Date) => {
@@ -203,7 +344,19 @@ export function ChatInterface({ matchId, isAIChat = false }: ChatInterfaceProps)
             variant="ghost"
             size="icon"
             onClick={toggleRecording}
-            className={isRecording ? 'text-red-500' : ''}
+            disabled={micPermission === 'checking' || !recognitionRef.current}
+            className={`${isRecording ? 'text-red-500' : ''} ${
+              micPermission === 'denied' ? 'text-gray-400' : ''
+            }`}
+            title={
+              micPermission === 'denied' 
+                ? (language === 'zh' ? '麦克风权限被拒绝' : 'Microphone permission denied')
+                : micPermission === 'checking'
+                ? (language === 'zh' ? '检查权限中...' : 'Checking permission...')
+                : isRecording 
+                ? (language === 'zh' ? '停止录音' : 'Stop recording')
+                : (language === 'zh' ? '开始语音输入' : 'Start voice input')
+            }
           >
             {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
           </Button>
@@ -212,7 +365,7 @@ export function ChatInterface({ matchId, isAIChat = false }: ChatInterfaceProps)
             <Input
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyPress}
               placeholder={language === 'zh' ? '输入消息...' : 'Type a message...'}
               disabled={isLoading}
             />

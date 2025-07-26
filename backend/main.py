@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Impromptu 后端主入口
+Linker 后端主入口
 
 统一的后端服务入口，整合所有API功能
 """

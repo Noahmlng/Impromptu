@@ -89,41 +89,6 @@ export default function ChatPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 flex flex-col">
       <div className="container mx-auto max-w-6xl px-4 py-6 flex-1 flex flex-col">
-        {/* Modern Header */}
-        <div className="flex items-center justify-between mb-8">
-          <Button
-            variant="ghost"
-            onClick={() => window.history.back()}
-            className="flex items-center space-x-2 hover:bg-muted/50 transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>{language === 'zh' ? '返回' : 'Back'}</span>
-          </Button>
-          
-          <div className="flex items-center space-x-3">
-            <div className={`p-2 rounded-lg ${
-              themeMode === 'romantic' 
-                ? 'bg-gradient-to-r from-pink-500/10 to-purple-500/10' 
-                : 'bg-gradient-to-r from-blue-500/10 to-cyan-500/10'
-            }`}>
-              <Brain className={`h-6 w-6 ${
-                themeMode === 'romantic' ? 'text-pink-500' : 'text-blue-500'
-              }`} />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold">Talk to Linker</h1>
-              <p className="text-sm text-muted-foreground">
-                {analysisStage === 'complete' 
-                  ? (language === 'zh' ? '分析完成' : 'Analysis Complete')
-                  : analysisStage === 'analysis' 
-                    ? (language === 'zh' ? '分析进行中' : 'Analysis in Progress')
-                    : (language === 'zh' ? '准备开始' : 'Ready to Start')
-                }
-              </p>
-            </div>
-          </div>
-        </div>
-
         {/* Feature Pills */}
         {analysisStage === 'intro' && (
           <div className="flex flex-wrap gap-3 mb-6 justify-center">
@@ -150,8 +115,18 @@ export default function ChatPage() {
           </div>
         )}
 
-        {/* Main Chat Interface */}
-        <Card className="shadow-2xl border-0 bg-card/50 backdrop-blur-sm overflow-hidden flex-1">
+        {/* Main Chat Interface with Back Button */}
+        <Card className="shadow-2xl border-0 bg-card/50 backdrop-blur-sm overflow-hidden flex-1 relative">
+          {/* Back Button inside card */}
+          <Button
+            variant="ghost"
+            onClick={() => window.history.back()}
+            className="absolute top-4 left-4 z-10 flex items-center space-x-2 hover:bg-muted/50 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>{language === 'zh' ? '返回' : 'Back'}</span>
+          </Button>
+          
           <CardContent className="p-0 h-full">
             <div className="h-full flex flex-col">
               <PersonalityAnalysisChat 
