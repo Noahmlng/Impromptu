@@ -40,14 +40,19 @@ app.add_middleware(
 )
 
 # 检查是否有构建好的前端文件
-frontend_dist = Path("frontend/.next")
 frontend_static = Path("frontend/out")
 frontend_public = Path("frontend/public")
 
-# 优先使用 Next.js 导出的静态文件
+# 优先使用 Next.js 静态导出文件
 if frontend_static.exists():
-    # 挂载静态文件
+    # 挂载静态文件（包括 _next 目录的资源）
     app.mount("/static", StaticFiles(directory=str(frontend_static)), name="static")
+    
+    # 挂载 _next 静态资源
+    next_static_path = frontend_static / "_next"
+    if next_static_path.exists():
+        app.mount("/_next", StaticFiles(directory=str(next_static_path)), name="next_static")
+    
     print("✅ 使用 Next.js 导出的静态文件")
 elif frontend_public.exists():
     # 备用：使用 public 目录
@@ -60,16 +65,10 @@ app.mount("/api", backend_app)
 @app.get("/")
 async def root():
     """前端主页"""
-    # 尝试返回前端的 index.html
-    index_paths = [
-        Path("frontend/out/index.html"),
-        Path("frontend/public/index.html"),
-        Path("frontend/legacy/index.html")
-    ]
-    
-    for index_path in index_paths:
-        if index_path.exists():
-            return FileResponse(str(index_path))
+    # Next.js 静态导出的主页
+    index_path = Path("frontend/out/index.html")
+    if index_path.exists():
+        return FileResponse(str(index_path))
     
     # 如果没有找到前端文件，返回简单的欢迎页面
     return HTMLResponse(content="""
@@ -137,12 +136,25 @@ async def root():
                 border-radius: 10px;
                 font-size: 0.9rem;
             }
+            .warning {
+                background: #fff3cd;
+                border: 1px solid #ffeaa7;
+                color: #856404;
+                padding: 1rem;
+                border-radius: 10px;
+                margin: 1rem 0;
+            }
         </style>
     </head>
     <body>
         <div class="container">
             <h1>🎯 Impromptu</h1>
             <p>AI驱动的智能社交匹配系统<br>找到最合适的伙伴，开启美好连接</p>
+            
+            <div class="warning">
+                ⚠️ 前端应用需要构建后才能访问<br>
+                请运行：<code>cd frontend && npm run build</code>
+            </div>
             
             <div class="features">
                 <div class="feature">🧠 AI智能匹配</div>
@@ -156,12 +168,34 @@ async def root():
             
             <p style="margin-top: 2rem; color: #999; font-size: 0.9rem;">
                 后端API已成功部署！<br>
-                前端界面正在构建中...
+                前端需要先构建才能显示界面
             </p>
         </div>
     </body>
     </html>
     """)
+
+# SPA 路由支持 - 对于 Next.js 应用的其他路由
+@app.get("/{path:path}")
+async def spa_router(path: str):
+    """SPA 路由支持，处理前端应用的所有路由"""
+    # 忽略 API 路由
+    if path.startswith("api/"):
+        return {"error": "API route not found"}
+    
+    # 检查是否是静态资源请求
+    if path.startswith("_next/") or path.endswith(('.js', '.css', '.png', '.jpg', '.ico', '.svg')):
+        static_file = Path("frontend/out") / path
+        if static_file.exists():
+            return FileResponse(str(static_file))
+    
+    # 对于其他路径，返回 Next.js 应用的主页（SPA 模式）
+    index_path = Path("frontend/out/index.html")
+    if index_path.exists():
+        return FileResponse(str(index_path))
+    
+    # 如果没有前端文件，返回404
+    return {"error": "Page not found", "message": "前端应用需要先构建"}
 
 @app.get("/health")
 async def health():
