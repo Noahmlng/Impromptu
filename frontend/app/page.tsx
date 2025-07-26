@@ -712,12 +712,16 @@ export default function LandingPage() {
                           function showChatFrame(frameNumber) {
                             // Hide all frames
                             document.querySelectorAll('.chat-animation-frame').forEach(frame => {
-                              frame.classList.remove('active');
+                              if (frame && frame.classList) {
+                                frame.classList.remove('active');
+                              }
                             });
                             
                             // Show current frame
                             const currentFrameElement = document.getElementById(\`chat-frame\${frameNumber}\`);
-                            currentFrameElement.classList.add('active');
+                            if (currentFrameElement && currentFrameElement.classList) {
+                              currentFrameElement.classList.add('active');
+                            }
                             
                             // Reset and start animations for the current frame
                             resetChatFrameAnimations(frameNumber);
@@ -753,15 +757,19 @@ export default function LandingPage() {
                             
                             // Reset message visibility and position
                             const frameElement = document.getElementById(\`chat-frame\${frameNumber}\`);
-                            const messages = frameElement.querySelectorAll('.chat-animation-message');
-                            
-                            messages.forEach((message, index) => {
-                              if (index >= messages.length - 2) { // Only the last two messages (bot and user)
-                                message.classList.remove('visible');
-                                message.classList.remove('typing');
-                                message.style.top = '';
-                              }
-                            });
+                            if (frameElement) {
+                              const messages = frameElement.querySelectorAll('.chat-animation-message');
+                              
+                              messages.forEach((message, index) => {
+                                if (index >= messages.length - 2) { // Only the last two messages (bot and user)
+                                  if (message && message.classList) {
+                                    message.classList.remove('visible');
+                                    message.classList.remove('typing');
+                                    message.style.top = '';
+                                  }
+                                }
+                              });
+                            }
                           }
                           
                           // Start animations for a frame
@@ -774,7 +782,11 @@ export default function LandingPage() {
                             const userTextElement = document.getElementById(\`chat-user-text-\${frameNumber}\`);
                             
                             const frameElement = document.getElementById(\`chat-frame\${frameNumber}\`);
+                            if (!frameElement) return;
+                            
                             const messages = frameElement.querySelectorAll('.chat-animation-message');
+                            if (messages.length < 2) return;
+                            
                             const botMessage = messages[messages.length - 2]; // Second to last message
                             const userMessage = messages[messages.length - 1]; // Last message
                             
@@ -783,7 +795,7 @@ export default function LandingPage() {
                             const startY = 50; // 向下移动起始位置
                             
                             messages.forEach((message, index) => {
-                              if (message.classList.contains('visible')) {
+                              if (message && message.classList && message.classList.contains('visible')) {
                                 message.classList.remove('typing');
                                 message.style.top = \`\${startY + index * messageHeight}px\`;
                               }
@@ -791,21 +803,29 @@ export default function LandingPage() {
                             
                             // Show bot message with typing animation
                             setTimeout(() => {
-                              botMessage.classList.add('visible');
-                              botMessage.classList.add('typing');
-                              botMessage.style.top = \`\${startY + (messages.length - 2) * messageHeight}px\`;
-                              typeChatText(botTextElement, botText, 0, () => {
-                                // After bot finishes typing, show user message
-                                botMessage.classList.remove('typing');
-                                setTimeout(() => {
-                                  userMessage.classList.add('visible');
-                                  userMessage.classList.add('typing');
-                                  userMessage.style.top = \`\${startY + (messages.length - 1) * messageHeight}px\`;
-                                  typeChatText(userTextElement, userText, 0, () => {
-                                    userMessage.classList.remove('typing');
-                                  });
-                                }, 400);
-                              });
+                              if (botMessage && botMessage.classList) {
+                                botMessage.classList.add('visible');
+                                botMessage.classList.add('typing');
+                                botMessage.style.top = \`\${startY + (messages.length - 2) * messageHeight}px\`;
+                                typeChatText(botTextElement, botText, 0, () => {
+                                  // After bot finishes typing, show user message
+                                  if (botMessage && botMessage.classList) {
+                                    botMessage.classList.remove('typing');
+                                  }
+                                  setTimeout(() => {
+                                    if (userMessage && userMessage.classList) {
+                                      userMessage.classList.add('visible');
+                                      userMessage.classList.add('typing');
+                                      userMessage.style.top = \`\${startY + (messages.length - 1) * messageHeight}px\`;
+                                      typeChatText(userTextElement, userText, 0, () => {
+                                        if (userMessage && userMessage.classList) {
+                                          userMessage.classList.remove('typing');
+                                        }
+                                      });
+                                    }
+                                  }, 400);
+                                });
+                              }
                             }, 400);
                           }
                           
