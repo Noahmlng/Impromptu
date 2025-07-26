@@ -34,10 +34,15 @@ export default function LandingPage() {
       ;(window as any).chatLanguage = language
       // 如果聊天动画已经初始化，重新启动以应用新语言
       setTimeout(() => {
-        if (typeof window !== 'undefined' && (window as any).restartChatAnimation) {
-          (window as any).restartChatAnimation()
+        if (typeof window !== 'undefined' && 
+            typeof (window as any).restartChatAnimation === 'function') {
+          try {
+            (window as any).restartChatAnimation()
+          } catch (error) {
+            console.error('Error calling restartChatAnimation:', error)
+          }
         }
-      }, 100)
+      }, 200) // 增加延迟确保DOM已准备好
     }
   }, [language])
 
@@ -730,22 +735,47 @@ export default function LandingPage() {
                           
                           // Initialize chat animation
                           function initChatAnimation() {
-                            showChatFrame(chatCurrentFrame);
-                            startChatAutoPlay();
+                            try {
+                              // Check if DOM elements exist
+                              const container = document.querySelector('.chat-animation-container');
+                              if (!container) {
+                                console.warn('Chat animation container not found, skipping initialization');
+                                return;
+                              }
+                              
+                              showChatFrame(chatCurrentFrame);
+                              startChatAutoPlay();
+                            } catch (error) {
+                              console.error('Error initializing chat animation:', error);
+                            }
                           }
                           
                           // Restart chat animation (for language changes)
                           function restartChatAnimation() {
-                            // Clear existing interval
-                            if (chatAnimationInterval) {
-                              clearInterval(chatAnimationInterval);
+                            try {
+                              // Check if DOM elements exist
+                              const container = document.querySelector('.chat-animation-container');
+                              if (!container) {
+                                console.warn('Chat animation container not found, skipping restart');
+                                return;
+                              }
+                              
+                              // Clear existing interval
+                              if (chatAnimationInterval) {
+                                clearInterval(chatAnimationInterval);
+                              }
+                              
+                              // Update static texts first
+                              updateStaticTexts();
+                              
+                              // Reset to first frame
+                              chatCurrentFrame = 1;
+                              
+                              // Restart animation
+                              initChatAnimation();
+                            } catch (error) {
+                              console.error('Error restarting chat animation:', error);
                             }
-                            // Update static texts first
-                            updateStaticTexts();
-                            // Reset to first frame
-                            chatCurrentFrame = 1;
-                            // Restart animation
-                            initChatAnimation();
                           }
                           
                           // Make restart function globally available
@@ -902,17 +932,19 @@ export default function LandingPage() {
                           
                           // Update static text content based on current language
                           function updateStaticTexts() {
-                            const lang = getCurrentLanguage();
-                            const headerElement = document.querySelector('.chat-animation-header');
-                            if (headerElement) {
-                              headerElement.textContent = lang === 'zh' ? '你的身份是什么？' : "What's your identity?";
-                            }
-                            
-                            // Update all static message texts
-                            const staticMessages = document.querySelectorAll('.chat-animation-message span:not(.chat-animation-text-animation)');
-                            const chatFrameTexts = getChatFrameTexts();
-                            
-                            staticMessages.forEach((span, index) => {
+                            try {
+                              const lang = getCurrentLanguage();
+                              const headerElement = document.querySelector('.chat-animation-header');
+                              if (headerElement) {
+                                headerElement.textContent = lang === 'zh' ? '你的身份是什么？' : "What's your identity?";
+                              }
+                              
+                              // Update all static message texts
+                              const staticMessages = document.querySelectorAll('.chat-animation-message span:not(.chat-animation-text-animation)');
+                              const chatFrameTexts = getChatFrameTexts();
+                              
+                              staticMessages.forEach((span, index) => {
+                                if (!span || !span.textContent) return;
                               const text = span.textContent;
                               // Update based on known text patterns
                               if (text === '你好！我想更好地了解你。' || text === "Hi! I'd like to know you better.") {
@@ -933,23 +965,38 @@ export default function LandingPage() {
                                 span.textContent = chatFrameTexts.frame4.user;
                               }
                             });
+                            } catch (error) {
+                              console.error('Error updating static texts:', error);
+                            }
                           }
                           
                           // Initialize when DOM is loaded
                           document.addEventListener('DOMContentLoaded', () => {
-                            updateStaticTexts();
-                            initChatAnimation();
+                            try {
+                              updateStaticTexts();
+                              initChatAnimation();
+                            } catch (error) {
+                              console.error('Error during DOM content loaded initialization:', error);
+                            }
                           });
                           
                           // Also initialize immediately if DOM is already loaded
                           if (document.readyState === 'loading') {
                             document.addEventListener('DOMContentLoaded', () => {
-                              updateStaticTexts();
-                              initChatAnimation();
+                              try {
+                                updateStaticTexts();
+                                initChatAnimation();
+                              } catch (error) {
+                                console.error('Error during delayed initialization:', error);
+                              }
                             });
                           } else {
-                            updateStaticTexts();
-                            initChatAnimation();
+                            try {
+                              updateStaticTexts();
+                              initChatAnimation();
+                            } catch (error) {
+                              console.error('Error during immediate initialization:', error);
+                            }
                           }
                         </script>
                       `
@@ -993,32 +1040,13 @@ export default function LandingPage() {
                 </Button>
               </div>
               
-              {/* 右侧：多维度分析图表 */}
-              <div className="bg-gradient-to-br from-pink-50 to-rose-100 dark:from-pink-950 dark:to-rose-900 rounded-3xl p-8 aspect-[4/3]">
-                <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 h-full">
-                  {/* 界面功能截图占位 */}
-                  <div className="flex items-center justify-center mb-6">
-                    <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center">
-                      <Heart className="w-8 h-8 text-white" />
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                      {language === 'zh' ? '多维度兼容性' : 'Multi-dimensional Compatibility'}
-                    </h4>
-                    <div className="flex justify-center space-x-2">
-                      <div className="w-3 h-3 bg-pink-400 rounded-full"></div>
-                      <div className="w-3 h-3 bg-rose-400 rounded-full"></div>
-                      <div className="w-3 h-3 bg-pink-300 rounded-full"></div>
-                    </div>
-                  </div>
-                  {/* 添加界面元素 */}
-                  <div className="mt-6 grid grid-cols-3 gap-2">
-                    <div className="bg-pink-100 rounded-lg p-2 text-center text-xs font-medium">性格</div>
-                    <div className="bg-rose-100 rounded-lg p-2 text-center text-xs font-medium">兴趣</div>
-                    <div className="bg-pink-100 rounded-lg p-2 text-center text-xs font-medium">价值观</div>
-                  </div>
-                </div>
+              {/* 右侧：多维度分析图表 - 替换为GIF */}
+              <div className="rounded-3xl aspect-[4/3] overflow-hidden">
+                <img 
+                  src="/loading.gif" 
+                  alt={language === 'zh' ? '多维度分析演示' : 'Multi-dimensional Analysis Demo'}
+                  className="w-full h-full object-cover rounded-3xl"
+                />
               </div>
             </div>
 

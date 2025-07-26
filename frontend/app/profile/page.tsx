@@ -552,6 +552,13 @@ export default function ProfilePage() {
       
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
+    } catch (error: any) {
+      setError(error.message || 'Failed to upload avatar')
+      setAvatarPreview(null)
+    } finally {
+      setIsUploadingAvatar(false)
+    }
+  }
       
   const generateTags = async (requestType: '找队友' | '找对象') => {
     if (!authUser) return
@@ -569,10 +576,8 @@ export default function ProfilePage() {
       }
     } catch (error: any) {
       setError(error.message || '生成标签失败，请稍后重试')
-      setError(error.message || 'Failed to upload avatar')
-      setAvatarPreview(null)
     } finally {
-      setIsUploadingAvatar(false)
+      setIsGeneratingTags(false)
     }
   }
 
@@ -1097,4 +1102,4 @@ export default function ProfilePage() {
       </div>
     </div>
   )
-} 
+}
