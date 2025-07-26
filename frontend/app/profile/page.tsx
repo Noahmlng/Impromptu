@@ -16,8 +16,6 @@ export default function ProfilePage() {
   
   const { 
     language, 
-    user, 
-    backendUser, 
     userMetadata, 
     userTags,
     setUserMetadata,
@@ -65,8 +63,8 @@ export default function ProfilePage() {
           const preferencesData = profileSection.preferences?.content || {}
           
           setProfileData({
-            name: backendUser?.display_name || '',
-            email: backendUser?.email || '',
+            name: authUser.display_name || '',
+            email: authUser.email || '',
             phone: contactData.phone || '',
             location: personalData.location || '',
             age: personalData.age || '',
@@ -95,7 +93,7 @@ export default function ProfilePage() {
     }
 
     loadUserData()
-  }, [authUser, backendUser])
+  }, [authUser])
 
   const handleSave = async () => {
     if (!authUser) return
@@ -237,9 +235,9 @@ export default function ProfilePage() {
           <div className="text-center space-y-4">
             <div className="relative">
               <Avatar className="h-32 w-32 mx-auto">
-                <AvatarImage src={user?.avatar} />
+                <AvatarImage src={authUser?.avatar_url} />
                 <AvatarFallback className="text-2xl">
-                  {(profileData.name || backendUser?.display_name || 'U').charAt(0)}
+                  {(profileData.name || authUser?.display_name || 'U').charAt(0)}
                 </AvatarFallback>
               </Avatar>
               {isEditing && (
@@ -252,8 +250,8 @@ export default function ProfilePage() {
               )}
             </div>
             <div>
-              <h2 className="text-2xl font-semibold">{profileData.name || backendUser?.display_name}</h2>
-              <p className="text-muted-foreground">{profileData.email || backendUser?.email}</p>
+              <h2 className="text-2xl font-semibold">{profileData.name || authUser?.display_name}</h2>
+              <p className="text-muted-foreground">{profileData.email || authUser?.email}</p>
             </div>
           </div>
 
@@ -265,11 +263,11 @@ export default function ProfilePage() {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span>{language === 'zh' ? '积分余额' : 'Credits'}</span>
-                <span className="font-medium">{user?.credits || 0}</span>
+                <span className="font-medium">0</span>
               </div>
               <div className="flex justify-between">
                 <span>{language === 'zh' ? '订阅等级' : 'Subscription'}</span>
-                <span className="font-medium capitalize">{backendUser?.subscription_type || user?.subscription || 'Free'}</span>
+                <span className="font-medium capitalize">{authUser?.subscription_type || 'Free'}</span>
               </div>
               <div className="flex justify-between">
                 <span>{language === 'zh' ? '匹配数量' : 'Matches'}</span>
