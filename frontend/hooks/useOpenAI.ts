@@ -1,101 +1,67 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import OpenAI from 'openai'
+import { useState } from 'react'
+import { useAppStore } from '@/lib/store'
+
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:5000'
+
+interface OpenAIMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
 
 export function useOpenAI() {
-  const [isConnected, setIsConnected] = useState(false)
-  const [openai, setOpenai] = useState<OpenAI | null>(null)
+  const { themeMode, language } = useAppStore();
+  const [isConnected, setIsConnected] = useState(true);
 
-  useEffect(() => {
-    // 初始化OpenAI客户端
-    const initOpenAI = () => {
-      try {
-        const client = new OpenAI({
-          apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
-          dangerouslyAllowBrowser: true // 注意：生产环境应该通过后端API调用
-        })
-        setOpenai(client)
-        setIsConnected(true)
-      } catch (error) {
-        console.error('Failed to initialize OpenAI:', error)
-        setIsConnected(false)
-      }
-    }
-
-    initOpenAI()
-  }, [])
-
-  const sendMessage = async (message: string): Promise<string | null> => {
-    if (!openai || !isConnected) {
-      console.error('OpenAI not initialized')
-      return null
-    }
+  const sendMessage = async (
+    message: string, 
+    history: OpenAIMessage[] = [], 
+    isAnalysis: boolean = false
+  ): Promise<string | null> => {
+    
+    const payload = {
+      message,
+      history,
+      isAnalysis,
+      themeMode,
+      language,
+    };
 
     try {
-      const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "user",
-            content: message
-          }
-        ],
-        max_tokens: 1000,
-        temperature: 0.7,
-        top_p: 1,
-        frequency_penalty: 0,
-        presence_penalty: 0
-      })
+      const response = await fetch(`${BACKEND_API_URL}/api/ai/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
 
-      return completion.choices[0]?.message?.content || null
-    } catch (error: any) {
-      console.error('Error sending message to OpenAI:', error)
-      
-      // 处理常见错误
-      if (error.status === 401) {
-        console.error('Invalid API key')
-      } else if (error.status === 429) {
-        console.error('Rate limit exceeded')
-      } else if (error.status === 500) {
-        console.error('OpenAI server error')
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error from backend chat API:', errorData.detail);
+        return `Error: ${errorData.detail}`;
       }
-      
-      return null
+
+      const data = await response.json();
+      return data.response;
+    } catch (error: any) {
+      console.error('Error sending message to backend:', error)
+      return "Failed to connect to the backend. Please check if the server is running."
     }
   }
 
+  // Streaming is not implemented via Python backend in this refactor
   const sendStreamMessage = async (
     message: string, 
-    onChunk: (chunk: string) => void
+    onChunk: (chunk: string) => void,
+    history: OpenAIMessage[] = [],
+    isAnalysis: boolean = false
   ): Promise<void> => {
-    if (!openai || !isConnected) {
-      console.error('OpenAI not initialized')
-      return
-    }
-
-    try {
-      const stream = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "user",
-            content: message
-          }
-        ],
-        max_tokens: 1000,
-        temperature: 0.7,
-        stream: true
-      })
-
-      for await (const chunk of stream) {
-        const content = chunk.choices[0]?.delta?.content
-        if (content) {
-          onChunk(content)
-        }
-      }
-    } catch (error: any) {
-      console.error('Error streaming message from OpenAI:', error)
+    console.warn('Streaming not yet implemented for Python backend. Using regular fetch.')
+    const response = await sendMessage(message, history, isAnalysis);
+    if (response) {
+      onChunk(response);
     }
   }
 

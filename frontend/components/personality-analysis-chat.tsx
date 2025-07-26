@@ -532,7 +532,7 @@ Please return a JSON object in the following format:
   }
 
   return (
-    <div className="flex flex-col h-full bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="flex flex-col h-[calc(100vh-9rem)] bg-gradient-to-br from-background via-background to-muted/20">
       {/* Enhanced Progress Bar */}
       {currentStage === 'analysis' && (
         <div className={`p-6 border-b bg-gradient-to-r ${

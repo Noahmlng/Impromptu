@@ -24,6 +24,7 @@ from backend.services.user_service import router as user_router
 from backend.services.tag_service import router as tag_router
 from backend.services.matching_service import router as matching_router
 from backend.services.metadata_service import router as metadata_router
+from backend.services.ai_service import router as ai_router
 from backend.services.database_service import init_database, close_database
 
 @asynccontextmanager
@@ -81,8 +82,8 @@ async def health_check():
 async def root():
     """根路径"""
     return {
-        "message": "Impromptu 社交匹配系统API",
-        "version": "1.0.0",
+        "message": "Linker 社交匹配系统API",
+        "version": "0.0.1",
         "docs": "/docs",
         "health": "/health"
     }
@@ -102,6 +103,7 @@ app.include_router(user_router, prefix="/api/users", tags=["用户"])
 app.include_router(tag_router, prefix="/api/tags", tags=["标签"])
 app.include_router(matching_router, prefix="/api/match", tags=["匹配"])
 app.include_router(metadata_router, prefix="/api/metadata", tags=["元数据"])
+app.include_router(ai_router, prefix="/api/ai", tags=["AI服务"])
 
 # 全局异常处理
 @app.exception_handler(Exception)
