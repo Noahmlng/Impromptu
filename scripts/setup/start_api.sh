@@ -47,7 +47,7 @@ check_service_running() {
         echo ""
         echo "💡 如需重启服务，请先停止现有服务："
         echo "   bash scripts/setup/manage_ports.sh clean"
-        echo "   然后重新运行此脚本"
+        echo "   然后重新运行此脚本
         exit 0
     fi
 }

@@ -22,19 +22,26 @@ load_dotenv()
 
 router = APIRouter()
 
-# Configure OpenAI client
+# Configure OpenAI client - 让API Key变为可选
 openai_api_key = os.getenv("OPENAI_API_KEY")
 openai_base_url = os.getenv("OPENAI_BASE_URL")
 moonshot_api_key = os.getenv("MOONSHOT_API_KEY")
 moonshot_base_url = os.getenv("MOONSHOT_BASE_URL")
 
-if not openai_api_key:
-    logger.error("OPENAI_API_KEY environment variable not set!")
-    raise ValueError("OPENAI_API_KEY environment variable not set.")
-
-# client = OpenAI(api_key=openai_api_key, base_url=openai_base_url)
-client = OpenAI(api_key=moonshot_api_key, base_url=moonshot_base_url)
-logger.info("OpenAI client initialized successfully")
+# 检查API Key状态但不阻止应用启动
+OPENAI_AVAILABLE = bool(openai_api_key or moonshot_api_key)
+if not OPENAI_AVAILABLE:
+    print("⚠️ OPENAI_API_KEY 或 MOONSHOT_API_KEY 未设置，AI聊天功能将不可用")
+    print("💡 如需使用AI功能，请设置环境变量: OPENAI_API_KEY=your_key 或 MOONSHOT_API_KEY=your_key")
+    client = None
+else:
+    # 优先使用 Moonshot，如果没有则使用 OpenAI
+    if moonshot_api_key:
+        client = OpenAI(api_key=moonshot_api_key, base_url=moonshot_base_url)
+        logger.info("Moonshot client initialized successfully")
+    else:
+        client = OpenAI(api_key=openai_api_key, base_url=openai_base_url)
+        logger.info("OpenAI client initialized successfully")
 
 class ChatRequest(BaseModel):
     message: Optional[str]
@@ -62,6 +69,17 @@ async def handle_chat(request: ChatRequest):
     """
     Handles AI chat requests by proxying them to OpenAI.
     """
+    # 检查API Key是否可用
+    if not OPENAI_AVAILABLE:
+        raise HTTPException(
+            status_code=503, 
+            detail={
+                "error": "AI服务不可用",
+                "message": "OPENAI_API_KEY 或 MOONSHOT_API_KEY 环境变量未设置",
+                "solution": "请设置 OPENAI_API_KEY 或 MOONSHOT_API_KEY 环境变量后重启应用"
+            }
+        )
+    
     try:
         logger.info(f"Received chat request: themeMode={request.themeMode}, language={request.language}, isAnalysis={request.isAnalysis}")
         logger.info(f"History length: {len(request.history)}")
@@ -218,6 +236,20 @@ async def get_conversation_history(
         logger.error(f"获取对话历史错误: {e}")
         raise HTTPException(status_code=500, detail=f"获取对话历史失败: {str(e)}") 
 
+# 添加AI服务状态检查路由
+@router.get("/status")
+async def ai_service_status():
+    """检查AI服务状态"""
+    return {
+        "openai_available": OPENAI_AVAILABLE,
+        "status": "ready" if OPENAI_AVAILABLE else "unavailable",
+        "message": "AI服务正常" if OPENAI_AVAILABLE else "需要设置 OPENAI_API_KEY 或 MOONSHOT_API_KEY",
+        "available_models": {
+            "openai": bool(openai_api_key),
+            "moonshot": bool(moonshot_api_key)
+        }
+    }
+
 """
 使用示例：
 
@@ -262,4 +294,4 @@ async def get_conversation_history(
    }
 
 对话记录将自动存储到数据库中，并可以用于标签生成，提高标签的准确性和个性化程度。
-""" 
+"""
