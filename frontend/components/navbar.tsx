@@ -34,6 +34,16 @@ export function Navbar() {
     setTheme(theme === 'dark' ? 'light' : 'dark')
   }
 
+  // 处理登录按钮点击
+  const handleLoginClick = () => {
+    console.log('Login button clicked in navbar')
+    try {
+      router.push('/login')
+    } catch (error) {
+      console.error('Error navigating to login:', error)
+    }
+  }
+
   // 翻译对象
   const t = {
     subscription: {
@@ -207,7 +217,7 @@ export function Navbar() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button size="sm" onClick={() => router.push('/login')}>
+                <Button size="sm" onClick={handleLoginClick}>
                   {language === 'zh' ? '登录' : 'Login'}
                 </Button>
               )}

@@ -550,10 +550,28 @@ export const apiClient = new ApiClient()
 export const auth = {
   login: async (email: string, password: string) => {
     try {
-      // 添加超时控制
+      // 添加超时控制和连接检查
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('登录请求超时，请检查网络连接')), 30000)
+        setTimeout(() => reject(new Error('登录请求超时，请检查网络连接')), 15000) // 减少超时时间
       })
+
+      // 添加连接测试
+      const testConnection = async () => {
+        try {
+          const response = await fetch('https://anxbbsrnjgmotxzysqwf.supabase.co/rest/v1/', {
+            method: 'HEAD',
+            signal: AbortSignal.timeout(5000)
+          })
+          if (!response.ok && response.status !== 401) {
+            throw new Error('Supabase服务不可用')
+          }
+        } catch (error) {
+          throw new Error('网络连接失败，请检查网络设置')
+        }
+      }
+
+      // 先测试连接，然后进行登录
+      await testConnection()
 
       const signInPromise = supabase.auth.signInWithPassword({
         email,
@@ -620,9 +638,21 @@ export const auth = {
       throw new Error('登录失败')
     } catch (error: any) {
       console.error('Login error:', error)
+      
+      // 处理特殊的浏览器错误
+      let errorMessage = error.message || '登录失败'
+      
+      if (error.message && error.message.includes('message channel closed')) {
+        errorMessage = '浏览器扩展冲突，请禁用相关扩展后重试'
+      } else if (error.message && error.message.includes('NetworkError')) {
+        errorMessage = '网络错误，请检查网络连接'
+      } else if (error.message && error.message.includes('timeout')) {
+        errorMessage = '连接超时，请检查网络设置'
+      }
+      
       return {
         success: false,
-        message: error.message || '登录失败',
+        message: errorMessage,
         data: null
       }
     }
