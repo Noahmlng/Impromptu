@@ -18,6 +18,7 @@ import {
   CheckCircle,
   X
 } from 'lucide-react'
+import ReactDOM from 'react-dom'
 
 interface MatchSearchProps {
   isOpen: boolean
@@ -182,8 +183,8 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
 
   if (!isOpen) return null
 
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  const modal = (
+    <div className="fixed top-0 left-0 right-0 bottom-0 w-screen h-screen bg-black/50 flex items-center justify-center z-[9999] p-4">
       <div className="bg-card rounded-lg shadow-xl border w-full max-w-4xl max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
@@ -452,7 +453,6 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
           </div>
         </div>
       </div>
-
       {/* Matching Loading Modal */}
       <MatchingLoadingModal
         isOpen={isMatchingLoading}
@@ -462,4 +462,9 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
       />
     </div>
   )
+
+  if (typeof window !== 'undefined') {
+    return ReactDOM.createPortal(modal, document.body)
+  }
+  return null
 } 

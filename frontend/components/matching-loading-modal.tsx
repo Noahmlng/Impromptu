@@ -113,7 +113,7 @@ export default function MatchingLoadingModal({
   const imageSize = matchType === '找队友' ? 'w-64 h-64' : 'w-20 h-20'
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4">
       <div className="bg-card rounded-lg shadow-xl border w-full max-w-4xl max-h-[90vh] overflow-hidden mt-[33px]" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">

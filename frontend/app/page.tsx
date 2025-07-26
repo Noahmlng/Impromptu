@@ -4,8 +4,10 @@ import { useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { useAppStore } from '@/lib/store'
 import { useOptionalAuth } from '@/hooks/useAuth'
+import { ScrollNavbar } from '@/components/scroll-navbar'
 import { 
   Heart, 
   Users, 
@@ -25,6 +27,19 @@ export default function LandingPage() {
   const { language } = useAppStore()
   const router = useRouter()
   const { isAuthenticated, isLoading } = useOptionalAuth()
+
+  // 设置全局语言变量供嵌入的HTML使用
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      ;(window as any).chatLanguage = language
+      // 如果聊天动画已经初始化，重新启动以应用新语言
+      setTimeout(() => {
+        if (typeof window !== 'undefined' && (window as any).restartChatAnimation) {
+          (window as any).restartChatAnimation()
+        }
+      }, 100)
+    }
+  }, [language])
 
   // Redirect to /home if user is authenticated
   useEffect(() => {
@@ -124,8 +139,11 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen">
+      {/* 滚动导航 */}
+      <ScrollNavbar />
+      
       {/* Hero Section */}
-      <section className="relative overflow-hidden" style={{ minHeight: '1200px' }}>
+      <section id="hero" className="relative overflow-hidden" style={{ minHeight: '1200px' }}>
         {/* Background Image - 放在最上边 */}
         <div 
           className="absolute inset-0 bg-contain bg-no-repeat"
@@ -182,7 +200,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-white dark:bg-gray-950">
+      <section id="features" className="py-20 bg-white dark:bg-gray-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -195,27 +213,924 @@ export default function LandingPage() {
               }
             </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <div key={index} className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-8 text-center hover:shadow-lg transition-shadow">
-                <div className="bg-gradient-to-r from-blue-500 to-purple-500 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <feature.icon className="h-8 w-8 text-white" />
+
+          {/* shadcn现代卡片布局 */}
+          <div className="space-y-20">
+            {/* 第一行：左图右文 */}
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-12 items-center">
+              {/* 左侧：AI对话气泡 */}
+              <div className="aspect-[4/3]">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 h-full overflow-hidden shadow-lg" style={{boxShadow: '0 10px 25px rgba(59, 130, 246, 0.15)'}}>
+                  {/* 嵌入的聊天动画 */}
+                  <div 
+                    className="w-full h-full"
+                    dangerouslySetInnerHTML={{
+                      __html: `
+                        <style>
+                          @font-face {
+                            font-family: 'MiSans';
+                            src: url('https://assets-persist.lovart.ai/agent-static-assets/MiSans-Regular.ttf') format('truetype');
+                            font-weight: normal;
+                            font-style: normal;
+                          }
+                          
+                          @font-face {
+                            font-family: 'MiSans';
+                            src: url('https://assets-persist.lovart.ai/agent-static-assets/MiSans-Medium.ttf') format('truetype');
+                            font-weight: 500;
+                            font-style: normal;
+                          }
+                          
+                          @font-face {
+                            font-family: 'MiSans';
+                            src: url('https://assets-persist.lovart.ai/agent-static-assets/MiSans-Bold.ttf') format('truetype');
+                            font-weight: bold;
+                            font-style: normal;
+                          }
+                          
+                          .chat-animation-container {
+                            font-family: 'MiSans', sans-serif;
+                            width: 100%;
+                            height: 100%;
+                            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                            border-radius: 16px;
+                            overflow: hidden;
+                            display: flex;
+                            flex-direction: column;
+                            position: relative;
+                          }
+                          
+                          .chat-animation-header {
+                            padding: 16px 20px;
+                            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+                            color: white;
+                            font-weight: 600;
+                            font-size: 16px;
+                            display: flex;
+                            align-items: center;
+                            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            z-index: 10;
+                            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+                          }
+                          
+                          .chat-animation-header i {
+                            margin-right: 12px;
+                            font-size: 20px;
+                            background: rgba(255, 255, 255, 0.2);
+                            padding: 8px;
+                            border-radius: 12px;
+                          }
+                          
+                          .chat-animation-body {
+                            flex: 1;
+                            padding: 16px 20px;
+                            padding-top: 80px;
+                            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                            display: flex;
+                            flex-direction: column;
+                            position: relative;
+                            overflow: hidden;
+                            height: 100%;
+                          }
+                          
+                          .chat-animation-message {
+                            display: flex;
+                            margin-bottom: 16px;
+                            opacity: 0;
+                            transform: translateY(20px);
+                            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                            position: absolute;
+                            width: calc(100% - 40px);
+                          }
+                          
+                          .chat-animation-message.visible {
+                            opacity: 1;
+                            transform: translateY(0);
+                          }
+                          
+                          .chat-animation-avatar {
+                            width: 36px;
+                            height: 36px;
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            margin-right: 12px;
+                            flex-shrink: 0;
+                            font-size: 16px;
+                            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                          }
+                          
+                          .chat-animation-bot-avatar {
+                            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+                            color: white;
+                            position: relative;
+                            overflow: hidden;
+                          }
+                          
+                          .chat-animation-bot-avatar::before {
+                            content: '';
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                            width: 20px;
+                            height: 20px;
+                            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2M7.5 13A2.5 2.5 0 0 0 5 15.5A2.5 2.5 0 0 0 7.5 18a2.5 2.5 0 0 0 2.5-2.5A2.5 2.5 0 0 0 7.5 13m9 0a2.5 2.5 0 0 0-2.5 2.5a2.5 2.5 0 0 0 2.5 2.5a2.5 2.5 0 0 0 2.5-2.5a2.5 2.5 0 0 0-2.5-2.5"/></svg>') no-repeat center;
+                            background-size: contain;
+                            opacity: 0.9;
+                          }
+                          
+                          .chat-animation-user-avatar {
+                            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+                            color: white;
+                            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>');
+                            background-size: 60%;
+                            background-repeat: no-repeat;
+                            background-position: center;
+                          }
+                          
+                          .chat-animation-message-content {
+                            max-width: 75%;
+                            padding: 14px 18px;
+                            border-radius: 20px;
+                            font-size: 14px;
+                            line-height: 1.5;
+                            position: relative;
+                            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+                            font-weight: 500;
+                          }
+                          
+                          .chat-animation-bot .chat-animation-message-content {
+                            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+                            color: white;
+                            border-top-left-radius: 6px;
+                            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+                          }
+                          
+                          .chat-animation-user {
+                            flex-direction: row-reverse;
+                            align-self: flex-end;
+                          }
+                          
+                          .chat-animation-user .chat-animation-avatar {
+                            margin-right: 0;
+                            margin-left: 12px;
+                          }
+                          
+                          .chat-animation-user .chat-animation-message-content {
+                            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+                            color: #1e293b;
+                            border-top-right-radius: 6px;
+                            border: 1px solid rgba(59, 130, 246, 0.1);
+                            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+                          }
+                          
+                          .chat-animation-cursor {
+                            display: inline-block;
+                            width: 2px;
+                            height: 18px;
+                            background-color: currentColor;
+                            margin-left: 3px;
+                            vertical-align: middle;
+                            animation: chat-animation-blink 1.2s infinite;
+                            border-radius: 1px;
+                          }
+                          
+                          @keyframes chat-animation-blink {
+                            0%, 100% {
+                              opacity: 1;
+                            }
+                            50% {
+                              opacity: 0;
+                            }
+                          }
+                          
+                          /* 添加打字机效果的光晕 */
+                          .chat-animation-message-content::after {
+                            content: '';
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            bottom: 0;
+                            border-radius: inherit;
+                            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+                            opacity: 0;
+                            transition: opacity 0.3s ease;
+                          }
+                          
+                          .chat-animation-message.typing .chat-animation-message-content::after {
+                            opacity: 1;
+                          }
+                          
+                          .chat-animation-frame {
+                            display: none;
+                          }
+                          
+                          .chat-animation-frame.active {
+                            display: block;
+                          }
+                          
+                          .chat-animation-text-animation {
+                            display: inline;
+                          }
+                          
+                          /* 第一个对话中机器人消息向下移动20px */
+                          #chat-frame1 .chat-animation-bot {
+                            transform: translateY(20px);
+                          }
+                        </style>
+                        
+                        <div class="chat-animation-container">
+                          <div class="chat-animation-header">
+                            <i class="ri-message-3-line"></i>
+                            ${language === 'zh' ? '你的身份是什么？' : "What's your identity?"}
+                    </div>
+                          <div class="chat-animation-body">
+                            <!-- Frame 1 -->
+                            <div class="chat-animation-frame" id="chat-frame1">
+                              <div class="chat-animation-message chat-animation-bot visible">
+                                <div class="chat-animation-avatar chat-animation-bot-avatar">
+                  </div>
+                                <div class="chat-animation-message-content">
+                                  <span class="chat-animation-text-animation" id="chat-bot-text-1"></span>
+                                  <span class="chat-animation-cursor"></span>
+                    </div>
+                    </div>
+                              <div class="chat-animation-message chat-animation-user">
+                                <div class="chat-animation-avatar chat-animation-user-avatar">
+                  </div>
+                                <div class="chat-animation-message-content">
+                                  <span class="chat-animation-text-animation" id="chat-user-text-1"></span>
+                                  <span class="chat-animation-cursor"></span>
+                  </div>
+                              </div>
+                            </div>
+                            
+                            <!-- Frame 2 -->
+                            <div class="chat-animation-frame" id="chat-frame2">
+                              <div class="chat-animation-message chat-animation-bot visible">
+                                <div class="chat-animation-avatar chat-animation-bot-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span>${language === 'zh' ? '你好！我想更好地了解你。' : "Hi! I'd like to know you better."}</span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-user visible">
+                                <div class="chat-animation-avatar chat-animation-user-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span>${language === 'zh' ? '你好！当然可以。' : "Hi! Sure."}</span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-bot visible">
+                                <div class="chat-animation-avatar chat-animation-bot-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span class="chat-animation-text-animation" id="chat-bot-text-2"></span>
+                                  <span class="chat-animation-cursor"></span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-user">
+                                <div class="chat-animation-avatar chat-animation-user-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span class="chat-animation-text-animation" id="chat-user-text-2"></span>
+                                  <span class="chat-animation-cursor"></span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <!-- Frame 3 -->
+                            <div class="chat-animation-frame" id="chat-frame3">
+                              <div class="chat-animation-message chat-animation-bot visible">
+                                <div class="chat-animation-avatar chat-animation-bot-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span>${language === 'zh' ? '你好！我想更好地了解你。' : "Hi! I'd like to know you better."}</span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-user visible">
+                                <div class="chat-animation-avatar chat-animation-user-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span>${language === 'zh' ? '你好！当然可以。' : "Hi! Sure."}</span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-bot visible">
+                                <div class="chat-animation-avatar chat-animation-bot-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span>${language === 'zh' ? '对你来说，什么是完美的一天？' : 'What would constitute a "perfect" day for you?'}</span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-user visible">
+                                <div class="chat-animation-avatar chat-animation-user-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span>${language === 'zh' ? '和朋友在一起，享受美食和音乐的一天。' : "A day with friends, good food, and music."}</span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-bot visible">
+                                <div class="chat-animation-avatar chat-animation-bot-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span class="chat-animation-text-animation" id="chat-bot-text-3"></span>
+                                  <span class="chat-animation-cursor"></span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-user">
+                                <div class="chat-animation-avatar chat-animation-user-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span class="chat-animation-text-animation" id="chat-user-text-3"></span>
+                                  <span class="chat-animation-cursor"></span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <!-- Frame 4 -->
+                            <div class="chat-animation-frame" id="chat-frame4">
+                              <div class="chat-animation-message chat-animation-bot visible">
+                                <div class="chat-animation-avatar chat-animation-bot-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span>${language === 'zh' ? '你好！我想更好地了解你。' : "Hi! I'd like to know you better."}</span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-user visible">
+                                <div class="chat-animation-avatar chat-animation-user-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span>${language === 'zh' ? '你好！当然可以。' : "Hi! Sure."}</span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-bot visible">
+                                <div class="chat-animation-avatar chat-animation-bot-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span>${language === 'zh' ? '对你来说，什么是完美的一天？' : 'What would constitute a "perfect" day for you?'}</span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-user visible">
+                                <div class="chat-animation-avatar chat-animation-user-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span>${language === 'zh' ? '和朋友在一起，享受美食和音乐的一天。' : "A day with friends, good food, and music."}</span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-bot visible">
+                                <div class="chat-animation-avatar chat-animation-bot-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span>${language === 'zh' ? '如果你明天醒来能获得任何一种品质或能力，你希望是什么？' : "If you could wake up tomorrow having gained any one quality or ability, what would it be?"}</span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-user visible">
+                                <div class="chat-animation-avatar chat-animation-user-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span>${language === 'zh' ? '能够说所有语言的能力。' : "The ability to speak every language."}</span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-bot visible">
+                                <div class="chat-animation-avatar chat-animation-bot-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span class="chat-animation-text-animation" id="chat-bot-text-4"></span>
+                                  <span class="chat-animation-cursor"></span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-user">
+                                <div class="chat-animation-avatar chat-animation-user-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span class="chat-animation-text-animation" id="chat-user-text-4"></span>
+                                  <span class="chat-animation-cursor"></span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <!-- Frame 5 -->
+                            <div class="chat-animation-frame" id="chat-frame5">
+                              <div class="chat-animation-message chat-animation-bot visible">
+                                <div class="chat-animation-avatar chat-animation-bot-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span>${language === 'zh' ? '你好！我想更好地了解你。' : "Hi! I'd like to know you better."}</span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-user visible">
+                                <div class="chat-animation-avatar chat-animation-user-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span>${language === 'zh' ? '你好！当然可以。' : "Hi! Sure."}</span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-bot visible">
+                                <div class="chat-animation-avatar chat-animation-bot-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span>${language === 'zh' ? '对你来说，什么是完美的一天？' : 'What would constitute a "perfect" day for you?'}</span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-user visible">
+                                <div class="chat-animation-avatar chat-animation-user-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span>${language === 'zh' ? '和朋友在一起，享受美食和音乐的一天。' : "A day with friends, good food, and music."}</span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-bot visible">
+                                <div class="chat-animation-avatar chat-animation-bot-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span>${language === 'zh' ? '如果你明天醒来能获得任何一种品质或能力，你希望是什么？' : "If you could wake up tomorrow having gained any one quality or ability, what would it be?"}</span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-user visible">
+                                <div class="chat-animation-avatar chat-animation-user-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span>${language === 'zh' ? '能够说所有语言的能力。' : "The ability to speak every language."}</span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-bot visible">
+                                <div class="chat-animation-avatar chat-animation-bot-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span>${language === 'zh' ? '在友谊中你最看重什么？' : "What do you value most in a friendship?"}</span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-user visible">
+                                <div class="chat-animation-avatar chat-animation-user-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span>${language === 'zh' ? '信任和诚实。' : "Trust and honesty."}</span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-bot visible">
+                                <div class="chat-animation-avatar chat-animation-bot-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span class="chat-animation-text-animation" id="chat-bot-text-5"></span>
+                                  <span class="chat-animation-cursor"></span>
+                                </div>
+                              </div>
+                              <div class="chat-animation-message chat-animation-user">
+                                <div class="chat-animation-avatar chat-animation-user-avatar">
+                                </div>
+                                <div class="chat-animation-message-content">
+                                  <span class="chat-animation-text-animation" id="chat-user-text-5"></span>
+                                  <span class="chat-animation-cursor"></span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <script>
+                          // Get current language from parent component
+                          const getCurrentLanguage = () => {
+                            // Try to get language from parent React component
+                            return window.chatLanguage || '${language}';
+                          };
+                          
+                          // Text content for each frame - function to get current texts
+                          const getChatFrameTexts = () => {
+                            const lang = getCurrentLanguage();
+                            return {
+                              frame1: {
+                                bot: lang === 'zh' ? "你好！我想更好地了解你。" : "Hi! I'd like to know you better.",
+                                user: lang === 'zh' ? "你好！当然可以。" : "Hi! Sure."
+                              },
+                              frame2: {
+                                bot: lang === 'zh' ? "对你来说，什么是完美的一天？" : 'What would constitute a "perfect" day for you?',
+                                user: lang === 'zh' ? "和朋友在一起，享受美食和音乐的一天。" : "A day with friends, good food, and music."
+                              },
+                              frame3: {
+                                bot: lang === 'zh' ? "如果你明天醒来能获得任何一种品质或能力，你希望是什么？" : "If you could wake up tomorrow having gained any one quality or ability, what would it be?",
+                                user: lang === 'zh' ? "能够说所有语言的能力。" : "The ability to speak every language."
+                              },
+                              frame4: {
+                                bot: lang === 'zh' ? "在友谊中你最看重什么？" : "What do you value most in a friendship?",
+                                user: lang === 'zh' ? "信任和诚实。" : "Trust and honesty."
+                              },
+                              frame5: {
+                                bot: lang === 'zh' ? "谢谢！我对你了解了很多。" : "Thanks! I'm learning a lot about you.",
+                                user: "😊"
+                              }
+                            };
+                          };
+
+                          // Animation variables
+                          let chatCurrentFrame = 1;
+                          const chatTypingSpeed = 40; // ms per character
+                          let chatAnimationInterval;
+                          
+                          // Initialize chat animation
+                          function initChatAnimation() {
+                            showChatFrame(chatCurrentFrame);
+                            startChatAutoPlay();
+                          }
+                          
+                          // Restart chat animation (for language changes)
+                          function restartChatAnimation() {
+                            // Clear existing interval
+                            if (chatAnimationInterval) {
+                              clearInterval(chatAnimationInterval);
+                            }
+                            // Update static texts first
+                            updateStaticTexts();
+                            // Reset to first frame
+                            chatCurrentFrame = 1;
+                            // Restart animation
+                            initChatAnimation();
+                          }
+                          
+                          // Make restart function globally available
+                          window.restartChatAnimation = restartChatAnimation;
+                          
+                          // Show specific frame
+                          function showChatFrame(frameNumber) {
+                            // Hide all frames
+                            document.querySelectorAll('.chat-animation-frame').forEach(frame => {
+                              if (frame && frame.classList) {
+                                frame.classList.remove('active');
+                              }
+                            });
+                            
+                            // Show current frame
+                            const currentFrameElement = document.getElementById(\`chat-frame\${frameNumber}\`);
+                            if (currentFrameElement && currentFrameElement.classList) {
+                              currentFrameElement.classList.add('active');
+                            }
+                            
+                            // Reset and start animations for the current frame
+                            resetChatFrameAnimations(frameNumber);
+                            startChatFrameAnimations(frameNumber);
+                            
+                            // Auto-scroll to show new messages with smooth animation
+                            setTimeout(() => {
+                              const bodyElement = document.querySelector('.chat-animation-body');
+                              if (bodyElement) {
+                                const scrollDistance = 120; // 增加滚动距离
+                                const currentScroll = bodyElement.scrollTop;
+                                const targetScroll = currentScroll + scrollDistance;
+                                
+                                // 平滑滚动动画
+                                const scrollStep = () => {
+                                  if (bodyElement.scrollTop < targetScroll) {
+                                    bodyElement.scrollTop += 8;
+                                    requestAnimationFrame(scrollStep);
+                                  }
+                                };
+                                scrollStep();
+                              }
+                            }, 200);
+                          }
+                          
+                          // Reset animations for a frame
+                          function resetChatFrameAnimations(frameNumber) {
+                            const botTextElement = document.getElementById(\`chat-bot-text-\${frameNumber}\`);
+                            const userTextElement = document.getElementById(\`chat-user-text-\${frameNumber}\`);
+                            
+                            if (botTextElement) botTextElement.textContent = '';
+                            if (userTextElement) userTextElement.textContent = '';
+                            
+                            // Reset message visibility and position
+                            const frameElement = document.getElementById(\`chat-frame\${frameNumber}\`);
+                            if (frameElement) {
+                              const messages = frameElement.querySelectorAll('.chat-animation-message');
+                              
+                              messages.forEach((message, index) => {
+                                if (index >= messages.length - 2) { // Only the last two messages (bot and user)
+                                  if (message && message.classList) {
+                                    message.classList.remove('visible');
+                                    message.classList.remove('typing');
+                                    message.style.top = '';
+                                  }
+                                }
+                              });
+                            }
+                          }
+                          
+                          // Start animations for a frame
+                          function startChatFrameAnimations(frameNumber) {
+                            const frameKey = \`frame\${frameNumber}\`;
+                            const chatFrameTexts = getChatFrameTexts();
+                            const botText = chatFrameTexts[frameKey].bot;
+                            const userText = chatFrameTexts[frameKey].user;
+                            
+                            const botTextElement = document.getElementById(\`chat-bot-text-\${frameNumber}\`);
+                            const userTextElement = document.getElementById(\`chat-user-text-\${frameNumber}\`);
+                            
+                            const frameElement = document.getElementById(\`chat-frame\${frameNumber}\`);
+                            if (!frameElement) return;
+                            
+                            const messages = frameElement.querySelectorAll('.chat-animation-message');
+                            if (messages.length < 2) return;
+                            
+                            const botMessage = messages[messages.length - 2]; // Second to last message
+                            const userMessage = messages[messages.length - 1]; // Last message
+                            
+                            // Position messages for mobile-style display
+                            const messageHeight = 80;
+                            const startY = 50; // 向下移动起始位置
+                            
+                            messages.forEach((message, index) => {
+                              if (message && message.classList && message.classList.contains('visible')) {
+                                message.classList.remove('typing');
+                                message.style.top = \`\${startY + index * messageHeight}px\`;
+                              }
+                            });
+                            
+                            // Show bot message with typing animation
+                            setTimeout(() => {
+                              if (botMessage && botMessage.classList) {
+                                botMessage.classList.add('visible');
+                                botMessage.classList.add('typing');
+                                botMessage.style.top = \`\${startY + (messages.length - 2) * messageHeight}px\`;
+                                typeChatText(botTextElement, botText, 0, () => {
+                                  // After bot finishes typing, show user message
+                                  if (botMessage && botMessage.classList) {
+                                    botMessage.classList.remove('typing');
+                                  }
+                                  setTimeout(() => {
+                                    if (userMessage && userMessage.classList) {
+                                      userMessage.classList.add('visible');
+                                      userMessage.classList.add('typing');
+                                      userMessage.style.top = \`\${startY + (messages.length - 1) * messageHeight}px\`;
+                                      typeChatText(userTextElement, userText, 0, () => {
+                                        if (userMessage && userMessage.classList) {
+                                          userMessage.classList.remove('typing');
+                                        }
+                                      });
+                                    }
+                                  }, 400);
+                                });
+                              }
+                            }, 400);
+                          }
+                          
+                          // Typing animation
+                          function typeChatText(element, text, index, callback) {
+                            if (index < text.length) {
+                              element.textContent += text.charAt(index);
+                              setTimeout(() => {
+                                typeChatText(element, text, index + 1, callback);
+                              }, chatTypingSpeed);
+                            } else if (callback) {
+                              callback();
+                            }
+                          }
+                          
+                          // Start auto-play
+                          function startChatAutoPlay() {
+                            // Auto-advance frames
+                            chatAnimationInterval = setInterval(() => {
+                              if (chatCurrentFrame < 5) {
+                                chatCurrentFrame++;
+                                showChatFrame(chatCurrentFrame);
+                              } else {
+                                // Loop back to first frame
+                                chatCurrentFrame = 1;
+                                showChatFrame(chatCurrentFrame);
+                              }
+                            }, 6000); // Time for each frame (typing + reading)
+                          }
+                          
+                          // Update static text content based on current language
+                          function updateStaticTexts() {
+                            const lang = getCurrentLanguage();
+                            const headerElement = document.querySelector('.chat-animation-header');
+                            if (headerElement) {
+                              headerElement.textContent = lang === 'zh' ? '你的身份是什么？' : "What's your identity?";
+                            }
+                            
+                            // Update all static message texts
+                            const staticMessages = document.querySelectorAll('.chat-animation-message span:not(.chat-animation-text-animation)');
+                            const chatFrameTexts = getChatFrameTexts();
+                            
+                            staticMessages.forEach((span, index) => {
+                              const text = span.textContent;
+                              // Update based on known text patterns
+                              if (text === '你好！我想更好地了解你。' || text === "Hi! I'd like to know you better.") {
+                                span.textContent = chatFrameTexts.frame1.bot;
+                              } else if (text === '你好！当然可以。' || text === "Hi! Sure.") {
+                                span.textContent = chatFrameTexts.frame1.user;
+                              } else if (text === '对你来说，什么是完美的一天？' || text === 'What would constitute a "perfect" day for you?') {
+                                span.textContent = chatFrameTexts.frame2.bot;
+                              } else if (text === '和朋友在一起，享受美食和音乐的一天。' || text === "A day with friends, good food, and music.") {
+                                span.textContent = chatFrameTexts.frame2.user;
+                              } else if (text === '如果你明天醒来能获得任何一种品质或能力，你希望是什么？' || text === "If you could wake up tomorrow having gained any one quality or ability, what would it be?") {
+                                span.textContent = chatFrameTexts.frame3.bot;
+                              } else if (text === '能够说所有语言的能力。' || text === "The ability to speak every language.") {
+                                span.textContent = chatFrameTexts.frame3.user;
+                              } else if (text === '在友谊中你最看重什么？' || text === "What do you value most in a friendship?") {
+                                span.textContent = chatFrameTexts.frame4.bot;
+                              } else if (text === '信任和诚实。' || text === "Trust and honesty.") {
+                                span.textContent = chatFrameTexts.frame4.user;
+                              }
+                            });
+                          }
+                          
+                          // Initialize when DOM is loaded
+                          document.addEventListener('DOMContentLoaded', () => {
+                            updateStaticTexts();
+                            initChatAnimation();
+                          });
+                          
+                          // Also initialize immediately if DOM is already loaded
+                          if (document.readyState === 'loading') {
+                            document.addEventListener('DOMContentLoaded', () => {
+                              updateStaticTexts();
+                              initChatAnimation();
+                            });
+                          } else {
+                            updateStaticTexts();
+                            initChatAnimation();
+                          }
+                        </script>
+                      `
+                    }}
+                  />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                  {feature.description}
-                </p>
               </div>
-            ))}
+              
+              {/* 右侧：文字内容 */}
+              <div className="space-y-4 max-w-xs mx-auto lg:mx-0 lg:ml-24 flex flex-col justify-center">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-tight font-helvetica">
+                  {features[0].title}
+                </h3>
+                <p className="text-base text-gray-600 dark:text-gray-300 leading-relaxed font-helvetica">
+                  {features[0].description} {language === 'zh' 
+                    ? '我们的AI系统能够深度分析用户的行为模式、兴趣爱好和价值观，通过先进的机器学习算法，为您找到最匹配的伙伴。无论是寻找浪漫伴侣还是工作伙伴，我们都能提供精准的推荐。'
+                    : 'Our AI system deeply analyzes user behavior patterns, interests, and values, using advanced machine learning algorithms to find your perfect match. Whether you\'re looking for a romantic partner or work companion, we provide accurate recommendations.'
+                  }
+                </p>
+                <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold w-[85px] h-[35px] rounded-md text-sm shadow-sm hover:shadow-md transition-all">
+                  {language === 'zh' ? '立即体验' : 'Try Now'}
+                </Button>
+              </div>
+            </div>
+
+            {/* 第二行：左文右图 */}
+            <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-12 items-center">
+              {/* 左侧：文字内容 */}
+              <div className="space-y-4 max-w-xs mx-auto lg:mx-0 lg:mr-24 flex flex-col justify-center">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-tight font-helvetica">
+                  {features[1].title}
+                </h3>
+                <p className="text-base text-gray-600 dark:text-gray-300 leading-relaxed font-helvetica">
+                  {features[1].description} {language === 'zh'
+                    ? '我们不仅仅看表面的兴趣爱好，还会从性格特征、沟通方式、生活目标等多个维度进行深度分析。通过科学的兼容性评估，确保匹配的准确性和长期稳定性。'
+                    : 'We don\'t just look at surface interests, but also analyze personality traits, communication styles, and life goals from multiple dimensions. Through scientific compatibility assessment, we ensure matching accuracy and long-term stability.'
+                  }
+                </p>
+                <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold w-[85px] h-[35px] rounded-md text-sm shadow-sm hover:shadow-md transition-all">
+                  {language === 'zh' ? '立即体验' : 'Try Now'}
+                </Button>
+              </div>
+              
+              {/* 右侧：多维度分析图表 */}
+              <div className="bg-gradient-to-br from-pink-50 to-rose-100 dark:from-pink-950 dark:to-rose-900 rounded-3xl p-8 aspect-[4/3]">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 h-full">
+                  {/* 界面功能截图占位 */}
+                  <div className="flex items-center justify-center mb-6">
+                    <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center">
+                      <Heart className="w-8 h-8 text-white" />
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                      {language === 'zh' ? '多维度兼容性' : 'Multi-dimensional Compatibility'}
+                    </h4>
+                    <div className="flex justify-center space-x-2">
+                      <div className="w-3 h-3 bg-pink-400 rounded-full"></div>
+                      <div className="w-3 h-3 bg-rose-400 rounded-full"></div>
+                      <div className="w-3 h-3 bg-pink-300 rounded-full"></div>
+                    </div>
+                  </div>
+                  {/* 添加界面元素 */}
+                  <div className="mt-6 grid grid-cols-3 gap-2">
+                    <div className="bg-pink-100 rounded-lg p-2 text-center text-xs font-medium">性格</div>
+                    <div className="bg-rose-100 rounded-lg p-2 text-center text-xs font-medium">兴趣</div>
+                    <div className="bg-pink-100 rounded-lg p-2 text-center text-xs font-medium">价值观</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 第三行：左图右文 */}
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-12 items-center">
+              {/* 左侧：安全盾牌 */}
+              <div className="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-950 dark:to-emerald-900 rounded-3xl p-8 aspect-[4/3]">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 h-full">
+                  {/* 界面功能截图占位 */}
+                  <div className="flex items-center justify-center mb-6">
+                    <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center">
+                      <Shield className="w-8 h-8 text-white" />
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                      {language === 'zh' ? '隐私安全' : 'Privacy & Security'}
+                    </h4>
+                    <div className="flex justify-center space-x-1">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-300 rounded-full"></div>
+                    </div>
+                  </div>
+                  {/* 添加界面元素 */}
+                  <div className="mt-6 space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      <span>端到端加密</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                      <span>隐私保护</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* 右侧：文字内容 */}
+              <div className="space-y-4 max-w-xs mx-auto lg:mx-0 lg:ml-24 flex flex-col justify-center">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-tight font-helvetica">
+                  {features[2].title}
+                </h3>
+                <p className="text-base text-gray-600 dark:text-gray-300 leading-relaxed font-helvetica">
+                  {features[2].description} {language === 'zh'
+                    ? '您的隐私是我们的首要考虑。我们采用银行级别的加密技术，所有个人信息都经过严格保护。您可以放心地分享您的想法和需求，我们承诺绝不会泄露您的任何隐私信息。'
+                    : 'Your privacy is our top priority. We use bank-level encryption technology, and all personal information is strictly protected. You can safely share your thoughts and needs, and we promise never to disclose any of your private information.'
+                  }
+                </p>
+                <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold w-[85px] h-[35px] rounded-md text-sm shadow-sm hover:shadow-md transition-all">
+                  {language === 'zh' ? '立即体验' : 'Try Now'}
+                </Button>
+              </div>
+            </div>
+
+            {/* 第四行：左文右图 */}
+            <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-12 items-center">
+              {/* 左侧：文字内容 */}
+              <div className="space-y-4 max-w-xs mx-auto lg:mx-0 lg:mr-24 flex flex-col justify-center">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-tight font-helvetica">
+                  {features[3].title}
+                </h3>
+                <p className="text-base text-gray-600 dark:text-gray-300 leading-relaxed font-helvetica">
+                  {features[3].description} {language === 'zh'
+                    ? '我们的系统响应速度极快，通常在几秒钟内就能为您找到合适的匹配。实时更新功能确保您总是能看到最新的推荐结果，不错过任何潜在的优质匹配。'
+                    : 'Our system responds extremely fast, usually finding suitable matches for you within seconds. Real-time updates ensure you always see the latest recommendations, never missing any potential quality matches.'
+                  }
+                </p>
+                <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold w-[85px] h-[35px] rounded-md text-sm shadow-sm hover:shadow-md transition-all">
+                  {language === 'zh' ? '立即体验' : 'Try Now'}
+                </Button>
+              </div>
+              
+              {/* 右侧：实时响应 */}
+              <div className="bg-gradient-to-br from-purple-50 to-violet-100 dark:from-purple-950 dark:to-violet-900 rounded-3xl p-8 aspect-[4/3]">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 h-full">
+                  {/* 界面功能截图占位 */}
+                  <div className="flex items-center justify-center mb-6">
+                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-violet-500 rounded-2xl flex items-center justify-center">
+                      <Zap className="w-8 h-8 text-white" />
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                      {language === 'zh' ? '实时响应' : 'Real-time Response'}
+                    </h4>
+                    <div className="flex justify-center space-x-1">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                      <div className="w-2 h-2 bg-violet-400 rounded-full animate-pulse delay-100"></div>
+                      <div className="w-2 h-2 bg-purple-300 rounded-full animate-pulse delay-200"></div>
+                    </div>
+                  </div>
+                  {/* 添加界面元素 */}
+                  <div className="mt-6 flex items-center justify-center">
+                    <div className="bg-purple-100 rounded-lg px-4 py-2 text-sm font-medium">
+                      <span className="text-purple-700">响应时间: 0.5s</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+      <section id="stats" className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center text-white">
             <div>
@@ -241,7 +1156,7 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 bg-gray-50 dark:bg-gray-900">
+      <section id="testimonials" className="py-20 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -275,7 +1190,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-white dark:bg-gray-950">
+      <section id="cta" className="py-20 bg-white dark:bg-gray-950">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">
             {language === 'zh' ? '准备好开始了吗？' : 'Ready to Get Started?'}

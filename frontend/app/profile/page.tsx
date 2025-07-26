@@ -6,10 +6,17 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { useAppStore } from '@/lib/store'
 import { useRequireAuth } from '@/hooks/useAuth'
-import { profile, tags, auth } from '@/lib/api'
+import { profile, auth } from '@/lib/api'
 import { User, UserMetadata, Language } from '@/lib/types'
-import { User as UserIcon, Mail, Phone, MapPin, Calendar, Camera, Save, Edit3, Tag, AlertCircle, CheckCircle, RefreshCw } from 'lucide-react'
+import { User as UserIcon, Mail, Phone, MapPin, Calendar, Camera, Save, Edit3, Upload, AlertCircle, CheckCircle, RefreshCw, Plus, ExternalLink, Trash2, Link } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+
+interface SocialLink {
+  id: string
+  platform: string
+  url: string
+  label: string
+}
 
 export default function ProfilePage() {
   console.log('📄 [ProfilePage] Component rendering...')
@@ -43,9 +50,7 @@ export default function ProfilePage() {
   const { 
     language, 
     userMetadata, 
-    userTags,
     setUserMetadata,
-    setUserTags,
     setIsLoading,
     setError,
     error,
@@ -55,6 +60,12 @@ export default function ProfilePage() {
   
   const [isEditing, setIsEditing] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([])
+  const [newLink, setNewLink] = useState({ platform: '', url: '', label: '' })
+  const [isAddingLink, setIsAddingLink] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [profileData, setProfileData] = useState({
     name: '',
     email: '',
@@ -69,7 +80,19 @@ export default function ProfilePage() {
       emailNotifications: true
     }
   })
-  const [generatedTags, setGeneratedTags] = useState<string[]>([])
+
+  // 预定义的社媒平台
+  const socialPlatforms = [
+    { value: 'wechat', label: language === 'zh' ? '微信' : 'WeChat' },
+    { value: 'weibo', label: language === 'zh' ? '微博' : 'Weibo' },
+    { value: 'linkedin', label: 'LinkedIn' },
+    { value: 'twitter', label: 'Twitter/X' },
+    { value: 'instagram', label: 'Instagram' },
+    { value: 'facebook', label: 'Facebook' },
+    { value: 'github', label: 'GitHub' },
+    { value: 'website', label: language === 'zh' ? '个人网站' : 'Website' },
+    { value: 'other', label: language === 'zh' ? '其他' : 'Other' }
+  ]
   const [dataLoading, setDataLoading] = useState(false) // 区分数据加载和认证加载
 
   // Load user data function
@@ -150,11 +173,15 @@ export default function ProfilePage() {
         if (metadataResponse.success) {
           setUserMetadata(metadataResponse.data)
           
-          // Parse metadata into profile form
-          const profileSection = metadataResponse.data.profile || {}
-          const personalData = profileSection.personal?.content || {}
+          // Load additional metadata for preferences and contact info
+          const metadataResponse = await profile.getMetadata()
+          const profileSection = metadataResponse.success ? metadataResponse.data.profile || {} : {}
           const contactData = profileSection.contact?.content || {}
           const preferencesData = profileSection.preferences?.content || {}
+          const socialLinksData = profileSection.social_links?.content || []
+          
+          setUserMetadata(metadataResponse.success ? metadataResponse.data : {})
+          setSocialLinks(socialLinksData)
           
           setProfileData({
             name: userProfile.display_name || authUser.display_name || '',
@@ -322,6 +349,11 @@ export default function ProfilePage() {
           }
         },
         {
+          section_type: 'profile',
+          section_key: 'social_links',
+          content: socialLinks
+        },
+        {
           section_type: 'user_request',
           section_key: 'description',
           content: {
@@ -448,6 +480,79 @@ export default function ProfilePage() {
     }
   }
 
+  // Social Links Management Functions
+  const addSocialLink = () => {
+    if (!newLink.platform || !newLink.url) {
+      setError(language === 'zh' ? '请填写平台和链接' : 'Please fill in platform and URL')
+      return
+    }
+
+    const link: SocialLink = {
+      id: Date.now().toString(),
+      platform: newLink.platform,
+      url: newLink.url,
+      label: newLink.label || newLink.platform
+    }
+
+    setSocialLinks(prev => [...prev, link])
+    setNewLink({ platform: '', url: '', label: '' })
+    setIsAddingLink(false)
+    setError(null)
+  }
+
+  const removeSocialLink = (id: string) => {
+    setSocialLinks(prev => prev.filter(link => link.id !== id))
+  }
+
+  const updateSocialLink = (id: string, updatedLink: Partial<SocialLink>) => {
+    setSocialLinks(prev => prev.map(link => 
+      link.id === id ? { ...link, ...updatedLink } : link
+    ))
+  }
+
+  const handleAvatarUpload = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // 验证文件类型
+    if (!file.type.startsWith('image/')) {
+      setError(language === 'zh' ? '请选择图片文件' : 'Please select an image file')
+      return
+    }
+
+    // 验证文件大小 (限制为5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError(language === 'zh' ? '图片大小不能超过5MB' : 'Image size cannot exceed 5MB')
+      return
+    }
+
+    setIsUploadingAvatar(true)
+    setError(null)
+
+    try {
+      // 创建预览
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setAvatarPreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+
+      // 这里需要调用实际的上传API
+      // TODO: 实现头像上传API调用
+      // const formData = new FormData()
+      // formData.append('avatar', file)
+      // const response = await profile.uploadAvatar(formData)
+      
+      // 模拟上传延迟
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      setSaveSuccess(true)
+      setTimeout(() => setSaveSuccess(false), 3000)
+      
   const generateTags = async (requestType: '找队友' | '找对象') => {
     if (!authUser) return
     
@@ -464,8 +569,10 @@ export default function ProfilePage() {
       }
     } catch (error: any) {
       setError(error.message || '生成标签失败，请稍后重试')
+      setError(error.message || 'Failed to upload avatar')
+      setAvatarPreview(null)
     } finally {
-      setIsLoading(false)
+      setIsUploadingAvatar(false)
     }
   }
 
@@ -556,7 +663,7 @@ export default function ProfilePage() {
           <div className="text-center space-y-4">
             <div className="relative">
               <Avatar className="h-32 w-32 mx-auto">
-                <AvatarImage src={authUser?.avatar_url} />
+                <AvatarImage src={avatarPreview || authUser?.avatar_url} />
                 <AvatarFallback className="text-2xl">
                   {(profileData.name || authUser?.display_name || 'U').charAt(0)}
                 </AvatarFallback>
@@ -565,11 +672,53 @@ export default function ProfilePage() {
                 <Button
                   size="icon"
                   className="absolute bottom-0 right-1/2 translate-x-1/2 translate-y-1/2 rounded-full"
+                  onClick={handleAvatarUpload}
+                  disabled={isUploadingAvatar}
                 >
-                  <Camera className="h-4 w-4" />
+                  {isUploadingAvatar ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Camera className="h-4 w-4" />
+                  )}
                 </Button>
               )}
             </div>
+            
+            {/* Upload Button */}
+            <div className="space-y-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleAvatarUpload}
+                disabled={isUploadingAvatar}
+                className="w-full"
+              >
+                {isUploadingAvatar ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
+                    {language === 'zh' ? '上传中...' : 'Uploading...'}
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4 mr-2" />
+                    {language === 'zh' ? '上传头像' : 'Upload Avatar'}
+                  </>
+                )}
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                {language === 'zh' ? '支持 JPG、PNG 格式，最大 5MB' : 'Support JPG, PNG format, max 5MB'}
+              </p>
+            </div>
+
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            
             <div>
               <h2 className="text-2xl font-semibold">{profileData.name || authUser?.display_name}</h2>
               <p className="text-muted-foreground">{profileData.email || authUser?.email}</p>
@@ -693,50 +842,6 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Tags */}
-          <div className="bg-card rounded-lg p-6 space-y-4">
-            <div className="flex items-center justify-between">
-            <h3 className="text-xl font-semibold">
-                {language === 'zh' ? '个人标签' : 'Tags'}
-            </h3>
-              <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => generateTags('找队友')}
-                  disabled={isLoading}
-                >
-                  <Tag className="h-4 w-4 mr-2" />
-                  {language === 'zh' ? '生成队友标签' : 'Generate Team Tags'}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => generateTags('找对象')}
-                  disabled={isLoading}
-                >
-                  <Tag className="h-4 w-4 mr-2" />
-                  {language === 'zh' ? '生成浪漫标签' : 'Generate Romantic Tags'}
-                </Button>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {generatedTags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
-                >
-                  {tag}
-                </span>
-              ))}
-              {generatedTags.length === 0 && (
-                <p className="text-muted-foreground text-sm">
-                  {language === 'zh' ? '暂无标签，点击按钮生成' : 'No tags yet, click button to generate'}
-                </p>
-              )}
-            </div>
-          </div>
-
           {/* Preferences */}
           <div className="bg-card rounded-lg p-6 space-y-4">
             <h3 className="text-xl font-semibold">
@@ -818,6 +923,164 @@ export default function ProfilePage() {
                   disabled={!isEditing}
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Social Links */}
+          <div className="bg-card rounded-lg p-6 space-y-4">
+            <h3 className="text-xl font-semibold">
+              {language === 'zh' ? '社媒链接' : 'Social Links'}
+            </h3>
+            <div className="space-y-3">
+              {socialLinks.map(link => (
+                <div key={link.id} className="space-y-2">
+                  {isEditing ? (
+                    <div className="bg-muted/50 p-3 rounded-md space-y-3">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                        <select
+                          value={link.platform}
+                          onChange={(e) => updateSocialLink(link.id, { platform: e.target.value })}
+                          className="px-3 py-2 border border-input rounded-md bg-background text-sm"
+                        >
+                          {socialPlatforms.map(platform => (
+                            <option key={platform.value} value={platform.value}>
+                              {platform.label}
+                            </option>
+                          ))}
+                        </select>
+                        <input
+                          type="text"
+                          placeholder={language === 'zh' ? '显示名称' : 'Display Name'}
+                          value={link.label}
+                          onChange={(e) => updateSocialLink(link.id, { label: e.target.value })}
+                          className="px-3 py-2 border border-input rounded-md bg-background text-sm"
+                        />
+                        <input
+                          type="url"
+                          placeholder={language === 'zh' ? '链接地址' : 'URL'}
+                          value={link.url}
+                          onChange={(e) => updateSocialLink(link.id, { url: e.target.value })}
+                          className="px-3 py-2 border border-input rounded-md bg-background text-sm"
+                        />
+                      </div>
+                      <div className="flex justify-end">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeSocialLink(link.id)}
+                          className="text-destructive hover:text-destructive/80"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          {language === 'zh' ? '删除' : 'Delete'}
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between bg-muted/50 p-3 rounded-md">
+                      <div className="flex items-center space-x-3">
+                        <Link className="h-5 w-5 text-muted-foreground" />
+                        <span className="font-medium">{link.label}</span>
+                        <span className="text-sm text-muted-foreground">
+                          ({socialPlatforms.find(p => p.value === link.platform)?.label || link.platform})
+                        </span>
+                      </div>
+                      <a 
+                        href={link.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-primary hover:text-primary/80 flex items-center space-x-1"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        <span className="text-sm">
+                          {language === 'zh' ? '访问' : 'Visit'}
+                        </span>
+                      </a>
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {/* Add New Link Form */ }
+              {isEditing && isAddingLink && (
+                <div className="bg-muted/30 p-4 rounded-md border-2 border-dashed border-muted-foreground/30 space-y-3">
+                  <h4 className="font-medium text-sm">
+                    {language === 'zh' ? '添加新链接' : 'Add New Link'}
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    <select
+                      value={newLink.platform}
+                      onChange={(e) => setNewLink(prev => ({ ...prev, platform: e.target.value }))}
+                      className="px-3 py-2 border border-input rounded-md bg-background text-sm"
+                    >
+                      <option value="">
+                        {language === 'zh' ? '选择平台' : 'Select Platform'}
+                      </option>
+                      {socialPlatforms.map(platform => (
+                        <option key={platform.value} value={platform.value}>
+                          {platform.label}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="text"
+                      placeholder={language === 'zh' ? '显示名称' : 'Display Name'}
+                      value={newLink.label}
+                      onChange={(e) => setNewLink(prev => ({ ...prev, label: e.target.value }))}
+                      className="px-3 py-2 border border-input rounded-md bg-background text-sm"
+                    />
+                    <input
+                      type="url"
+                      placeholder={language === 'zh' ? '链接地址' : 'URL'}
+                      value={newLink.url}
+                      onChange={(e) => setNewLink(prev => ({ ...prev, url: e.target.value }))}
+                      className="px-3 py-2 border border-input rounded-md bg-background text-sm"
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setIsAddingLink(false)
+                        setNewLink({ platform: '', url: '', label: '' })
+                      }}
+                    >
+                      {language === 'zh' ? '取消' : 'Cancel'}
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={addSocialLink}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      {language === 'zh' ? '添加' : 'Add'}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Add Link Button */}
+              {isEditing && !isAddingLink && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsAddingLink(true)}
+                  className="w-full"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  {language === 'zh' ? '添加社媒链接' : 'Add Social Link'}
+                </Button>
+              )}
+
+              {/* Empty State */}
+              {socialLinks.length === 0 && !isEditing && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Link className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p className="text-sm">
+                    {language === 'zh' ? '暂无社媒链接' : 'No social links yet'}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
