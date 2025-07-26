@@ -21,24 +21,14 @@ import {
 
 export default function HomePage() {
   const { user: authUser } = useRequireAuth()
-  const { themeMode, language, user, setUser, userTags, setUserTags } = useAppStore()
+  const { themeMode, language, userTags, setUserTags } = useAppStore()
   
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [recentTags, setRecentTags] = useState<UserTag[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => {
-    if (!user && authUser) {
-      setUser({
-        id: authUser.user_id,
-        name: authUser.display_name || 'User',
-        email: authUser.email,
-        credits: 1250,
-        subscription: authUser.subscription_type || 'free'
-      })
-    }
-  }, [user, authUser, setUser])
-
+  // 移除冗余的user状态设置，直接使用authUser（来自store的backendUser）
+  
   useEffect(() => {
     const loadUserTags = async () => {
       if (!authUser) return

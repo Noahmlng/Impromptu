@@ -45,8 +45,8 @@ export const useAppStore = create<ExtendedAppState>()(
     (set, get) => ({
       // Basic app state
       themeMode: 'romantic',
-      isDarkMode: false,  
-      language: 'zh',
+      isDarkMode: false,
+      language: 'en',
       user: null,
       
       // Auth state
@@ -58,11 +58,11 @@ export const useAppStore = create<ExtendedAppState>()(
       userTags: [],
       userMetadata: {},
       
-      // Loading states (not persisted)
+      // Loading states (不持久化)
       isLoading: false,
       isAuthLoading: false,
       
-      // Error handling (not persisted)
+      // Error handling (不持久化)
       error: null,
       
       // Basic actions
@@ -72,15 +72,25 @@ export const useAppStore = create<ExtendedAppState>()(
       setUser: (user) => set({ user }),
       
       // Auth actions
-      setAuthToken: (token) => set({ 
-        authToken: token, 
-        isAuthenticated: !!token 
-      }),
-      setBackendUser: (user) => set({ 
-        backendUser: user, 
-        isAuthenticated: !!user 
-      }),
-      setIsAuthenticated: (authenticated) => set({ isAuthenticated: authenticated }),
+      setAuthToken: (token) => {
+        console.log('🏪 [Store] setAuthToken called with:', token ? 'TOKEN_SET' : 'TOKEN_CLEARED')
+        set({ 
+          authToken: token, 
+          isAuthenticated: !!token 
+        })
+      },
+      setBackendUser: (user) => {
+        console.log('🏪 [Store] setBackendUser called with:', user ? user.email : 'USER_CLEARED')
+        console.log('🏪 [Store] User data:', user)
+        set({ 
+          backendUser: user, 
+          isAuthenticated: !!user 
+        })
+      },
+      setIsAuthenticated: (authenticated) => {
+        console.log('🏪 [Store] setIsAuthenticated called with:', authenticated)
+        set({ isAuthenticated: authenticated })
+      },
       
       // User data actions
       setUserTags: (tags) => set({ userTags: tags }),
@@ -95,30 +105,34 @@ export const useAppStore = create<ExtendedAppState>()(
       clearError: () => set({ error: null }),
       
       // Combined actions
-      logout: () => set({
-        user: null,
-        isAuthenticated: false,
-        authToken: null,
-        backendUser: null,
-        userTags: [],
-        userMetadata: {},
-        error: null
-      }),
+      logout: () => {
+        console.log('🚪 [Store] logout called - clearing all auth state')
+        set({
+          user: null,
+          isAuthenticated: false,
+          authToken: null,
+          backendUser: null,
+          userTags: [],
+          userMetadata: {},
+          error: null
+        })
+        console.log('🚪 [Store] Auth state cleared')
+      }
     }),
     {
-      name: 'linker-app-storage',
+      name: 'linker-auth-storage', // 存储key
       partialize: (state) => ({
-        // Only persist these fields
+        // 只持久化认证相关和用户数据，不持久化loading和error状态
+        authToken: state.authToken,
+        backendUser: state.backendUser,
+        isAuthenticated: state.isAuthenticated,
+        userTags: state.userTags,
+        userMetadata: state.userMetadata,
         themeMode: state.themeMode,
         isDarkMode: state.isDarkMode,
         language: state.language,
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
-        authToken: state.authToken,
-        backendUser: state.backendUser,
-        userTags: state.userTags,
-        userMetadata: state.userMetadata,
-      }),
+        user: state.user
+      })
     }
   )
 ) 

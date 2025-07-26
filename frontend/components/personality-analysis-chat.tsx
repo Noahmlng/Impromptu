@@ -479,11 +479,15 @@ Please return a JSON object in the following format:
 
   const saveAnalysisToProfile = async (analysis: PersonalityAnalysis) => {
     try {
-      await profile.updateMetadata('personality_analysis', 'ai_analysis', {
-        analysis_data: analysis,
-        conversation_history: conversationHistory,
-        analysis_date: new Date().toISOString(),
-        version: '1.0'
+      await profile.createMetadata({
+        section_type: 'personality_analysis',
+        section_key: 'ai_analysis',
+        content: {
+          analysis_data: analysis,
+          conversation_history: conversationHistory,
+          analysis_date: new Date().toISOString(),
+          version: '1.0'
+        }
       })
     } catch (error) {
       console.error('Error saving analysis to profile:', error)

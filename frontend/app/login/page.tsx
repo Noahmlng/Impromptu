@@ -70,10 +70,10 @@ export default function LoginPage() {
             subscription: response.data!.subscription_type || 'free'
           })
           
-          // 等待状态更新完成后再跳转，直接跳转到主页
+          // 确保状态更新完成后再跳转，直接跳转到主页
           setTimeout(() => {
             router.push('/home')
-          }, 100)
+          }, 200)
         } else {
           setError(response.message)
         }
@@ -120,15 +120,16 @@ export default function LoginPage() {
             subscription: response.data!.subscription_type || 'free'
           })
           
-          // 等待状态更新完成后再跳转到新手引导页面
+          // 确保状态更新完成后再跳转到新手引导页面
           setTimeout(() => {
             router.push('/onboarding')
-          }, 100)
+          }, 200)
         } else {
           setError(response.message)
         }
       }
     } catch (error: any) {
+      console.error('Login/Register error:', error)
       setError(error.message || (language === 'zh' ? '操作失败，请重试' : 'Operation failed, please try again'))
     } finally {
       setIsSubmitting(false)

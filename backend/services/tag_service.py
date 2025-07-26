@@ -48,13 +48,51 @@ def get_topic_model():
         try:
             from backend.models.topic_modeling import LDATopicModel
             from configs.config import ConfigManager
+            import os
             
+            print("🤖 [TagService] 初始化主题建模实例...")
             config_manager = ConfigManager()
             _topic_model = LDATopicModel(config_manager.topic_config)
+            
+            # 检查并加载生产模型
+            production_model_path = "data/models/production_model"
+            if (os.path.exists(f"{production_model_path}_lda") and 
+                os.path.exists(f"{production_model_path}_dict") and 
+                os.path.exists(f"{production_model_path}_tag_mapping.json")):
+                try:
+                    _topic_model.load_model(production_model_path)
+                    print("✅ 标签服务已加载生产LDA模型")
+                except Exception as load_e:
+                    print(f"⚠️ 标签服务加载生产模型失败: {load_e}")
+                    print("🔄 [TagService] 将使用临时训练模式")
+                    _initialize_temp_model(_topic_model)
+            else:
+                print("⚠️ 生产模型文件不完整，将使用临时训练模式")
+                _initialize_temp_model(_topic_model)
+                
         except Exception as e:
-            print(f"主题模型初始化失败: {e}")
+            print(f"❌ 主题模型初始化失败: {e}")
+            import traceback
+            print(f"详细错误: {traceback.format_exc()}")
             _topic_model = None
     return _topic_model
+
+def _initialize_temp_model(topic_model):
+    """初始化临时模型用于标签生成"""
+    try:
+        print("🔧 [TagService] 初始化临时主题模型...")
+        # 创建一些基本的训练文档
+        temp_docs = [
+            "我是一个AI人工智能工程师，喜欢技术创新和产品开发，希望找到志同道合的创业伙伴",
+            "我从事产品管理工作，热爱用户体验设计，寻找技术合作伙伴一起创业做有意义的产品"
+        ]
+        
+        topic_model.train(temp_docs)
+        print("✅ [TagService] 临时主题模型训练完成")
+        
+    except Exception as e:
+        print(f"⚠️ [TagService] 临时模型初始化失败: {e}")
+        # 即使失败也不抛出异常，让系统继续运行
 
 @router.post("/generate", response_model=TagResponse)
 async def generate_user_tags(
@@ -64,27 +102,37 @@ async def generate_user_tags(
     """基于用户元数据生成标签"""
     try:
         user_id = current_user['user_id']
+        print(f"🏷️ [TagService] 开始为用户 {user_id} 生成标签，请求类型: {request.request_type}")
         
         # 获取主题建模实例
         topic_model = get_topic_model()
         if not topic_model:
+            print("❌ [TagService] 主题建模实例为空")
             raise HTTPException(status_code=500, detail="主题建模服务不可用")
+        
+        print("✅ [TagService] 主题建模实例已获取")
         
         # 获取用户的所有元数据
         metadata_list = await user_metadata_db.get_by_user_id(user_id)
+        print(f"📊 [TagService] 获取到 {len(metadata_list) if metadata_list else 0} 条元数据")
         
         if not metadata_list:
+            print("❌ [TagService] 用户元数据为空")
             raise HTTPException(status_code=400, detail="用户元数据为空，请先完善个人信息")
         
         # 构建用户文本描述
         text_parts = []
-        for item in metadata_list:
+        for i, item in enumerate(metadata_list):
+            print(f"📄 [TagService] 处理元数据项 {i+1}: {item.get('section_type', 'unknown')}.{item.get('section_key', 'unknown')}")
             content = item['content']
+            
             if isinstance(content, str):
                 try:
                     content = json.loads(content)
+                    print(f"📝 [TagService] 成功解析JSON内容")
                 except json.JSONDecodeError:
                     text_parts.append(content)
+                    print(f"📝 [TagService] 添加字符串内容: {content[:50]}...")
                     continue
             
             # 提取文本内容
@@ -98,25 +146,52 @@ async def generate_user_tags(
                 text_parts.extend([str(item) for item in content])
         
         user_text = ' '.join(text_parts)
+        print(f"📝 [TagService] 合并后文本长度: {len(user_text)} 字符")
+        print(f"📝 [TagService] 文本预览: {user_text[:200]}...")
         
         if not user_text.strip():
+            print("❌ [TagService] 提取的文本为空")
             raise HTTPException(status_code=400, detail="无法从元数据中提取有效文本")
         
         # 使用主题建模生成标签
-        topic_result = topic_model.extract_topics_and_tags(user_text, request.request_type)
+        print("🤖 [TagService] 开始主题建模分析...")
+        try:
+            topic_result = topic_model.extract_topics_and_tags(user_text, request.request_type)
+            print(f"✅ [TagService] 主题建模完成，提取到 {len(topic_result.extracted_tags)} 个标签")
+            print(f"🏷️ [TagService] 提取的标签: {list(topic_result.extracted_tags.keys())[:10]}")
+        except Exception as topic_error:
+            print(f"❌ [TagService] 主题建模失败: {topic_error}")
+            raise HTTPException(status_code=500, detail=f"主题建模处理失败: {str(topic_error)}")
+        
+        # 先删除所有现有的generated标签
+        print("🧹 [TagService] 清理现有生成的标签...")
+        existing_tags = await user_tags_db.get_by_user_id(user_id)
+        removed_count = 0
+        for tag in existing_tags:
+            if tag.get('tag_source') == 'topic_modeling' or tag.get('tag_category') == 'generated':
+                await user_tags_db.remove_tag(user_id, tag['tag_name'])
+                removed_count += 1
+        print(f"🧹 [TagService] 已删除 {removed_count} 个旧标签")
         
         # 保存生成的标签到数据库
+        print("💾 [TagService] 保存新生成的标签...")
         saved_tags = []
         for tag_name, confidence in topic_result.extracted_tags.items():
-            result = await user_tags_db.add_tag(
-                user_id=user_id,
-                tag_name=tag_name,
-                tag_category='generated',
-                confidence_score=confidence,
-                tag_source='topic_modeling'
-            )
-            if result:
-                saved_tags.append(result)
+            try:
+                result = await user_tags_db.add_tag(
+                    user_id=user_id,
+                    tag_name=tag_name,
+                    tag_category='generated',
+                    confidence_score=confidence,
+                    tag_source='topic_modeling'
+                )
+                if result:
+                    saved_tags.append(result)
+                    print(f"💾 [TagService] 已保存标签: {tag_name} (置信度: {confidence:.2f})")
+            except Exception as save_error:
+                print(f"⚠️ [TagService] 保存标签失败 {tag_name}: {save_error}")
+        
+        print(f"✅ [TagService] 成功保存 {len(saved_tags)} 个标签")
         
         return TagResponse(
             success=True,

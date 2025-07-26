@@ -191,27 +191,54 @@ class LDATopicModel:
     
     def extract_topics_and_tags(self, text: str, request_type: str = "all") -> TopicResult:
         """从文本中提取主题和标签"""
+        print(f"🔍 [TopicModel] 开始提取标签，请求类型: {request_type}")
+        print(f"📝 [TopicModel] 输入文本长度: {len(text)} 字符")
+        
+        # 如果模型未训练，直接使用关键词匹配
         if not self.lda_model:
-            raise ValueError("模型尚未训练，请先调用train()方法")
+            print("⚠️ [TopicModel] LDA模型未训练，使用关键词匹配方式")
+            extracted_tags = self._extract_tags_by_keywords(text, request_type)
+            return TopicResult(
+                topics=[],
+                extracted_tags=extracted_tags,
+                topic_keywords={},
+                text_vector=[]
+            )
         
         # 预处理文本
         tokens = self.preprocessor.tokenize(text)
+        print(f"🔤 [TopicModel] 分词结果: {len(tokens)} 个词汇")
+        
         if not tokens:
+            print("⚠️ [TopicModel] 分词结果为空，使用关键词匹配")
+            extracted_tags = self._extract_tags_by_keywords(text, request_type)
             return TopicResult(
                 topics=[],
-                extracted_tags={},
+                extracted_tags=extracted_tags,
                 topic_keywords={},
                 text_vector=[0.0] * self.lda_model.num_topics
             )
         
         # 转换为BOW
         bow = self.dictionary.doc2bow(tokens)
+        print(f"📊 [TopicModel] BOW向量长度: {len(bow)}")
+        
+        if not bow:
+            print("⚠️ [TopicModel] BOW向量为空，使用关键词匹配")
+            extracted_tags = self._extract_tags_by_keywords(text, request_type)
+            return TopicResult(
+                topics=[],
+                extracted_tags=extracted_tags,
+                topic_keywords={},
+                text_vector=[0.0] * self.lda_model.num_topics
+            )
         
         # 获取主题分布
         topic_distribution = self.lda_model.get_document_topics(
             bow, 
             minimum_probability=0.01  # 降低阈值
         )
+        print(f"📈 [TopicModel] 主题分布: {len(topic_distribution)} 个主题")
         
         # 获取主题关键词
         topic_keywords = {}
@@ -224,16 +251,20 @@ class LDATopicModel:
             topic_distribution, 
             request_type
         )
+        print(f"🏷️ [TopicModel] 从主题提取到 {len(extracted_tags)} 个标签")
         
         # 如果没有提取到标签，使用简单的关键词匹配
         if not extracted_tags:
+            print("🔄 [TopicModel] 主题提取为空，改用关键词匹配")
             extracted_tags = self._extract_tags_by_keywords(text, request_type)
+            print(f"🏷️ [TopicModel] 关键词匹配提取到 {len(extracted_tags)} 个标签")
         
         # 生成文本向量（主题概率分布）
         text_vector = [0.0] * self.lda_model.num_topics
         for topic_id, prob in topic_distribution:
             text_vector[topic_id] = prob
         
+        print(f"✅ [TopicModel] 标签提取完成，总共 {len(extracted_tags)} 个标签")
         return TopicResult(
             topics=topic_distribution,
             extracted_tags=extracted_tags,
@@ -243,28 +274,98 @@ class LDATopicModel:
     
     def _extract_tags_by_keywords(self, text: str, request_type: str) -> Dict[str, float]:
         """基于关键词匹配提取标签"""
+        print(f"🔍 [TopicModel] 开始关键词匹配，请求类型: {request_type}")
         text_lower = text.lower()
         extracted_tags = {}
         
         # 获取相关标签池
-        relevant_tags = self.tag_pool.get_tag_list(request_type)
+        try:
+            relevant_tags = self.tag_pool.get_tag_list(request_type)
+            print(f"📋 [TopicModel] 获取到 {len(relevant_tags)} 个候选标签")
+        except Exception as e:
+            print(f"⚠️ [TopicModel] 获取标签池失败: {e}")
+            relevant_tags = []
         
+        # 标签匹配
+        matched_count = 0
         for tag in relevant_tags:
             tag_lower = tag.lower()
-            # 简单的关键词匹配
-            if tag_lower in text_lower or any(word in text_lower for word in tag_lower.split()):
-                extracted_tags[tag] = 0.5  # 给一个中等的置信度
+            # 完整匹配
+            if tag_lower in text_lower:
+                extracted_tags[tag] = 0.8
+                matched_count += 1
+            # 部分词匹配
+            elif any(word in text_lower for word in tag_lower.split() if len(word) > 1):
+                extracted_tags[tag] = 0.6
+                matched_count += 1
         
-        # 手动添加一些基于内容的标签
-        if 'ai' in text_lower or '人工智能' in text_lower:
-            extracted_tags['人工智能'] = 0.8
-        if '创业' in text_lower:
-            extracted_tags['创业者'] = 0.8
-        if '技术' in text_lower:
-            extracted_tags['技术型'] = 0.7
-        if '产品' in text_lower:
-            extracted_tags['产品管理'] = 0.7
+        print(f"🎯 [TopicModel] 从标签池匹配到 {matched_count} 个标签")
         
+        # 基于内容的标签规则（增强版）
+        content_rules = {
+            # 技术相关
+            ('ai', '人工智能', 'machine learning', '机器学习', 'deep learning', '深度学习'): '人工智能',
+            ('创业', 'startup', '创新', '企业家'): '创业者',
+            ('技术', 'technology', '开发', 'development', '编程', 'programming'): '技术型',
+            ('产品', 'product', '产品经理', 'pm'): '产品管理',
+            ('设计', 'design', 'ui', 'ux', '用户体验'): '设计师',
+            ('数据', 'data', '分析', 'analytics', '数据科学'): '数据分析',
+            ('研究', 'research', '科研', '学术'): '研究型',
+            ('管理', 'management', '领导', 'leader', '团队'): '管理型',
+            ('营销', 'marketing', '市场', '推广'): '市场营销',
+            ('运营', 'operation', '运营管理'): '运营专家',
+            
+            # 性格特征
+            ('外向', '开朗', '活泼', '社交'): '外向型',
+            ('内向', '安静', '思考', '独立'): '内向型',
+            ('幽默', '有趣', '搞笑', '风趣'): '幽默感',
+            ('认真', '负责', '可靠', '责任心'): '责任感',
+            ('创意', '创造', '想象', '艺术'): '创意型',
+            ('逻辑', '理性', '分析', '思维'): '逻辑思维',
+            
+            # 兴趣爱好
+            ('旅行', '旅游', '探索', '冒险'): '旅行爱好者',
+            ('运动', '健身', '锻炼', 'fitness'): '运动达人',
+            ('读书', '阅读', '学习', '知识'): '学习型',
+            ('音乐', '歌曲', '乐器', '演奏'): '音乐爱好者',
+            ('摄影', '拍照', '相机', '镜头'): '摄影爱好者',
+            ('游戏', '电竞', 'gaming'): '游戏爱好者',
+            ('美食', '烹饪', '料理', '厨艺'): '美食家',
+        }
+        
+        rule_matched_count = 0
+        for keywords, tag_name in content_rules.items():
+            for keyword in keywords:
+                if keyword in text_lower:
+                    extracted_tags[tag_name] = min(extracted_tags.get(tag_name, 0) + 0.2, 0.9)
+                    rule_matched_count += 1
+                    break
+        
+        print(f"📝 [TopicModel] 从内容规则匹配到 {rule_matched_count} 个标签")
+        
+        # 如果还是没有标签，添加一些通用标签
+        if not extracted_tags:
+            print("🔄 [TopicModel] 未匹配到任何标签，添加通用标签")
+            if request_type == '找对象':
+                extracted_tags.update({
+                    '寻找伴侣': 0.6,
+                    '真诚交友': 0.5,
+                    '长期关系': 0.5
+                })
+            elif request_type == '找队友':
+                extracted_tags.update({
+                    '寻找合作': 0.6,
+                    '团队协作': 0.5,
+                    '共同成长': 0.5
+                })
+            else:
+                extracted_tags.update({
+                    '真诚': 0.5,
+                    '友善': 0.5,
+                    '积极': 0.5
+                })
+        
+        print(f"✅ [TopicModel] 关键词匹配完成，共提取 {len(extracted_tags)} 个标签")
         return extracted_tags
     
     def _extract_tags_from_topics(self, topic_distribution: List[Tuple[int, float]], 

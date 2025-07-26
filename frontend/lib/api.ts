@@ -3,7 +3,7 @@ import { supabase } from './supabase'
 import { MatchUser } from './types'
 
 // Base URL for the backend API (only for AI operations like tag generation and matching)
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5003'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'
 
 // Types based on backend API documentation
 export interface LoginRequest {
@@ -35,6 +35,7 @@ export interface UserInfo {
   email: string
   display_name: string
   avatar_url?: string
+  subscription_type: string
   created_at: string
   updated_at: string
   last_login_at: string
@@ -143,10 +144,11 @@ class ApiClient {
 
   constructor(baseUrl: string = API_BASE_URL) {
     this.baseUrl = baseUrl
-    console.log('API Client initialized with base URL:', this.baseUrl)
+    console.log('🚀 [ApiClient] Initialized with base URL:', this.baseUrl)
     // Try to get token from localStorage on initialization
     if (typeof window !== 'undefined') {
       this.token = localStorage.getItem('auth_token')
+      console.log('🔑 [ApiClient] Loaded token from localStorage:', this.token ? 'TOKEN_EXISTS' : 'NO_TOKEN')
     }
   }
 
@@ -171,12 +173,48 @@ class ApiClient {
       'Accept': 'application/json',
     }
     
-    // 从Supabase获取当前session的token
-    const { data: { session } } = await supabase.auth.getSession()
-    if (session?.access_token) {
-      headers['Authorization'] = `Bearer ${session.access_token}`
+    console.log('🔑 [getSupabaseHeaders] Getting authentication headers...')
+    
+    // 优先使用后端JWT token（从store获取）
+    if (typeof window !== 'undefined') {
+      try {
+        const store = await import('@/lib/store')
+        const authToken = store.useAppStore.getState().authToken
+        console.log('🏪 [getSupabaseHeaders] Store authToken:', authToken ? 'EXISTS' : 'NULL')
+        
+        if (authToken) {
+          headers['Authorization'] = `Bearer ${authToken}`
+          console.log('✅ [getSupabaseHeaders] Using store authToken')
+          return headers
+        }
+      } catch (error) {
+        console.error('❌ [getSupabaseHeaders] Error accessing store:', error)
+      }
     }
     
+    // 如果没有后端token，尝试使用旧的localStorage token
+    console.log('🔑 [getSupabaseHeaders] Checking localStorage token:', this.token ? 'EXISTS' : 'NULL')
+    if (this.token) {
+      headers['Authorization'] = `Bearer ${this.token}`
+      console.log('✅ [getSupabaseHeaders] Using localStorage token')
+      return headers
+    }
+    
+    // 最后才尝试使用Supabase token（通常只用于直接访问Supabase的操作）
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      console.log('🔑 [getSupabaseHeaders] Supabase session:', session ? 'EXISTS' : 'NULL')
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`
+        console.log('✅ [getSupabaseHeaders] Using Supabase session token')
+        return headers
+      }
+    } catch (error) {
+      console.error('❌ [getSupabaseHeaders] Error getting Supabase session:', error)
+    }
+    
+    console.log('⚠️ [getSupabaseHeaders] No valid token found!')
+    console.log('📋 [getSupabaseHeaders] Final headers:', headers)
     return headers
   }
 
@@ -193,6 +231,19 @@ class ApiClient {
         errorMessage = errorText || errorMessage
       }
       
+      // 为常见的HTTP状态码提供更友好的错误信息
+      if (response.status === 401) {
+        errorMessage = 'HTTP 401: Unauthorized'
+      } else if (response.status === 403) {
+        errorMessage = 'HTTP 403: 权限不足'
+      } else if (response.status === 404) {
+        errorMessage = 'HTTP 404: 请求的资源不存在'
+      } else if (response.status === 500) {
+        errorMessage = 'HTTP 500: 服务器内部错误'
+      } else if (response.status === 503) {
+        errorMessage = 'HTTP 503: 服务暂时不可用'
+      }
+      
       throw new Error(errorMessage)
     }
     
@@ -200,9 +251,11 @@ class ApiClient {
   }
 
   public setToken(token: string) {
+    console.log('🔑 [ApiClient.setToken] Setting token:', token ? 'TOKEN_PROVIDED' : 'NULL_TOKEN')
     this.token = token
     if (typeof window !== 'undefined') {
       localStorage.setItem('auth_token', token)
+      console.log('💾 [ApiClient.setToken] Token saved to localStorage')
     }
   }
 
@@ -229,6 +282,7 @@ class ApiClient {
   }
 
   async login(data: LoginRequest): Promise<AuthResponse> {
+    console.log('🔐 [ApiClient.login] Attempting login for:', data.email)
     const response = await fetch(`${this.baseUrl}/api/auth/login`, {
       method: 'POST',
       headers: this.getHeaders(),
@@ -237,18 +291,51 @@ class ApiClient {
     
     const result = await this.handleResponse<AuthResponse>(response)
     if (result.success && result.data.token) {
+      console.log('✅ [ApiClient.login] Login successful, setting token')
+      
+      // 优先设置store中的token
+      if (typeof window !== 'undefined') {
+        try {
+          const store = await import('@/lib/store')
+          store.useAppStore.getState().setAuthToken(result.data.token)
+          
+          // 确保 last_login_at 字段存在
+          const userData = {
+            ...result.data,
+            last_login_at: result.data.last_login_at || new Date().toISOString()
+          }
+          store.useAppStore.getState().setBackendUser(userData)
+          console.log('✅ [ApiClient.login] Token and user data set in store')
+        } catch (error) {
+          console.error('❌ [ApiClient.login] Failed to set auth data in store:', error)
+        }
+      }
+      
+      // 同时设置到localStorage（向后兼容）
       this.setToken(result.data.token)
+    } else {
+      console.log('❌ [ApiClient.login] Login failed:', result.message)
     }
     return result
   }
 
   async getCurrentUser(): Promise<ApiResponse<UserInfo>> {
+    console.log('🔗 [ApiClient.getCurrentUser] Starting HTTP request...')
+    console.log('🔗 [ApiClient.getCurrentUser] URL:', `${this.baseUrl}/api/auth/user`)
+    console.log('🔗 [ApiClient.getCurrentUser] Headers:', this.getHeaders())
+    
     const response = await fetch(`${this.baseUrl}/api/auth/user`, {
       method: 'GET',
-      headers: await this.getSupabaseHeaders(),
+      headers: this.getHeaders(),
     })
     
-    return this.handleResponse<ApiResponse<UserInfo>>(response)
+    console.log('📡 [ApiClient.getCurrentUser] HTTP response status:', response.status)
+    console.log('📡 [ApiClient.getCurrentUser] HTTP response ok:', response.ok)
+    
+    const result = await this.handleResponse<ApiResponse<UserInfo>>(response)
+    console.log('📊 [ApiClient.getCurrentUser] Parsed response:', result)
+    
+    return result
   }
 
   // User Profile APIs - 获取完整的用户资料信息
@@ -451,53 +538,83 @@ class ApiClient {
   }
 
   async batchUpdateMetadata(data: { metadata_entries: MetadataEntry[] }): Promise<ApiResponse<any>> {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('User not authenticated')
+    console.log('🔄 [ApiClient.batchUpdateMetadata] Starting batch metadata update...')
+    console.log('📝 [ApiClient.batchUpdateMetadata] Entries count:', data.metadata_entries.length)
+    
+    const headers = await this.getSupabaseHeaders()
+    const response = await fetch(`${this.baseUrl}/api/metadata/batch`, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify(data),
+    })
+    
+    console.log('📡 [ApiClient.batchUpdateMetadata] Response status:', response.status)
+    console.log('📡 [ApiClient.batchUpdateMetadata] Response ok:', response.ok)
+    
+    return this.handleResponse<ApiResponse<any>>(response)
+  }
 
-      const results = []
-      const errors = []
+  async updateProfile(profileData: any): Promise<ApiResponse<any>> {
+    console.log('🔄 [ApiClient.updateProfile] Starting profile update...')
+    console.log('📝 [ApiClient.updateProfile] Profile data:', profileData)
+    
+    const headers = await this.getSupabaseHeaders()
+    console.log('📋 [ApiClient.updateProfile] Request headers:', headers)
+    
+    const response = await fetch(`${this.baseUrl}/api/users/me/profile`, {
+      method: 'PUT',
+      headers: headers,
+      body: JSON.stringify(profileData),
+    })
+    
+    console.log('📡 [ApiClient.updateProfile] Response status:', response.status)
+    console.log('📡 [ApiClient.updateProfile] Response ok:', response.ok)
+    
+    return this.handleResponse<ApiResponse<any>>(response)
+  }
 
-      for (const entry of data.metadata_entries) {
-        try {
-          const result = await this.createMetadata(entry)
-          if (result.success) {
-            results.push(result.data)
-          } else {
-            errors.push({ entry, error: result.error })
-          }
-        } catch (error: any) {
-          errors.push({ entry, error: error.message })
-        }
-      }
-
-      return {
-        success: true,
-        message: `Successfully processed ${results.length} entries`,
-        data: {
-          success_count: results.length,
-          error_count: errors.length,
-          results,
-          errors
-        }
-      }
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message
-      }
-    }
+  async getBackendUserMetadata(): Promise<MetadataResponse> {
+    const response = await fetch(`${this.baseUrl}/api/users/me/profile`, {
+      method: 'GET',
+      headers: await this.getSupabaseHeaders(),
+    })
+    
+    return this.handleResponse<MetadataResponse>(response)
   }
 
   // Tags APIs - 生成标签使用后端API，获取标签使用Supabase
   async generateTags(data: GenerateTagsRequest): Promise<GenerateTagsResponse> {
+    console.log('🚀 [ApiClient.generateTags] Starting tag generation request...')
+    console.log('📝 [ApiClient.generateTags] Request data:', data)
+    
+    const headers = await this.getSupabaseHeaders()
+    const headerObj = headers as Record<string, string>
+    console.log('🔑 [ApiClient.generateTags] Request headers:', {
+      hasAuth: !!headerObj['Authorization'],
+      authType: headerObj['Authorization']?.substring(0, 20) + '...',
+      contentType: headerObj['Content-Type']
+    })
+    
+    console.log('🌐 [ApiClient.generateTags] Making request to:', `${this.baseUrl}/api/tags/generate`)
+    
     const response = await fetch(`${this.baseUrl}/api/tags/generate`, {
       method: 'POST',
-      headers: await this.getSupabaseHeaders(),
+      headers: headers,
       body: JSON.stringify(data),
     })
     
-    return this.handleResponse<GenerateTagsResponse>(response)
+    console.log('📡 [ApiClient.generateTags] Response status:', response.status)
+    console.log('📡 [ApiClient.generateTags] Response ok:', response.ok)
+    
+    const result = await this.handleResponse<GenerateTagsResponse>(response)
+    console.log('📊 [ApiClient.generateTags] Parsed result:', {
+      success: result.success,
+      message: result.message,
+      dataExists: !!result.data,
+      tagsCount: result.data?.generated_tags?.length || 0
+    })
+    
+    return result
   }
 
   async addManualTags(data: ManualTagsRequest): Promise<ApiResponse<UserTag[]>> {
@@ -810,64 +927,90 @@ export const auth = {
   },
   
   getCurrentUser: async () => {
+    console.log('🌐 [auth.getCurrentUser] Starting API call...')
     try {
-      const { data: { user }, error } = await supabase.auth.getUser()
+      console.log('🔄 [auth.getCurrentUser] Calling backend API...')
+      const response = await apiClient.getCurrentUser()
+      console.log('📥 [auth.getCurrentUser] Raw API response:', response)
       
-      if (error) throw error
-      if (!user) throw new Error('用户未登录')
-      
-      // 获取用户档案信息
-      const { data: profile, error: profileError } = await supabase
-        .from('user_profile')
-        .select('*')
-        .eq('auth_user_id', user.id)
-        .single()
-      
-      if (profileError) throw profileError
-      
-      return {
-        success: true,
-        data: {
-          user_id: profile.auth_user_id,
-          email: user.email!,
-          display_name: profile.display_name,
-          avatar_url: profile.avatar_url,
-          subscription_type: profile.subscription_type,
-          created_at: profile.created_at,
-          updated_at: profile.updated_at,
-          is_active: profile.is_active
+      if (response.success && response.data) {
+        console.log('✅ [auth.getCurrentUser] API call successful')
+        console.log('📋 [auth.getCurrentUser] User data:', response.data)
+        return {
+          success: true,
+          data: {
+            user_id: response.data.user_id,
+            email: response.data.email,
+            display_name: response.data.display_name,
+            avatar_url: response.data.avatar_url,
+            subscription_type: response.data.subscription_type,
+            created_at: response.data.created_at,
+            updated_at: response.data.updated_at,
+            last_login_at: response.data.last_login_at || new Date().toISOString(),
+            is_active: response.data.is_active
+          }
         }
       }
-    } catch (error: any) {
+      
+      console.log('❌ [auth.getCurrentUser] API call failed:', response.message)
       return {
         success: false,
-        message: error.message || '获取用户信息失败',
+        message: response.message || '获取用户信息失败',
+        data: null
+      }
+    } catch (error: any) {
+      console.error('💥 [auth.getCurrentUser] Exception occurred:', error)
+      console.error('💥 [auth.getCurrentUser] Error stack:', error.stack)
+      
+      let errorMessage = error.message || '获取用户信息失败'
+      
+      // 处理网络错误
+      if (error.message && error.message.includes('NetworkError')) {
+        errorMessage = '网络错误，请检查网络连接'
+        console.log('🌐 [auth.getCurrentUser] Network error detected')
+      } else if (error.message && error.message.includes('timeout')) {
+        errorMessage = '连接超时，请检查网络设置'
+        console.log('⏰ [auth.getCurrentUser] Timeout error detected')
+      } else if (error.message && error.message.includes('fetch')) {
+        errorMessage = '无法连接到服务器，请检查后端服务是否启动'
+        console.log('🔌 [auth.getCurrentUser] Fetch error detected')
+      } else if (error.message && (error.message.includes('401') || error.message.includes('Unauthorized'))) {
+        errorMessage = '登录已过期，请重新登录'
+        console.log('🔐 [auth.getCurrentUser] Authorization error detected')
+        
+        // 自动清除认证状态
+        console.log('🧹 [auth.getCurrentUser] Auto-clearing auth state due to 401 error')
+        apiClient.clearToken()
+        
+        // 清除store中的认证状态
+        if (typeof window !== 'undefined') {
+          try {
+            const { useAppStore } = await import('@/lib/store')
+            useAppStore.getState().logout()
+            console.log('✅ [auth.getCurrentUser] Store auth state cleared')
+          } catch (storeError) {
+            console.error('❌ [auth.getCurrentUser] Failed to clear store state:', storeError)
+          }
+        }
+      }
+      
+      console.log('❌ [auth.getCurrentUser] Final error message:', errorMessage)
+      return {
+        success: false,
+        message: errorMessage,
         data: null
       }
     }
   }
 }
 
+// Profile API object
 export const profile = {
-  getProfile: () => {
-    return apiClient.getUserProfile()
-  },
-  
-  updateProfile: (profileData: { bio?: string, location?: string, age?: string }) => {
-    return apiClient.updateUserProfile(profileData)
-  },
-  
-  updateMetadata: (sectionType: string, sectionKey: string, content: any) => {
-    return apiClient.createMetadata({ section_type: sectionType, section_key: sectionKey, content })
-  },
-  
-  getMetadata: () => {
-    return apiClient.getUserMetadata()
-  },
-  
-  batchUpdateMetadata: (entries: MetadataEntry[]) => {
-    return apiClient.batchUpdateMetadata({ metadata_entries: entries })
-  }
+  getMetadata: () => apiClient.getUserMetadata(), // 直接从Supabase获取
+  getBackendMetadata: () => apiClient.getBackendUserMetadata(), // 从后端API获取
+  createMetadata: (data: MetadataEntry) => apiClient.createMetadata(data),
+  batchUpdateMetadata: (entries: MetadataEntry[]) => apiClient.batchUpdateMetadata({ metadata_entries: entries }),
+  updateProfile: (profileData: any) => apiClient.updateProfile(profileData),
 }
 
 export const tags = {
