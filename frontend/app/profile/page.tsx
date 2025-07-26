@@ -2,13 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { useAppStore } from '@/lib/store'
 import { useRequireAuth } from '@/hooks/useAuth'
 import { profile, auth, tags } from '@/lib/api'
 import { User, UserMetadata, Language, UserTag } from '@/lib/types'
-import { User as UserIcon, Mail, Phone, MapPin, Calendar, Camera, Save, Edit3, Upload, AlertCircle, CheckCircle, RefreshCw, Plus, ExternalLink, Trash2, Link } from 'lucide-react'
+import { User as UserIcon, Mail, Phone, MapPin, Calendar, Camera, Save, Edit3, Upload, AlertCircle, CheckCircle, RefreshCw, Plus, ExternalLink, Trash2, Link, X, Image as ImageIcon } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 interface SocialLink {
@@ -16,6 +15,13 @@ interface SocialLink {
   platform: string
   url: string
   label: string
+}
+
+interface UserPhoto {
+  id: string
+  url: string
+  file?: File
+  isUploading?: boolean
 }
 
 export default function ProfilePage() {
@@ -62,8 +68,7 @@ export default function ProfilePage() {
   
   const [isEditing, setIsEditing] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const [userPhotos, setUserPhotos] = useState<UserPhoto[]>([])
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([])
   const [newLink, setNewLink] = useState({ platform: '', url: '', label: '' })
   const [isAddingLink, setIsAddingLink] = useState(false)
@@ -126,10 +131,12 @@ export default function ProfilePage() {
         const personalInfo = profileSection.personal || {}
         const contactInfo = profileSection.contact || {}  
         const preferencesInfo = profileSection.preferences || {}
+        const photosInfo = profileSection.photos || {}
         
         const personalData = personalInfo.content || {}
         const contactData = contactInfo.content || {}
         const preferencesData = preferencesInfo.content || {}
+        const photosData = photosInfo.content || []
         
         setProfileData({
           name: String(basicInfo.display_name || authUser.display_name || ''),
@@ -145,6 +152,22 @@ export default function ProfilePage() {
             emailNotifications: preferencesData.email_notifications !== false
           }
         })
+        
+        // 设置照片数据
+        if (Array.isArray(photosData) && photosData.length > 0) {
+          setUserPhotos(photosData.map((photo: any, index: number) => ({
+            id: photo.id || `photo_${index}`,
+            url: photo.url || photo,
+            isUploading: false
+          })))
+        } else if (authUser?.avatar_url) {
+          // 如果没有照片数据但有头像，将头像作为第一张照片
+          setUserPhotos([{
+            id: 'avatar_photo',
+            url: authUser.avatar_url,
+            isUploading: false
+          }])
+        }
         
         // 设置标签 - 确保是数组格式
         const userTagsData = Array.isArray(userData.tags) ? userData.tags : []
@@ -181,9 +204,26 @@ export default function ProfilePage() {
           const contactData = profileSection.contact?.content || {}
           const preferencesData = profileSection.preferences?.content || {}
           const socialLinksData = profileSection.social_links?.content || []
+          const photosData = profileSection.photos?.content || []
           
           setUserMetadata(metadataResponse.data)
           setSocialLinks(socialLinksData)
+          
+          // 设置照片数据
+          if (Array.isArray(photosData) && photosData.length > 0) {
+            setUserPhotos(photosData.map((photo: any, index: number) => ({
+              id: photo.id || `photo_${index}`,
+              url: photo.url || photo,
+              isUploading: false
+            })))
+          } else if (authUser?.avatar_url) {
+            // 如果没有照片数据但有头像，将头像作为第一张照片
+            setUserPhotos([{
+              id: 'avatar_photo',
+              url: authUser.avatar_url,
+              isUploading: false
+            }])
+          }
           
           setProfileData({
             name: userProfile.display_name || authUser.display_name || '',
@@ -356,6 +396,14 @@ export default function ProfilePage() {
           content: socialLinks
         },
         {
+          section_type: 'profile',
+          section_key: 'photos',
+          content: userPhotos.filter(photo => !photo.file).map(photo => ({
+            id: photo.id,
+            url: photo.url
+          }))
+        },
+        {
           section_type: 'user_request',
           section_key: 'description',
           content: {
@@ -512,54 +560,110 @@ export default function ProfilePage() {
     ))
   }
 
-  const handleAvatarUpload = () => {
+  // 照片管理函数
+  const handlePhotosUpload = () => {
+    if (userPhotos.length >= 9) {
+      setError(language === 'zh' ? '最多只能上传9张照片' : 'Maximum 9 photos allowed')
+      return
+    }
     fileInputRef.current?.click()
   }
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
+  const handleFilesChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || [])
+    if (!files.length) return
 
-    // 验证文件类型
-    if (!file.type.startsWith('image/')) {
-      setError(language === 'zh' ? '请选择图片文件' : 'Please select an image file')
+    // 检查照片数量限制
+    const availableSlots = 9 - userPhotos.length
+    if (files.length > availableSlots) {
+      setError(language === 'zh' ? `最多还能上传${availableSlots}张照片` : `Can only upload ${availableSlots} more photos`)
       return
     }
 
-    // 验证文件大小 (限制为5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setError(language === 'zh' ? '图片大小不能超过5MB' : 'Image size cannot exceed 5MB')
-      return
-    }
+    // 验证文件
+    const validFiles = files.filter(file => {
+      if (!file.type.startsWith('image/')) {
+        setError(language === 'zh' ? '请选择图片文件' : 'Please select image files')
+        return false
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setError(language === 'zh' ? '图片大小不能超过5MB' : 'Image size cannot exceed 5MB')
+        return false
+      }
+      return true
+    })
 
-    setIsUploadingAvatar(true)
+    if (validFiles.length === 0) return
+
     setError(null)
 
-    try {
-      // 创建预览
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setAvatarPreview(e.target?.result as string)
+    // 为每个文件创建预览
+    const newPhotos: UserPhoto[] = []
+    
+    for (const file of validFiles) {
+      const photoId = `temp_${Date.now()}_${Math.random()}`
+      
+      // 创建预览URL
+      const previewUrl = URL.createObjectURL(file)
+      
+      const newPhoto: UserPhoto = {
+        id: photoId,
+        url: previewUrl,
+        file: file,
+        isUploading: true
       }
-      reader.readAsDataURL(file)
-
-      // 这里需要调用实际的上传API
-      // TODO: 实现头像上传API调用
-      // const formData = new FormData()
-      // formData.append('avatar', file)
-      // const response = await profile.uploadAvatar(formData)
       
-      // 模拟上传延迟
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      setSaveSuccess(true)
-      setTimeout(() => setSaveSuccess(false), 3000)
-    } catch (error: any) {
-      setError(error.message || 'Failed to upload avatar')
-      setAvatarPreview(null)
-    } finally {
-      setIsUploadingAvatar(false)
+      newPhotos.push(newPhoto)
     }
+
+    // 添加到照片列表
+    setUserPhotos(prev => [...prev, ...newPhotos])
+
+    // 模拟上传过程
+    for (const photo of newPhotos) {
+      try {
+        // 这里应该调用实际的上传API
+        // const formData = new FormData()
+        // formData.append('photo', photo.file!)
+        // const response = await profile.uploadPhoto(formData)
+        
+        // 模拟上传延迟
+        await new Promise(resolve => setTimeout(resolve, 2000))
+        
+        // 上传成功，更新照片状态
+        setUserPhotos(prev => prev.map(p => 
+          p.id === photo.id 
+            ? { ...p, isUploading: false }
+            : p
+        ))
+        
+      } catch (error: any) {
+        console.error('Photo upload failed:', error)
+        // 上传失败，移除该照片
+        setUserPhotos(prev => prev.filter(p => p.id !== photo.id))
+        setError(error.message || 'Failed to upload photo')
+      }
+    }
+  }
+
+  const removePhoto = (photoId: string) => {
+    setUserPhotos(prev => {
+      const photo = prev.find(p => p.id === photoId)
+      if (photo?.url.startsWith('blob:')) {
+        URL.revokeObjectURL(photo.url)
+      }
+      return prev.filter(p => p.id !== photoId)
+    })
+  }
+
+  const reorderPhotos = (dragIndex: number, hoverIndex: number) => {
+    setUserPhotos(prev => {
+      const newPhotos = [...prev]
+      const dragPhoto = newPhotos[dragIndex]
+      newPhotos.splice(dragIndex, 1)
+      newPhotos.splice(hoverIndex, 0, dragPhoto)
+      return newPhotos
+    })
   }
       
   const generateTags = async (requestType: '找队友' | '找对象') => {
@@ -665,64 +769,104 @@ export default function ProfilePage() {
       </div>
 
       <div className="grid md:grid-cols-3 gap-8">
-        {/* Profile Image and Basic Info */}
+        {/* Photos and Basic Info */}
         <div className="md:col-span-1 space-y-6">
+          {/* 照片展示区域 */}
           <div className="text-center space-y-4">
-            <div className="relative">
-              <Avatar className="h-32 w-32 mx-auto">
-                <AvatarImage src={avatarPreview || authUser?.avatar_url} />
-                <AvatarFallback className="text-2xl">
-                  {(profileData.name || authUser?.display_name || 'U').charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-              {isEditing && (
-                <Button
-                  size="icon"
-                  className="absolute bottom-0 right-1/2 translate-x-1/2 translate-y-1/2 rounded-full"
-                  onClick={handleAvatarUpload}
-                  disabled={isUploadingAvatar}
-                >
-                  {isUploadingAvatar ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <Camera className="h-4 w-4" />
+            <h3 className="font-semibold text-lg">
+              {language === 'zh' ? '我的照片' : 'My Photos'}
+            </h3>
+            
+            {/* 照片网格 */}
+            <div className="grid grid-cols-3 gap-2">
+              {/* 现有照片 */}
+              {userPhotos.map((photo, index) => (
+                <div key={photo.id} className="relative aspect-square group">
+                  <div className="w-full h-full rounded-lg overflow-hidden bg-muted">
+                    <img 
+                      src={photo.url} 
+                      alt={`Photo ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  
+                  {/* 上传中状态 */}
+                  {photo.isUploading && (
+                    <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
+                      <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    </div>
                   )}
-                </Button>
+                  
+                  {/* 删除按钮 */}
+                  {isEditing && !photo.isUploading && (
+                    <Button
+                      size="icon"
+                      variant="destructive"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => removePhoto(photo.id)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  )}
+                  
+                  {/* 主照片标识 */}
+                  {index === 0 && (
+                    <div className="absolute bottom-1 left-1 bg-primary text-primary-foreground text-xs px-1 py-0.5 rounded">
+                      {language === 'zh' ? '主照片' : 'Main'}
+                    </div>
+                  )}
+                </div>
+              ))}
+              
+              {/* 添加照片按钮 */}
+              {userPhotos.length < 9 && isEditing && (
+                <button
+                  onClick={handlePhotosUpload}
+                  className="aspect-square rounded-lg border-2 border-dashed border-muted-foreground/30 hover:border-primary hover:bg-primary/5 transition-colors flex flex-col items-center justify-center gap-1 text-muted-foreground hover:text-primary"
+                >
+                  <Plus className="h-6 w-6" />
+                  <span className="text-xs">
+                    {language === 'zh' ? '添加' : 'Add'}
+                  </span>
+                </button>
               )}
+              
+              {/* 空白占位 */}
+              {Array.from({ length: 9 - userPhotos.length - (isEditing && userPhotos.length < 9 ? 1 : 0) }).map((_, index) => (
+                <div key={`empty-${index}`} className="aspect-square rounded-lg bg-muted/30" />
+              ))}
             </div>
             
-            {/* Upload Button */}
-            <div className="space-y-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleAvatarUpload}
-                disabled={isUploadingAvatar}
-                className="w-full"
-              >
-                {isUploadingAvatar ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
-                    {language === 'zh' ? '上传中...' : 'Uploading...'}
-                  </>
-                ) : (
-                  <>
-                    <Upload className="h-4 w-4 mr-2" />
-                    {language === 'zh' ? '上传头像' : 'Upload Avatar'}
-                  </>
-                )}
-              </Button>
-              <p className="text-xs text-muted-foreground">
-                {language === 'zh' ? '支持 JPG、PNG 格式，最大 5MB' : 'Support JPG, PNG format, max 5MB'}
-              </p>
-            </div>
+            {/* 上传按钮和说明 */}
+            {isEditing && (
+              <div className="space-y-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePhotosUpload}
+                  disabled={userPhotos.length >= 9}
+                  className="w-full"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  {language === 'zh' ? '上传照片' : 'Upload Photos'} 
+                  <span className="ml-1 text-xs">({userPhotos.length}/9)</span>
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  {language === 'zh' 
+                    ? '支持 JPG、PNG 格式，最大 5MB，最多 9 张' 
+                    : 'Support JPG, PNG format, max 5MB, up to 9 photos'
+                  }
+                </p>
+              </div>
+            )}
 
             {/* Hidden file input */}
             <input
               ref={fileInputRef}
               type="file"
               accept="image/*"
-              onChange={handleFileChange}
+              multiple
+              onChange={handleFilesChange}
               className="hidden"
             />
             
@@ -827,6 +971,23 @@ export default function ProfilePage() {
                   />
                 ) : (
                   <p className="px-3 py-2">{profileData.location}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center space-x-2">
+                  <Calendar className="h-4 w-4" />
+                  <span>{language === 'zh' ? '年龄' : 'Age'}</span>
+                </label>
+                {isEditing ? (
+                  <input
+                    type="number"
+                    value={profileData.age}
+                    onChange={(e) => handleInputChange('age', e.target.value)}
+                    className="w-full px-3 py-2 border border-input rounded-md bg-background"
+                  />
+                ) : (
+                  <p className="px-3 py-2">{profileData.age}</p>
                 )}
               </div>
             </div>

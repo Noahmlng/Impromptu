@@ -21,6 +21,9 @@ python-multipart>=0.0.6
 supabase>=2.0.0
 pyjwt>=2.8.0
 
+#LLM相关
+openai 
+
 # 其他工具依赖
 python-json-logger>=2.0.0
 bcrypt>=4.1.2 

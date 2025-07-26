@@ -1,3 +1,4 @@
+// 没用的过渡页
 'use client'
 
 import { useState, useEffect } from 'react'
