@@ -53,24 +53,26 @@ export default function ProfilePage() {
       
       setIsLoading(true)
       try {
-        // Load metadata
-        const metadataResponse = await profile.getMetadata()
-        if (metadataResponse.success) {
-          setUserMetadata(metadataResponse.data)
+        // Load user profile (includes basic info from user_profile + personal metadata)
+        const profileResponse = await profile.getProfile()
+        if (profileResponse.success) {
+          const userData = profileResponse.data
           
-          // Parse metadata into profile form
-          const profileSection = metadataResponse.data.profile || {}
-          const personalData = profileSection.personal?.content || {}
+          // Load additional metadata for preferences and contact info
+          const metadataResponse = await profile.getMetadata()
+          const profileSection = metadataResponse.success ? metadataResponse.data.profile || {} : {}
           const contactData = profileSection.contact?.content || {}
           const preferencesData = profileSection.preferences?.content || {}
           
+          setUserMetadata(metadataResponse.success ? metadataResponse.data : {})
+          
           setProfileData({
-            name: backendUser?.display_name || '',
-            email: backendUser?.email || '',
+            name: userData.display_name || '',
+            email: userData.email || '',
             phone: contactData.phone || '',
-            location: personalData.location || '',
-            age: personalData.age || '',
-            bio: personalData.bio || '',
+            location: userData.location || '',  // Now from user_profile + personal metadata
+            age: userData.age || '',            // Now from user_profile + personal metadata
+            bio: userData.bio || '',            // Now from user_profile + personal metadata
             preferences: {
               romanticMode: preferencesData.romantic_mode !== false,
               teamMode: preferencesData.team_mode !== false,
@@ -105,17 +107,15 @@ export default function ProfilePage() {
     setError(null)
     
     try {
-      // Prepare metadata entries
+      // Save basic profile info (bio, location, age) using the new profile API
+      await profile.updateProfile({
+        bio: profileData.bio,
+        location: profileData.location,
+        age: profileData.age
+      })
+
+      // Save other metadata (contact info and preferences)
       const metadataEntries = [
-        {
-          section_type: 'profile',
-          section_key: 'personal',
-          content: {
-            location: profileData.location,
-            age: profileData.age,
-            bio: profileData.bio
-          }
-        },
         {
           section_type: 'profile',
           section_key: 'contact',
@@ -135,7 +135,7 @@ export default function ProfilePage() {
         }
       ]
 
-      // Save metadata
+      // Save additional metadata
       await profile.batchUpdateMetadata(metadataEntries)
       
       setSaveSuccess(true)

@@ -199,7 +199,7 @@ export default function HomePage() {
           </div>
           <div className="ml-4">
             <Button 
-              onClick={() => window.location.href = '/personality-chat'}
+              onClick={() => window.location.href = '/chat'}
               className={`bg-gradient-to-r ${
                 themeMode === 'romantic' 
                   ? 'from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700' 

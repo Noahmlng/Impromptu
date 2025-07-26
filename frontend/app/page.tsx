@@ -30,11 +30,12 @@ export default function LandingPage() {
   // Redirect to /home if user is authenticated
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.push('/home')
+      // 立即跳转，不显示重定向消息
+      router.replace('/home')
     }
   }, [isAuthenticated, isLoading, router])
 
-  // Show loading or redirect if authenticated
+  // Show loading during auth check
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -48,9 +49,18 @@ export default function LandingPage() {
     )
   }
 
-  // Don't render landing page if user is authenticated (will redirect)
+  // 如果已认证，显示简单的跳转提示而不是完整页面
   if (isAuthenticated) {
-    return null
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300">
+            {language === 'zh' ? '正在跳转...' : 'Redirecting...'}
+          </p>
+        </div>
+      </div>
+    )
   }
 
   const features = [

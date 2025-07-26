@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import { AppState, User, ThemeMode, Language, BackendUserInfo, UserTag, UserMetadata } from './types'
 
 interface ExtendedAppState extends AppState {
@@ -39,60 +40,85 @@ interface ExtendedAppState extends AppState {
   logout: () => void
 }
 
-export const useAppStore = create<ExtendedAppState>((set, get) => ({
-  // Basic app state
-  themeMode: 'romantic',
-  isDarkMode: false,
-  language: 'en',
-  user: null,
-  
-  // Auth state
-  isAuthenticated: false,
-  authToken: null,
-  backendUser: null,
-  
-  // User data
-  userTags: [],
-  userMetadata: {},
-  
-  // Loading states
-  isLoading: false,
-  isAuthLoading: false,
-  
-  // Error handling
-  error: null,
-  
-  // Basic actions
-  setThemeMode: (mode) => set({ themeMode: mode }),
-  setIsDarkMode: (isDark) => set({ isDarkMode: isDark }),
-  setLanguage: (lang) => set({ language: lang }),
-  setUser: (user) => set({ user }),
-  
-  // Auth actions
-  setAuthToken: (token) => set({ authToken: token, isAuthenticated: !!token }),
-  setBackendUser: (user) => set({ backendUser: user }),
-  setIsAuthenticated: (authenticated) => set({ isAuthenticated: authenticated }),
-  
-  // User data actions
-  setUserTags: (tags) => set({ userTags: tags }),
-  setUserMetadata: (metadata) => set({ userMetadata: metadata }),
-  
-  // Loading actions
-  setIsLoading: (loading) => set({ isLoading: loading }),
-  setIsAuthLoading: (loading) => set({ isAuthLoading: loading }),
-  
-  // Error actions
-  setError: (error) => set({ error }),
-  clearError: () => set({ error: null }),
-  
-  // Combined actions
-  logout: () => set({
-    user: null,
-    isAuthenticated: false,
-    authToken: null,
-    backendUser: null,
-    userTags: [],
-    userMetadata: {},
-    error: null
-  }),
-})) 
+export const useAppStore = create<ExtendedAppState>()(
+  persist(
+    (set, get) => ({
+      // Basic app state
+      themeMode: 'romantic',
+      isDarkMode: false,  
+      language: 'zh',
+      user: null,
+      
+      // Auth state
+      isAuthenticated: false,
+      authToken: null,
+      backendUser: null,
+      
+      // User data
+      userTags: [],
+      userMetadata: {},
+      
+      // Loading states (not persisted)
+      isLoading: false,
+      isAuthLoading: false,
+      
+      // Error handling (not persisted)
+      error: null,
+      
+      // Basic actions
+      setThemeMode: (mode) => set({ themeMode: mode }),
+      setIsDarkMode: (isDark) => set({ isDarkMode: isDark }),
+      setLanguage: (lang) => set({ language: lang }),
+      setUser: (user) => set({ user }),
+      
+      // Auth actions
+      setAuthToken: (token) => set({ 
+        authToken: token, 
+        isAuthenticated: !!token 
+      }),
+      setBackendUser: (user) => set({ 
+        backendUser: user, 
+        isAuthenticated: !!user 
+      }),
+      setIsAuthenticated: (authenticated) => set({ isAuthenticated: authenticated }),
+      
+      // User data actions
+      setUserTags: (tags) => set({ userTags: tags }),
+      setUserMetadata: (metadata) => set({ userMetadata: metadata }),
+      
+      // Loading actions
+      setIsLoading: (loading) => set({ isLoading: loading }),
+      setIsAuthLoading: (loading) => set({ isAuthLoading: loading }),
+      
+      // Error actions
+      setError: (error) => set({ error }),
+      clearError: () => set({ error: null }),
+      
+      // Combined actions
+      logout: () => set({
+        user: null,
+        isAuthenticated: false,
+        authToken: null,
+        backendUser: null,
+        userTags: [],
+        userMetadata: {},
+        error: null
+      }),
+    }),
+    {
+      name: 'linker-app-storage',
+      partialize: (state) => ({
+        // Only persist these fields
+        themeMode: state.themeMode,
+        isDarkMode: state.isDarkMode,
+        language: state.language,
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+        authToken: state.authToken,
+        backendUser: state.backendUser,
+        userTags: state.userTags,
+        userMetadata: state.userMetadata,
+      }),
+    }
+  )
+) 

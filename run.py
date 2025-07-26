@@ -21,9 +21,17 @@ def run_demo():
     from scripts.demo.main import main
     main()
 
-def run_api():
-    """启动API服务"""
-    os.system("bash scripts/setup/start_api.sh")
+def run_api(port=5000):
+    """启动FastAPI服务"""
+    print("🌐 启动新的模块化FastAPI服务器...")
+    print(f"📍 API服务将在 http://localhost:{port} 启动")
+    print("📖 API文档: http://localhost:{}/docs".format(port))
+    os.system(f"cd backend/services && python main_api.py --port {port}")
+
+def run_legacy_api():
+    """启动传统API服务（兼容模式）"""
+    print("🔄 使用传统后端入口...")
+    os.system("python backend/main.py comprehensive")
 
 def run_train():
     """训练模型"""
@@ -36,7 +44,7 @@ def run_web():
 
 def main():
     parser = argparse.ArgumentParser(description='Impromptu 匹配系统')
-    parser.add_argument('mode', choices=['demo', 'api', 'train', 'web', 'setup'], 
+    parser.add_argument('mode', choices=['demo', 'api', 'legacy-api', 'train', 'web', 'setup'], 
                        help='运行模式')
     parser.add_argument('--port', type=int, default=5000, help='API服务端口')
     
@@ -49,8 +57,11 @@ def main():
         print("📱 启动命令行演示...")
         run_demo()
     elif args.mode == 'api':
-        print("🌐 启动API服务...")
-        run_api()
+        print("🌐 启动新版模块化API服务...")
+        run_api(args.port)
+    elif args.mode == 'legacy-api':
+        print("🔄 启动传统API服务（兼容模式）...")
+        run_legacy_api()
     elif args.mode == 'train':
         print("🧠 开始模型训练...")
         run_train()

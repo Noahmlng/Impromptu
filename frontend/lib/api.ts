@@ -251,26 +251,101 @@ class ApiClient {
     return this.handleResponse<ApiResponse<UserInfo>>(response)
   }
 
+  // User Profile APIs - 获取完整的用户资料信息
+  async getUserProfile(): Promise<ApiResponse<any>> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('User not authenticated')
+
+      // 获取用户基本资料
+      const { data: profile, error: profileError } = await supabase
+        .from('user_profile')
+        .select('*')
+        .eq('auth_user_id', user.id)
+        .single()
+
+      if (profileError) throw profileError
+
+      // 获取关键的个人信息metadata（bio, location, age等）
+      const { data: personalMetadata, error: metadataError } = await supabase
+        .from('user_metadata')
+        .select('*')
+        .eq('auth_user_id', user.id)
+        .eq('section_type', 'profile')
+        .eq('section_key', 'personal')
+        .single()
+
+      // 合并profile和metadata信息
+      let personalInfo: any = {}
+      if (personalMetadata && !metadataError) {
+        try {
+          personalInfo = typeof personalMetadata.content === 'string' 
+            ? JSON.parse(personalMetadata.content) 
+            : personalMetadata.content || {}
+        } catch (e) {
+          console.error('Error parsing personal metadata:', e)
+        }
+      }
+
+      return {
+        success: true,
+        data: {
+          ...profile,
+          bio: personalInfo.bio || '',
+          location: personalInfo.location || '',
+          age: personalInfo.age || '',
+          // 其他个人信息也可以添加到这里
+        }
+      }
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message
+      }
+    }
+  }
+
+  // Update user profile basic info (bio, location, age)
+  async updateUserProfile(profileData: { bio?: string, location?: string, age?: string }): Promise<ApiResponse<any>> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('User not authenticated')
+
+      // Update personal metadata (bio, location, age)
+      const personalMetadataEntry = {
+        section_type: 'profile',
+        section_key: 'personal',
+        content: {
+          bio: profileData.bio || '',
+          location: profileData.location || '',
+          age: profileData.age || ''
+        }
+      }
+
+      const result = await this.createMetadata(personalMetadataEntry)
+      return result
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message
+      }
+    }
+  }
+
   // Metadata APIs - 直接使用Supabase
   async createMetadata(data: MetadataEntry): Promise<ApiResponse<any>> {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
 
-      // 获取用户的user_id
-      const { data: profile } = await supabase
-        .from('user_profile')
-        .select('user_id')
-        .eq('auth_user_id', user.id)
-        .single()
-
-      if (!profile) throw new Error('User profile not found')
+      // 直接使用auth_user_id，不需要查询user_profile
+      const authUserId = user.id
 
       // 检查是否已存在相同的metadata
       const { data: existing } = await supabase
         .from('user_metadata')
         .select('id')
-        .eq('user_id', profile.user_id)
+        .eq('auth_user_id', authUserId)
         .eq('section_type', data.section_type)
         .eq('section_key', data.section_key)
         .single()
@@ -301,7 +376,7 @@ class ApiClient {
         const { data: created, error } = await supabase
           .from('user_metadata')
           .insert({
-            user_id: profile.user_id,
+            auth_user_id: authUserId,
             section_type: data.section_type,
             section_key: data.section_key,
             content: data.content,
@@ -332,23 +407,14 @@ class ApiClient {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
 
-      // 获取用户的user_id
-      const { data: profile } = await supabase
-        .from('user_profile')
-        .select('user_id')
-        .eq('auth_user_id', user.id)
-        .single()
-
-      if (!profile) throw new Error('User profile not found')
+      // 直接使用auth_user_id
+      const authUserId = user.id
 
       // 获取所有metadata
       const { data: metadata, error } = await supabase
         .from('user_metadata')
         .select('*')
-        .eq('user_id', profile.user_id)
-        .eq('is_active', true)
-        .order('section_type')
-        .order('display_order')
+        .eq('auth_user_id', authUserId)
 
       if (error) throw error
 
@@ -388,15 +454,6 @@ class ApiClient {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
-
-      // 获取用户的user_id
-      const { data: profile } = await supabase
-        .from('user_profile')
-        .select('user_id')
-        .eq('auth_user_id', user.id)
-        .single()
-
-      if (!profile) throw new Error('User profile not found')
 
       const results = []
       const errors = []
@@ -458,21 +515,14 @@ class ApiClient {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
 
-      // 获取用户的user_id
-      const { data: profile } = await supabase
-        .from('user_profile')
-        .select('user_id')
-        .eq('auth_user_id', user.id)
-        .single()
-
-      if (!profile) throw new Error('User profile not found')
+      // 直接使用auth_user_id
+      const authUserId = user.id
 
       // 获取用户标签
       const { data: tags, error } = await supabase
         .from('user_tags')
         .select('*')
-        .eq('user_id', profile.user_id)
-        .eq('is_active', true)
+        .eq('auth_user_id', authUserId)
         .order('confidence_score', { ascending: false })
 
       if (error) throw error
@@ -480,7 +530,7 @@ class ApiClient {
       // 转换为前端需要的格式
       const formattedTags: UserTag[] = (tags || []).map((tag: any) => ({
         id: tag.id,
-        user_id: tag.user_id,
+        user_id: tag.auth_user_id,
         tag_name: tag.tag_name,
         tag_category: tag.tag_category || 'generated',
         confidence_score: parseFloat(tag.confidence_score || 0),
@@ -591,7 +641,7 @@ export const auth = {
             success: true,
             message: '登录成功',
             data: {
-              user_id: profile?.user_id || data.user.id,
+              user_id: profile?.auth_user_id || data.user.id,
               email: data.user.email!,
               display_name: profile?.display_name || data.user.user_metadata?.display_name,
               avatar_url: profile?.avatar_url || data.user.user_metadata?.avatar_url,
@@ -778,7 +828,7 @@ export const auth = {
       return {
         success: true,
         data: {
-          user_id: profile.user_id,
+          user_id: profile.auth_user_id,
           email: user.email!,
           display_name: profile.display_name,
           avatar_url: profile.avatar_url,
@@ -799,6 +849,14 @@ export const auth = {
 }
 
 export const profile = {
+  getProfile: () => {
+    return apiClient.getUserProfile()
+  },
+  
+  updateProfile: (profileData: { bio?: string, location?: string, age?: string }) => {
+    return apiClient.updateUserProfile(profileData)
+  },
+  
   updateMetadata: (sectionType: string, sectionKey: string, content: any) => {
     return apiClient.createMetadata({ section_type: sectionType, section_key: sectionKey, content })
   },

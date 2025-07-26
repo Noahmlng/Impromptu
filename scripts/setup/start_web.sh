@@ -9,31 +9,53 @@ if [ ! -f "setup.py" ]; then
     exit 1
 fi
 
-# 检查web目录
-if [ ! -d "web" ]; then
-    echo "❌ 错误: web目录不存在"
+# 检查frontend目录
+if [ ! -d "frontend" ]; then
+    echo "❌ 错误: frontend目录不存在"
     exit 1
 fi
 
-# 检查Python是否安装
-if ! command -v python3 &> /dev/null; then
-    echo "❌ 错误: 未找到Python3"
+# 检查Node.js是否安装
+if ! command -v node &> /dev/null; then
+    echo "❌ 错误: 未找到Node.js，请先安装Node.js"
+    echo "💡 建议使用: brew install node (macOS) 或访问 https://nodejs.org/"
     exit 1
 fi
 
-echo "🔍 检查端口8000是否可用..."
-if lsof -Pi :8000 -sTCP:LISTEN -t >/dev/null ; then
-    echo "⚠️  警告: 端口8000已被占用，尝试终止占用进程..."
-    kill -9 $(lsof -Pi :8000 -sTCP:LISTEN -t) 2>/dev/null || true
+# 检查npm是否安装
+if ! command -v npm &> /dev/null; then
+    echo "❌ 错误: 未找到npm"
+    exit 1
+fi
+
+# 进入前端目录
+cd frontend
+
+# 检查package.json是否存在
+if [ ! -f "package.json" ]; then
+    echo "❌ 错误: 未找到package.json文件"
+    exit 1
+fi
+
+# 安装依赖（如果node_modules不存在）
+if [ ! -d "node_modules" ]; then
+    echo "📦 安装前端依赖..."
+    npm install
+fi
+
+# 检查端口3000是否可用
+echo "🔍 检查端口3000是否可用..."
+if lsof -Pi :3000 -sTCP:LISTEN -t >/dev/null ; then
+    echo "⚠️  警告: 端口3000已被占用，尝试终止占用进程..."
+    kill -9 $(lsof -Pi :3000 -sTCP:LISTEN -t) 2>/dev/null || true
     sleep 2
 fi
 
-echo "🚀 启动Web服务器 (端口 8000)..."
-echo "访问地址: http://localhost:8000"
+echo "🚀 启动Next.js开发服务器 (端口 3000)..."
+echo "访问地址: http://localhost:3000"
 echo "确保API服务已启动: bash scripts/setup/start_api.sh"
 echo ""
 echo "按 Ctrl+C 停止服务"
 echo ""
 
-cd web
-python3 -m http.server 8000 
+npm run dev 

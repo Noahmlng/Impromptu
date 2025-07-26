@@ -1,12 +1,13 @@
-import type { Metadata } from 'next'
 import './globals.css'
+import type { Metadata } from 'next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Navbar } from '@/components/navbar'
 import { ModeSwitcher } from '@/components/mode-switcher'
+import { StoreInitializer } from '@/components/store-initializer'
 
 export const metadata: Metadata = {
-  title: 'Linker - AI-Powered Social Linking',
-  description: 'Find your perfect match with AI-powered compatibility analysis',
+  title: 'Linker - Smart Matching Platform',
+  description: 'Connect with the perfect partner through AI-powered matching',
 }
 
 export default function RootLayout({
@@ -15,20 +16,16 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="font-sans antialiased" suppressHydrationWarning>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
+    <html lang="en">
+      <body>
+        <StoreInitializer />
+        <ThemeProvider>
           <div className="min-h-screen bg-background">
             <Navbar />
-            <ModeSwitcher />
             <main className="container mx-auto px-4 py-8">
               {children}
             </main>
+            <ModeSwitcher />
           </div>
         </ThemeProvider>
       </body>

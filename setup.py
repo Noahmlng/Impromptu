@@ -33,7 +33,7 @@ setup(
     entry_points={
         "console_scripts": [
             "impromptu-demo=scripts.demo.main:main",
-            "impromptu-api=src.services.api_server:main",
+            "impromptu-api=backend.services.api_server:main",
         ],
     },
 ) 
