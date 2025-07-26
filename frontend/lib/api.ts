@@ -107,9 +107,12 @@ export interface MatchSearchRequest {
 
 export interface MatchSearchResponse {
   success: boolean
-  data: MatchUser[]
-  total: number
-  query: MatchSearchRequest
+  message: string
+  data: {
+    matched_users: MatchUser[]
+    total: number
+    query: MatchSearchRequest
+  }
 }
 
 export interface CompatibilityAnalysisRequest {
@@ -141,6 +144,7 @@ export interface ApiResponse<T> {
 class ApiClient {
   private baseUrl: string
   private token: string | null = null
+  private defaultTimeout = 10000 // 10秒超时
 
   constructor(baseUrl: string = API_BASE_URL) {
     this.baseUrl = baseUrl
@@ -149,6 +153,27 @@ class ApiClient {
     if (typeof window !== 'undefined') {
       this.token = localStorage.getItem('auth_token')
       console.log('🔑 [ApiClient] Loaded token from localStorage:', this.token ? 'TOKEN_EXISTS' : 'NO_TOKEN')
+    }
+  }
+
+  // 添加超时包装函数
+  private async fetchWithTimeout(url: string, options: RequestInit = {}): Promise<Response> {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), this.defaultTimeout)
+    
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal
+      })
+      clearTimeout(timeoutId)
+      return response
+    } catch (error: any) {
+      clearTimeout(timeoutId)
+      if (error.name === 'AbortError') {
+        throw new Error('网络请求超时，请检查网络连接')
+      }
+      throw error
     }
   }
 
@@ -268,7 +293,7 @@ class ApiClient {
 
   // Authentication APIs
   async register(data: RegisterRequest): Promise<AuthResponse> {
-    const response = await fetch(`${this.baseUrl}/api/auth/register`, {
+    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/auth/register`, {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify(data),
@@ -283,7 +308,7 @@ class ApiClient {
 
   async login(data: LoginRequest): Promise<AuthResponse> {
     console.log('🔐 [ApiClient.login] Attempting login for:', data.email)
-    const response = await fetch(`${this.baseUrl}/api/auth/login`, {
+    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/auth/login`, {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify(data),
@@ -324,7 +349,7 @@ class ApiClient {
     console.log('🔗 [ApiClient.getCurrentUser] URL:', `${this.baseUrl}/api/auth/user`)
     console.log('🔗 [ApiClient.getCurrentUser] Headers:', this.getHeaders())
     
-    const response = await fetch(`${this.baseUrl}/api/auth/user`, {
+    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/auth/user`, {
       method: 'GET',
       headers: this.getHeaders(),
     })
@@ -338,8 +363,20 @@ class ApiClient {
     return result
   }
 
-  // User Profile APIs - 获取完整的用户资料信息
-  async getUserProfile(): Promise<ApiResponse<any>> {
+  async verifyTokenFast(): Promise<{ valid: boolean; user_id?: string; email?: string }> {
+    console.log('⚡ [ApiClient.verifyTokenFast] Starting fast token verification...')
+    
+    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/auth/verify-fast`, {
+      method: 'GET',
+      headers: this.getHeaders(),
+    })
+    
+    console.log('📡 [ApiClient.verifyTokenFast] Response status:', response.status)
+    return this.handleResponse<{ valid: boolean; user_id?: string; email?: string }>(response)
+  }
+
+  // Metadata APIs - 直接使用Supabase
+  async createMetadata(data: MetadataEntry): Promise<ApiResponse<any>> {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
@@ -542,7 +579,7 @@ class ApiClient {
     console.log('📝 [ApiClient.batchUpdateMetadata] Entries count:', data.metadata_entries.length)
     
     const headers = await this.getSupabaseHeaders()
-    const response = await fetch(`${this.baseUrl}/api/metadata/batch`, {
+    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/metadata/batch`, {
       method: 'POST',
       headers: headers,
       body: JSON.stringify(data),
@@ -561,7 +598,7 @@ class ApiClient {
     const headers = await this.getSupabaseHeaders()
     console.log('📋 [ApiClient.updateProfile] Request headers:', headers)
     
-    const response = await fetch(`${this.baseUrl}/api/users/me/profile`, {
+    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/users/me/profile`, {
       method: 'PUT',
       headers: headers,
       body: JSON.stringify(profileData),
@@ -574,7 +611,7 @@ class ApiClient {
   }
 
   async getBackendUserMetadata(): Promise<MetadataResponse> {
-    const response = await fetch(`${this.baseUrl}/api/users/me/profile`, {
+    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/users/me/profile`, {
       method: 'GET',
       headers: await this.getSupabaseHeaders(),
     })
@@ -597,7 +634,7 @@ class ApiClient {
     
     console.log('🌐 [ApiClient.generateTags] Making request to:', `${this.baseUrl}/api/tags/generate`)
     
-    const response = await fetch(`${this.baseUrl}/api/tags/generate`, {
+    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/tags/generate`, {
       method: 'POST',
       headers: headers,
       body: JSON.stringify(data),
@@ -618,7 +655,7 @@ class ApiClient {
   }
 
   async addManualTags(data: ManualTagsRequest): Promise<ApiResponse<UserTag[]>> {
-    const response = await fetch(`${this.baseUrl}/api/tags/manual`, {
+    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/tags/manual`, {
       method: 'POST',
       headers: await this.getSupabaseHeaders(),
       body: JSON.stringify(data),
@@ -671,7 +708,7 @@ class ApiClient {
 
   // Matching APIs - 使用后端API进行AI匹配
   async searchMatches(data: MatchSearchRequest): Promise<MatchSearchResponse> {
-    const response = await fetch(`${this.baseUrl}/api/match/search`, {
+    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/match/search`, {
       method: 'POST',
       headers: await this.getSupabaseHeaders(),
       body: JSON.stringify(data),
@@ -681,7 +718,7 @@ class ApiClient {
   }
 
   async analyzeCompatibility(data: CompatibilityAnalysisRequest): Promise<CompatibilityAnalysisResponse> {
-    const response = await fetch(`${this.baseUrl}/api/match/analyze`, {
+    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/match/analyze`, {
       method: 'POST',
       headers: await this.getSupabaseHeaders(),
       body: JSON.stringify(data),
@@ -692,7 +729,7 @@ class ApiClient {
 
   // System APIs
   async healthCheck(): Promise<any> {
-    const response = await fetch(`${this.baseUrl}/api/system/health`, {
+    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/system/health`, {
       method: 'GET',
       headers: this.getHeaders(),
     })
@@ -701,7 +738,7 @@ class ApiClient {
   }
 
   async getSystemStats(): Promise<ApiResponse<any>> {
-    const response = await fetch(`${this.baseUrl}/api/system/stats`, {
+    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/system/stats`, {
       method: 'GET',
       headers: await this.getSupabaseHeaders(),
     })
@@ -923,6 +960,45 @@ export const auth = {
       return { success: true, message: '登出成功' }
     } catch (error: any) {
       return { success: false, message: error.message || '登出失败' }
+    }
+  },
+  
+  // 快速验证token - 只检查有效性，不返回完整用户数据
+  verifyTokenFast: async () => {
+    console.log('⚡ [auth.verifyTokenFast] Starting fast verification...')
+    try {
+      const response = await apiClient.verifyTokenFast()
+      console.log('📥 [auth.verifyTokenFast] Fast verification response:', response)
+      
+      return {
+        success: response.valid,
+        data: response.valid ? {
+          user_id: response.user_id,
+          email: response.email
+        } : null
+      }
+    } catch (error: any) {
+      console.error('💥 [auth.verifyTokenFast] Fast verification failed:', error)
+      
+      // 如果是401错误，自动清除认证状态
+      if (error.message && (error.message.includes('401') || error.message.includes('Unauthorized'))) {
+        console.log('🧹 [auth.verifyTokenFast] Auto-clearing auth state due to 401 error')
+        apiClient.clearToken()
+        
+        if (typeof window !== 'undefined') {
+          try {
+            const { useAppStore } = await import('@/lib/store')
+            useAppStore.getState().logout()
+          } catch (storeError) {
+            console.error('❌ [auth.verifyTokenFast] Failed to clear store state:', storeError)
+          }
+        }
+      }
+      
+      return {
+        success: false,
+        message: error.message || '快速验证失败'
+      }
     }
   },
   

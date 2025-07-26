@@ -18,16 +18,27 @@ export function useAuth(requireAuth: boolean = true) {
   
   const isInitialized = useRef(false)
   const [isHydrated, setIsHydrated] = useState(false)
+  const hydrationAttempts = useRef(0)
+  const maxHydrationAttempts = 20 // 最多等待2秒 (20 * 100ms)
 
-  // 等待 zustand persist 状态恢复
+  // 等待 zustand persist 状态恢复，添加超时机制
   useEffect(() => {
     console.log('💧 [useAuth] Checking hydration status...')
     
     // 检查是否已经从 localStorage 恢复状态
     const checkHydration = () => {
+      hydrationAttempts.current++
+      
       // 检查是否在客户端环境
       if (typeof window === 'undefined') {
         console.log('💧 [useAuth] Server side, not hydrated yet')
+        return
+      }
+      
+      // 检查是否已经超过最大尝试次数
+      if (hydrationAttempts.current > maxHydrationAttempts) {
+        console.log('⏰ [useAuth] Hydration timeout, proceeding anyway')
+        setIsHydrated(true)
         return
       }
       
@@ -41,8 +52,8 @@ export function useAuth(requireAuth: boolean = true) {
       console.log('💧 [useAuth] hasStateData:', !!hasStateData)
       
       // 如果localStorage有数据但store没有，说明还在恢复中
-      if (hasTokenInStorage && !hasStateData) {
-        console.log('💧 [useAuth] Store not hydrated yet, waiting...')
+      if (hasTokenInStorage && !hasStateData && hydrationAttempts.current <= maxHydrationAttempts) {
+        console.log(`💧 [useAuth] Store not hydrated yet, waiting... (attempt ${hydrationAttempts.current}/${maxHydrationAttempts})`)
         return
       }
       
@@ -54,7 +65,7 @@ export function useAuth(requireAuth: boolean = true) {
     checkHydration()
     
     // 如果还没有恢复，等待一小段时间再检查
-    if (!isHydrated) {
+    if (!isHydrated && hydrationAttempts.current <= maxHydrationAttempts) {
       const timeout = setTimeout(checkHydration, 100)
       return () => clearTimeout(timeout)
     }
@@ -82,54 +93,102 @@ export function useAuth(requireAuth: boolean = true) {
         if (authToken && backendUser) {
           console.log('✅ [useAuth] Found persisted auth state for:', backendUser.email)
           
-          // 验证token是否仍然有效
+          // 先使用快速验证检查token是否仍然有效（不查询数据库，速度更快）
           try {
-            console.log('🔄 [useAuth] Validating token with backend...')
-            const response = await auth.getCurrentUser()
-            console.log('📥 [useAuth] Backend response:', response)
+            console.log('⚡ [useAuth] Performing fast token validation...')
             
-            if (response.success && response.data) {
-              // Token仍然有效，更新用户信息
-              console.log('✅ [useAuth] Token valid, updating user info')
-              setBackendUser(response.data)
-              console.log('✅ [useAuth] Token verified and user info updated')
-            } else {
-              // Token无效，检查是否已经被getCurrentUser自动清除
-              const currentState = useAppStore.getState()
-              if (currentState.authToken || currentState.backendUser) {
-                console.log('❌ [useAuth] Token invalid, clearing remaining auth state')
-                console.log('❌ [useAuth] Response message:', response.message)
-                logout()
-              } else {
-                console.log('ℹ️ [useAuth] Auth state already cleared by getCurrentUser')
+            // 使用快速验证，只检查JWT token有效性
+            const fastVerificationPromise = auth.verifyTokenFast()
+            const timeoutPromise = new Promise((_, reject) => {
+              setTimeout(() => reject(new Error('Fast verification timeout')), 5000) // 5秒超时
+            })
+            
+            const fastResponse = await Promise.race([
+              fastVerificationPromise,
+              timeoutPromise
+            ]) as any
+            
+            console.log('📥 [useAuth] Fast verification response:', fastResponse)
+            
+            if (fastResponse.success) {
+              // 快速验证成功，token有效
+              console.log('✅ [useAuth] Fast verification successful, token is valid')
+              
+              // 如果用户数据比较旧（超过1小时），在后台更新用户信息（不阻塞UI）
+              const userDataAge = backendUser.last_login_at ? 
+                Date.now() - new Date(backendUser.last_login_at).getTime() : 
+                Infinity
+              
+              if (userDataAge > 60 * 60 * 1000) { // 1小时
+                console.log('🔄 [useAuth] User data is old, refreshing in background...')
+                
+                // 后台刷新用户数据，不等待结果
+                auth.getCurrentUser().then(fullResponse => {
+                  if (fullResponse.success && fullResponse.data) {
+                    console.log('✅ [useAuth] Background user data refresh successful')
+                    setBackendUser(fullResponse.data)
+                  }
+                }).catch(err => {
+                  console.warn('⚠️ [useAuth] Background user data refresh failed:', err)
+                })
               }
               
+              // 直接继续，不需要完整的用户数据验证
+            } else {
+              // 快速验证失败，token无效
+              console.log('❌ [useAuth] Fast verification failed, clearing auth state')
+              logout()
+              
               if (requireAuth) {
-                console.log('🔄 [useAuth] Redirecting to login (token invalid)')
+                console.log('🔄 [useAuth] Redirecting to login (fast verification failed)')
                 router.push('/login')
               }
             }
           } catch (error: any) {
-            console.error('❌ [useAuth] Token validation failed:', error)
+            console.error('❌ [useAuth] Fast verification error:', error)
             
-            // 检查是否是401错误，如果是，认证状态可能已经被getCurrentUser清除
-            if (error?.message && (error.message.includes('401') || error.message.includes('Unauthorized'))) {
-              console.log('🔐 [useAuth] 401 error detected, checking if auth state was auto-cleared')
-              const currentState = useAppStore.getState()
-              if (currentState.authToken || currentState.backendUser) {
-                console.log('🧹 [useAuth] Clearing remaining auth state after 401 error')
+            // 检查是否是超时错误
+            if (error.message && error.message.includes('timeout')) {
+              console.log('⏰ [useAuth] Fast verification timeout, falling back to full verification')
+              
+              // 快速验证超时，回退到完整验证（但有更短的超时时间）
+              try {
+                const fullVerificationPromise = auth.getCurrentUser()
+                const shortTimeoutPromise = new Promise((_, reject) => {
+                  setTimeout(() => reject(new Error('Full verification timeout')), 8000) // 8秒超时
+                })
+                
+                const response = await Promise.race([
+                  fullVerificationPromise,
+                  shortTimeoutPromise
+                ]) as any
+                
+                if (response.success && response.data) {
+                  console.log('✅ [useAuth] Fallback verification successful')
+                  setBackendUser(response.data)
+                } else {
+                  console.log('❌ [useAuth] Fallback verification failed')
+                  logout()
+                  
+                  if (requireAuth) {
+                    router.push('/login')
+                  }
+                }
+              } catch (fallbackError: any) {
+                console.error('❌ [useAuth] Fallback verification also failed:', fallbackError)
                 logout()
-              } else {
-                console.log('✅ [useAuth] Auth state already cleared by error handler')
+                
+                if (requireAuth) {
+                  router.push('/login')
+                }
               }
             } else {
-              // 其他错误，正常清除状态
+              // 其他错误，清除认证状态
               logout()
-            }
-            
-            if (requireAuth) {
-              console.log('🔄 [useAuth] Redirecting to login (validation error)')
-              router.push('/login')
+              
+              if (requireAuth) {
+                router.push('/login')
+              }
             }
           }
         } else if (requireAuth) {
@@ -145,9 +204,9 @@ export function useAuth(requireAuth: boolean = true) {
         // 提供更具体的错误信息
         let errorMessage = '认证检查失败'
         if (error?.message) {
-          if (error.message.includes('Network')) {
+          if (error.message.includes('Network') || error.message.includes('网络')) {
             errorMessage = '网络连接失败，请检查网络设置'
-          } else if (error.message.includes('timeout')) {
+          } else if (error.message.includes('timeout') || error.message.includes('超时')) {
             errorMessage = '连接超时，请稍后重试'
           } else if (error.message.includes('401') || error.message.includes('Unauthorized')) {
             errorMessage = '登录已过期，正在跳转到登录页面'
