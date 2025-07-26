@@ -15,7 +15,8 @@ import {
   Tag,
   Settings,
   Sparkles,
-  TrendingUp
+  TrendingUp,
+  Search
 } from 'lucide-react'
 
 export default function HomePage() {
@@ -84,26 +85,6 @@ export default function HomePage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
-      {/* Welcome Section */}
-      <div className="text-center space-y-4">
-        <div className="flex items-center justify-center space-x-3">
-          {themeMode === 'romantic' ? (
-            <Heart className="h-12 w-12 text-romantic-pink-500" />
-          ) : (
-            <Users className="h-12 w-12 text-miami-blue-500" />
-          )}
-          <h1 className="text-4xl font-bold">
-            {language === 'zh' ? '智能匹配中心' : 'AI Matching Center'}
-          </h1>
-        </div>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          {language === 'zh' 
-            ? `欢迎回来，${user?.name || 'User'}！通过先进的AI算法，为您找到最合适的伙伴。`
-            : `Welcome back, ${user?.name || 'User'}! Find your perfect match with advanced AI algorithms.`
-          }
-        </p>
-      </div>
-
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat, index) => (
@@ -125,6 +106,21 @@ export default function HomePage() {
         ))}
       </div>
 
+      {/* Start Matching Button */}
+      <div className="text-center">
+        <Button
+          onClick={() => setIsSearchOpen(true)}
+          size="lg"
+          className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-lg px-8 py-4"
+        >
+          <Search className="h-5 w-5 mr-2" />
+          {language === 'zh' ? '开始匹配' : 'Start Matching'}
+          <ArrowRight className="h-5 w-5 ml-2" />
+        </Button>
+        <p className="text-sm text-muted-foreground mt-2">
+          {language === 'zh' ? '描述您的需求，找到最合适的伙伴' : 'Describe your needs and find the perfect match'}
+        </p>
+      </div>
 
 
       {/* Recent Tags */}
@@ -191,60 +187,6 @@ export default function HomePage() {
           </div>
         </div>
       )}
-
-      {/* Recent Activity */}
-      <div className="space-y-4">
-        <h2 className="text-2xl font-semibold">
-          {language === 'zh' ? '最近活动' : 'Recent Activity'}
-        </h2>
-        <div className="bg-card rounded-lg border">
-          <div className="p-6">
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
-                <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm">
-                    {language === 'zh' ? '生成了新的标签集合' : 'Generated new tag collection'}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {language === 'zh' ? '2小时前' : '2 hours ago'}
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
-                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                  <Users className="h-4 w-4 text-blue-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm">
-                    {language === 'zh' ? '找到了3个高匹配度用户' : 'Found 3 high-compatibility users'}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {language === 'zh' ? '1天前' : '1 day ago'}
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
-                <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-                  <Settings className="h-4 w-4 text-purple-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm">
-                    {language === 'zh' ? '更新了个人资料信息' : 'Updated profile information'}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {language === 'zh' ? '3天前' : '3 days ago'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Match Search Modal */}
       <MatchSearch 

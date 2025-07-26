@@ -5,14 +5,10 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/lib/store'
 import { useRequireAuth } from '@/hooks/useAuth'
-import { profile, tags, matching } from '@/lib/api'
-import { UserTag, MatchUser } from '@/lib/types'
+import { profile, matching } from '@/lib/api'
+import { MatchUser } from '@/lib/types'
 import { 
   User, 
-  MapPin, 
-  Calendar, 
-  FileText, 
-  Tag, 
   Search, 
   Heart, 
   Users, 
@@ -58,11 +54,8 @@ export default function OnboardingPage() {
     goals: ''
   })
   
-  // Step 2: Generated Tags
-  const [generatedTags, setGeneratedTags] = useState<UserTag[]>([])
+  // Step 2: Search Results
   const [selectedRequestType, setSelectedRequestType] = useState<'找队友' | '找对象'>('找队友')
-  
-  // Step 3: Search Results
   const [searchDescription, setSearchDescription] = useState('')
   const [searchResults, setSearchResults] = useState<MatchUser[]>([])
   
@@ -75,15 +68,9 @@ export default function OnboardingPage() {
     },
     {
       id: 2,
-      title: language === 'zh' ? '生成个人标签' : 'Generate Tags',
-      description: language === 'zh' ? '基于您的信息生成匹配标签' : 'Generate matching tags based on your info',
+      title: language === 'zh' ? '开始匹配' : 'Start Matching',
+      description: language === 'zh' ? '描述需求并开始匹配' : 'Describe your needs and start matching',
       completed: currentStep > 2
-    },
-    {
-      id: 3,
-      title: language === 'zh' ? '寻找匹配用户' : 'Find Matches',
-      description: language === 'zh' ? '开始寻找合适的伙伴' : 'Start finding suitable partners',
-      completed: currentStep > 3
     }
   ]
 
@@ -122,7 +109,7 @@ export default function OnboardingPage() {
       // Save metadata
       await profile.batchUpdateMetadata(metadataEntries)
       
-      setSuccessMessage(language === 'zh' ? '基本信息保存成功！' : 'Basic information saved successfully!')
+      setSuccessMessage(language === 'zh' ? '基本信息保存成功！标签将自动生成。' : 'Basic information saved successfully! Tags will be generated automatically.')
       setTimeout(() => {
         setSuccessMessage('')
         setCurrentStep(2)
@@ -130,35 +117,6 @@ export default function OnboardingPage() {
       
     } catch (error: any) {
       setError(error.message || (language === 'zh' ? '保存失败，请重试' : 'Failed to save, please try again'))
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  // Generate tags based on metadata
-  const handleGenerateTags = async () => {
-    if (!authUser) return
-    
-    setIsSubmitting(true)
-    setError(null)
-    
-    try {
-      const response = await tags.generate(selectedRequestType)
-      if (response.success) {
-        setGeneratedTags(response.data.generated_tags)
-        setSuccessMessage(
-          language === 'zh' 
-            ? `成功生成${response.data.generated_tags.length}个标签！` 
-            : `Successfully generated ${response.data.generated_tags.length} tags!`
-        )
-        
-        setTimeout(() => {
-          setSuccessMessage('')
-          setCurrentStep(3)
-        }, 1500)
-      }
-    } catch (error: any) {
-      setError(error.message || (language === 'zh' ? '标签生成失败，请重试' : 'Failed to generate tags, please try again'))
     } finally {
       setIsSubmitting(false)
     }
@@ -172,14 +130,9 @@ export default function OnboardingPage() {
     setError(null)
     
     try {
-      const selectedTags = generatedTags
-        .filter(tag => tag.confidence_score > 0.5)
-        .slice(0, 5)
-        .map(tag => tag.tag_name)
-      
       const response = await matching.search(
         searchDescription,
-        selectedTags,
+        [], // Empty tags array since backend will use auto-generated tags
         selectedRequestType,
         10
       )
@@ -290,7 +243,7 @@ export default function OnboardingPage() {
                   {language === 'zh' ? '基本信息' : 'Basic Information'}
                 </h2>
                 <p className="text-muted-foreground">
-                  {language === 'zh' ? '请填写您的基本信息，这将帮助我们为您生成个性化标签' : 'Please fill in your basic information to help us generate personalized tags'}
+                  {language === 'zh' ? '请填写您的基本信息，保存后系统将自动生成个性化标签' : 'Please fill in your basic information, personalized tags will be generated automatically after saving'}
                 </p>
               </div>
 
@@ -429,16 +382,16 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* Step 2: Generate Tags */}
+          {/* Step 2: Start Matching */}
           {currentStep === 2 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <Tag className="h-12 w-12 text-primary mx-auto mb-4" />
+                <Search className="h-12 w-12 text-primary mx-auto mb-4" />
                 <h2 className="text-2xl font-semibold mb-2">
-                  {language === 'zh' ? '生成个人标签' : 'Generate Personal Tags'}
+                  {language === 'zh' ? '开始匹配' : 'Start Matching'}
                 </h2>
                 <p className="text-muted-foreground">
-                  {language === 'zh' ? '基于您的信息，我们将为您生成个性化的匹配标签' : 'Based on your information, we will generate personalized matching tags for you'}
+                  {language === 'zh' ? '选择匹配类型并描述您的需求，我们将为您找到最合适的伙伴' : 'Choose matching type and describe your needs, we will find the most suitable partners for you'}
                 </p>
               </div>
 
@@ -480,74 +433,6 @@ export default function OnboardingPage() {
                 </div>
               </div>
 
-              {/* Generated Tags Display */}
-              {generatedTags.length > 0 && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">
-                    {language === 'zh' ? '为您生成的标签' : 'Generated Tags for You'}
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {generatedTags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm flex items-center space-x-1"
-                      >
-                        <span>{tag.tag_name}</span>
-                        <span className="text-xs opacity-70">
-                          {Math.round(tag.confidence_score * 100)}%
-                        </span>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <Button
-                onClick={handleGenerateTags}
-                className="w-full"
-                size="lg"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    {language === 'zh' ? '生成中...' : 'Generating...'}
-                  </>
-                ) : (
-                  <>
-                    <Tag className="h-4 w-4 mr-2" />
-                    {language === 'zh' ? '生成标签' : 'Generate Tags'}
-                  </>
-                )}
-              </Button>
-
-              {generatedTags.length > 0 && (
-                <Button
-                  onClick={() => setCurrentStep(3)}
-                  variant="outline"
-                  className="w-full"
-                  size="lg"
-                >
-                  {language === 'zh' ? '继续下一步' : 'Continue to Next Step'}
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              )}
-            </div>
-          )}
-
-          {/* Step 3: Find Matches */}
-          {currentStep === 3 && (
-            <div className="space-y-6">
-              <div className="text-center mb-6">
-                <Search className="h-12 w-12 text-primary mx-auto mb-4" />
-                <h2 className="text-2xl font-semibold mb-2">
-                  {language === 'zh' ? '寻找匹配用户' : 'Find Matching Users'}
-                </h2>
-                <p className="text-muted-foreground">
-                  {language === 'zh' ? '描述您的需求，我们将为您找到最合适的伙伴' : 'Describe your needs and we will find the most suitable partners for you'}
-                </p>
-              </div>
-
               <div className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">
@@ -575,12 +460,12 @@ export default function OnboardingPage() {
                   {isSubmitting ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      {language === 'zh' ? '搜索中...' : 'Searching...'}
+                      {language === 'zh' ? '匹配中...' : 'Matching...'}
                     </>
                   ) : (
                     <>
                       <Search className="h-4 w-4 mr-2" />
-                      {language === 'zh' ? '搜索匹配用户' : 'Search Matching Users'}
+                      {language === 'zh' ? '开始匹配' : 'Start Matching'}
                     </>
                   )}
                 </Button>
