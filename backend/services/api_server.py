@@ -168,7 +168,7 @@ def get_all_users():
         metadata_dict = {}
         if metadata_response.data:
             for item in metadata_response.data:
-                user_id = item['user_id']
+                user_id = item['auth_user_id']
                 if user_id not in metadata_dict:
                     metadata_dict[user_id] = {}
                 
@@ -189,11 +189,11 @@ def get_all_users():
                 metadata_dict[user_id][section_type][section_key] = content
         
         # 获取用户标签
-        user_tags_response = supabase.table('user_tags').select('user_id, tag_name, tag_category, confidence_score, tag_source').execute()
+        user_tags_response = supabase.table('user_tags').select('auth_user_id, tag_name, tag_category, confidence_score, tag_source').execute()
         user_tags_dict = {}
         if user_tags_response.data:
             for tag in user_tags_response.data:
-                user_id = tag['user_id']
+                user_id = tag['auth_user_id']
                 if user_id not in user_tags_dict:
                     user_tags_dict[user_id] = []
                 user_tags_dict[user_id].append({
@@ -206,7 +206,7 @@ def get_all_users():
         # 合并数据并转换为Web应用期望的格式
         users = []
         for profile in profiles_response.data:
-            user_id = profile['user_id']
+            user_id = profile['auth_user_id']
             metadata = metadata_dict.get(user_id, {})
             user_tags = user_tags_dict.get(user_id, [])
             
@@ -297,7 +297,7 @@ def get_user_by_id(user_id):
         metadata = metadata_response.data[0] if metadata_response.data else {}
         
         # 获取用户标签
-        user_tags_response = supabase.table('user_tags').select('tag_id, weight').eq('user_id', user_id).execute()
+        user_tags_response = supabase.table('user_tags').select('tag_id, weight').eq('auth_user_id', user_id).execute()
         user_tags = []
         
         if user_tags_response.data:
