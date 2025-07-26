@@ -180,7 +180,7 @@ async def match_users_lda(request: SearchMatchRequest, current_user: Dict = Depe
         
         matched_users = []
         
-        for candidate in candidates[:request.limit]:
+        for candidate in candidates:  # 遍历所有候选用户，而不是只取前几个
             user_id = candidate['id']
             
             # 获取候选用户的元数据和标签
