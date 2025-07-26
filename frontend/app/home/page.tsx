@@ -122,6 +122,57 @@ export default function HomePage() {
         </p>
       </div>
 
+      {/* AI Personality Analysis */}
+      <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg p-6 border border-purple-200 dark:border-purple-800">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <div className="flex items-center space-x-3 mb-3">
+              <div className="p-2 rounded-lg bg-purple-500/10">
+                <svg className="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-100">
+                  {language === 'zh' ? 'AI人格分析师' : 'AI Personality Analyst'}
+                </h3>
+                <p className="text-sm text-purple-700 dark:text-purple-300">
+                  {language === 'zh' ? '通过智能对话深度了解你的人格特征' : 'Understand your personality through intelligent conversation'}
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 mb-4">
+              <span className="px-3 py-1 bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-200 rounded-full text-xs">
+                {language === 'zh' ? '语音对话' : 'Voice Chat'}
+              </span>
+              <span className="px-3 py-1 bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-200 rounded-full text-xs">
+                {language === 'zh' ? '性格分析' : 'Personality Analysis'}
+              </span>
+              <span className="px-3 py-1 bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-200 rounded-full text-xs">
+                {language === 'zh' ? '匹配优化' : 'Match Optimization'}
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              {language === 'zh' 
+                ? '10-15分钟的智能对话，生成详细的人格分析报告，为你提供更精准的匹配建议。支持语音和文字交流。'
+                : '10-15 minute intelligent conversation to generate detailed personality analysis reports and provide more accurate matching suggestions. Supports voice and text communication.'
+              }
+            </p>
+          </div>
+          <div className="ml-4">
+            <Button 
+              onClick={() => window.location.href = '/personality-chat'}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+            >
+              <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+              {language === 'zh' ? '开始分析' : 'Start Analysis'}
+            </Button>
+          </div>
+        </div>
+      </div>
+
 
       {/* Recent Tags */}
       {recentTags.length > 0 && (

@@ -8,7 +8,7 @@ import { useAppStore } from '@/lib/store'
 import { useRequireAuth } from '@/hooks/useAuth'
 import { matching } from '@/lib/api'
 import { MatchUser } from '@/lib/api'
-import { MessageCircle, Bot, Users, Heart, Search, Star, MapPin, AlertCircle } from 'lucide-react'
+import { MessageCircle, Bot, Users, Heart, Search, Star, MapPin, AlertCircle, Brain } from 'lucide-react'
 
 export default function ChatPage() {
   // Auth check
@@ -30,6 +30,16 @@ export default function ChatPage() {
   const [searchTags, setSearchTags] = useState<string[]>([])
 
   const chatOptions = [
+    {
+      id: 'personality',
+      title: language === 'zh' ? 'AI人格分析师' : 'AI Personality Analyst',
+      description: language === 'zh' 
+        ? '深度人格分析，支持语音对话，优化匹配效果'
+        : 'Deep personality analysis with voice support to optimize matching',
+      icon: Brain,
+      color: 'text-purple-500',
+      special: true
+    },
     {
       id: 'ai',
       title: language === 'zh' ? 'AI匹配助手' : 'AI Matching Assistant',
@@ -328,22 +338,41 @@ export default function ChatPage() {
       <div className="grid md:grid-cols-2 gap-6">
         {chatOptions.map((option) => {
           const OptionIcon = option.icon
+          const isPersonality = option.id === 'personality'
           return (
             <Card 
               key={option.id}
-              className="cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={() => setActiveChatType(option.id as 'ai' | 'match')}
+              className={`cursor-pointer hover:shadow-lg transition-shadow ${
+                isPersonality ? 'border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20' : ''
+              }`}
+              onClick={() => {
+                if (isPersonality) {
+                  window.location.href = '/personality-chat'
+                } else {
+                  setActiveChatType(option.id as 'ai' | 'match')
+                }
+              }}
             >
               <CardHeader>
                 <CardTitle className="flex items-center space-x-3">
                   <OptionIcon className={`h-8 w-8 ${option.color}`} />
                   <span>{option.title}</span>
+                  {isPersonality && (
+                    <span className="px-2 py-1 bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-200 rounded-full text-xs">
+                      {language === 'zh' ? '新功能' : 'New'}
+                    </span>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">{option.description}</p>
-                <Button className="w-full">
-                  {language === 'zh' ? '开始对话' : 'Start Chat'}
+                <Button className={`w-full ${
+                  isPersonality ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700' : ''
+                }`}>
+                  {isPersonality 
+                    ? (language === 'zh' ? '开始分析' : 'Start Analysis')
+                    : (language === 'zh' ? '开始对话' : 'Start Chat')
+                  }
                 </Button>
               </CardContent>
             </Card>

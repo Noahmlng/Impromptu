@@ -11,7 +11,7 @@ import json
 import sys
 import jwt
 import datetime
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Optional
 from flask import Flask, request, jsonify, g
 from flask_cors import CORS
 from functools import wraps
@@ -25,6 +25,9 @@ from backend.algorithms.tag_compatibility_analyzer import EnhancedCompatibilityA
 from backend.models.tag_pool import TagPool
 from backend.models.topic_modeling import LDATopicModel
 from configs.config import ConfigManager
+import dotenv
+
+dotenv.load_dotenv()
 
 app = Flask(__name__)
 CORS(app, resources={
@@ -36,11 +39,11 @@ CORS(app, resources={
 })
 
 # 配置
-SUPABASE_URL = os.getenv('SUPABASE_URL', 'https://anxbbsrnjgmotxzysqwf.supabase.co')
-SUPABASE_KEY = os.getenv('SUPABASE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFueGJic3Juamdtb3R4enlzcXdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MDY0OTIsImV4cCI6MjA2NTk4MjQ5Mn0.a0t-pgH-Z2Fbs6JuMNWX8_kpqkQsBag3-COAUZVF6-0')
+SUPABASE_URL = os.getenv('SUPABASE_URL', '')
+NEXT_PUBLIC_SUPABASE_ANON_KEY = os.getenv('NEXT_PUBLIC_SUPABASE_ANON_KEY', '')
 
 # 初始化 Supabase 客户端
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+supabase: Client = create_client(SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY)
 
 # 全局组件
 analyzer = None
