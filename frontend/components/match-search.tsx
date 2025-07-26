@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/lib/store'
 import { matching, tags } from '@/lib/api'
 import { MatchUser, UserTag } from '@/lib/types'
+import MatchingLoadingModal from './matching-loading-modal'
 import { 
   Search, 
   Heart, 
@@ -31,6 +32,7 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [searchResults, setSearchResults] = useState<MatchUser[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [isMatchingLoading, setIsMatchingLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState('')
 
@@ -40,10 +42,13 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
       return
     }
 
-    setIsLoading(true)
+    setIsMatchingLoading(true)
     setError(null)
     
     try {
+      // 模拟匹配过程，让loading弹窗显示一段时间
+      await new Promise(resolve => setTimeout(resolve, 5000))
+      
       const response = await matching.search(
         searchDescription,
         selectedTags,
@@ -63,7 +68,7 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
     } catch (error: any) {
       setError(error.message || (language === 'zh' ? '搜索失败，请重试' : 'Search failed, please try again'))
     } finally {
-      setIsLoading(false)
+      setIsMatchingLoading(false)
     }
   }
 
@@ -91,7 +96,9 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div className="flex items-center space-x-3">
-            <Search className="h-6 w-6 text-primary" />
+            <Search className={`h-6 w-6 ${
+              selectedMatchType === '找队友' ? 'text-blue-600' : 'text-pink-600'
+            }`} />
             <h2 className="text-xl font-semibold">
               {language === 'zh' ? '智能匹配搜索' : 'Smart Match Search'}
             </h2>
@@ -114,8 +121,8 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
                   onClick={() => setSelectedMatchType('找队友')}
                   className={`p-3 rounded-lg border-2 transition-colors ${
                     selectedMatchType === '找队友' 
-                      ? 'border-miami-blue-500 bg-miami-blue-50 text-miami-blue-700' 
-                      : 'border-muted hover:border-primary'
+                      ? 'border-blue-500 bg-blue-50 text-blue-700' 
+                      : 'border-muted hover:border-blue-500'
                   }`}
                 >
                   <Users className="h-5 w-5 mx-auto mb-1" />
@@ -171,7 +178,9 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
                       onClick={() => toggleTag(tag.tag_name)}
                       className={`px-3 py-1 rounded-full text-sm transition-colors ${
                         selectedTags.includes(tag.tag_name)
-                          ? 'bg-primary text-primary-foreground'
+                          ? selectedMatchType === '找队友'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-pink-600 text-white'
                           : 'bg-muted hover:bg-muted/80'
                       }`}
                     >
@@ -194,20 +203,15 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
             <div className="flex space-x-3">
               <Button
                 onClick={handleSearch}
-                className="flex-1"
-                disabled={isLoading || !searchDescription.trim()}
+                className={`flex-1 ${
+                  selectedMatchType === '找队友' 
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                    : 'bg-pink-600 hover:bg-pink-700 text-white'
+                }`}
+                disabled={isMatchingLoading || !searchDescription.trim()}
               >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    {language === 'zh' ? '搜索中...' : 'Searching...'}
-                  </>
-                ) : (
-                  <>
-                    <Search className="h-4 w-4 mr-2" />
-                    {language === 'zh' ? '开始搜索' : 'Start Search'}
-                  </>
-                )}
+                <Search className="h-4 w-4 mr-2" />
+                {language === 'zh' ? '开始搜索' : 'Start Search'}
               </Button>
               
               <Button variant="outline" onClick={clearSearch}>
@@ -317,7 +321,7 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
           )}
 
           {/* Empty State */}
-          {searchResults.length === 0 && !isLoading && searchDescription.trim() && (
+          {searchResults.length === 0 && !isMatchingLoading && searchDescription.trim() && (
             <div className="text-center py-12">
               <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground">
@@ -336,6 +340,14 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
           </div>
         </div>
       </div>
+
+      {/* Matching Loading Modal */}
+      <MatchingLoadingModal
+        isOpen={isMatchingLoading}
+        onClose={() => setIsMatchingLoading(false)}
+        matchType={selectedMatchType}
+        onComplete={() => setIsMatchingLoading(false)}
+      />
     </div>
   )
 } 
