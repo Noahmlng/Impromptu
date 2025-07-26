@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useAppStore } from '@/lib/store'
-import { Send, Mic, MicOff, Smile } from 'lucide-react'
+import { Send, Mic, MicOff, Smile, StopCircle, CheckCircle } from 'lucide-react'
 
 interface Message {
   id: string
@@ -21,15 +21,18 @@ interface ChatInterfaceProps {
 }
 
 export function ChatInterface({ matchId, isAIChat = false }: ChatInterfaceProps) {
-  const { language, user } = useAppStore()
+  const { language, user, authToken } = useAppStore()
   const [messages, setMessages] = useState<Message[]>([])
   const [inputText, setInputText] = useState('')
   const [isRecording, setIsRecording] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isEndingConversation, setIsEndingConversation] = useState(false)
+  const [conversationEnded, setConversationEnded] = useState(false)
   const [micPermission, setMicPermission] = useState<'granted' | 'denied' | 'prompt' | 'checking'>('checking')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const recognitionRef = useRef<any>(null)
   const baseTextOnRecord = useRef('')
+  const sessionIdRef = useRef<string>('')
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -39,8 +42,15 @@ export function ChatInterface({ matchId, isAIChat = false }: ChatInterfaceProps)
     scrollToBottom()
   }, [messages])
 
-  // 检查麦克风权限
+  // 生成会话ID
   useEffect(() => {
+    sessionIdRef.current = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  }, [])
+
+  // 检查麦克风权限（仅在非AI聊天模式下）
+  useEffect(() => {
+    if (isAIChat) return // AI聊天模式不需要语音功能
+    
     const checkMicrophonePermission = async () => {
       try {
         if (navigator.permissions) {
@@ -51,7 +61,6 @@ export function ChatInterface({ matchId, isAIChat = false }: ChatInterfaceProps)
             setMicPermission(permission.state as 'granted' | 'denied' | 'prompt')
           }
         } else {
-          // 如果不支持权限API，设置为prompt状态
           setMicPermission('prompt')
         }
       } catch (error) {
@@ -61,9 +70,11 @@ export function ChatInterface({ matchId, isAIChat = false }: ChatInterfaceProps)
     }
 
     checkMicrophonePermission()
-  }, [])
+  }, [isAIChat])
 
   useEffect(() => {
+    if (isAIChat) return // AI聊天模式不需要语音识别
+    
     // 检查浏览器是否支持语音识别
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     if (!SpeechRecognition) {
@@ -88,13 +99,12 @@ export function ChatInterface({ matchId, isAIChat = false }: ChatInterfaceProps)
         }
       }
       
-      // 更新输入框内容：原有文本 + 最终识别结果 + 临时识别结果
       setInputText(baseTextOnRecord.current + finalTranscript + interimTranscript)
     }
 
     recognition.onstart = () => {
       console.log('Speech recognition started')
-      setMicPermission('granted') // 成功启动说明权限已获得
+      setMicPermission('granted')
     }
 
     recognition.onend = () => {
@@ -106,7 +116,6 @@ export function ChatInterface({ matchId, isAIChat = false }: ChatInterfaceProps)
       console.error('Speech recognition error:', event.error)
       setIsRecording(false)
       
-      // 处理权限相关错误
       if (event.error === 'not-allowed' || event.error === 'permission-denied') {
         setMicPermission('denied')
       }
@@ -119,7 +128,7 @@ export function ChatInterface({ matchId, isAIChat = false }: ChatInterfaceProps)
         recognitionRef.current.stop()
       }
     }
-  }, [language])
+  }, [language, isAIChat])
 
   // 模拟初始消息
   useEffect(() => {
@@ -145,8 +154,101 @@ export function ChatInterface({ matchId, isAIChat = false }: ChatInterfaceProps)
     setMessages(initialMessages)
   }, [isAIChat, language])
 
+  // 保存对话记录并生成标签
+  const saveConversationAndGenerateTags = async (status: 'completed' | 'terminated') => {
+    if (!user?.id) {
+      console.error('User not logged in')
+      return
+    }
+
+    try {
+      setIsEndingConversation(true)
+      
+      // 准备对话历史数据
+      const conversationHistory = messages.map(msg => ({
+        role: msg.sender === 'user' ? 'user' : 'assistant',
+        content: msg.content
+      }))
+
+      // 调用后端API保存对话并生成标签
+      const response = await fetch('/api/ai/conversation/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        },
+        body: JSON.stringify({
+          history: conversationHistory,
+          themeMode: 'romantic', // 可以根据实际情况调整
+          language: language,
+          sessionId: sessionIdRef.current,
+          status: status,
+          triggerTagGeneration: true
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const result = await response.json()
+      
+      if (result.success) {
+        console.log('对话保存成功:', result)
+        setConversationEnded(true)
+        
+        // 显示成功消息
+        const successMessage: Message = {
+          id: `success_${Date.now()}`,
+          content: language === 'zh' 
+            ? `对话已结束并保存。${result.data?.tag_generation?.success ? `成功生成了 ${result.data.tag_generation.generated_tags_count} 个标签！` : '标签生成失败，请稍后重试。'}`
+            : `Conversation ended and saved. ${result.data?.tag_generation?.success ? `Successfully generated ${result.data.tag_generation.generated_tags_count} tags!` : 'Tag generation failed, please try again later.'}`,
+          sender: 'ai',
+          timestamp: new Date(),
+          type: 'text'
+        }
+        
+        setMessages(prev => [...prev, successMessage])
+      } else {
+        throw new Error(result.message || 'Failed to save conversation')
+      }
+    } catch (error) {
+      console.error('保存对话失败:', error)
+      
+      // 显示错误消息
+      const errorMessage: Message = {
+        id: `error_${Date.now()}`,
+        content: language === 'zh' 
+          ? '对话保存失败，请稍后重试。'
+          : 'Failed to save conversation, please try again later.',
+        sender: 'ai',
+        timestamp: new Date(),
+        type: 'text'
+      }
+      
+      setMessages(prev => [...prev, errorMessage])
+    } finally {
+      setIsEndingConversation(false)
+    }
+  }
+
+  // 提前结束对话
+  const handleEndConversation = async () => {
+    if (conversationEnded) return
+    
+    const confirmEnd = window.confirm(
+      language === 'zh' 
+        ? '确定要提前结束对话吗？对话记录将被保存并用于生成个性化标签。'
+        : 'Are you sure you want to end the conversation early? The conversation will be saved and used to generate personalized tags.'
+    )
+    
+    if (confirmEnd) {
+      await saveConversationAndGenerateTags('terminated')
+    }
+  }
+
   const handleSendMessage = async () => {
-    if (!inputText.trim()) return
+    if (!inputText.trim() || conversationEnded) return
 
     const newMessage: Message = {
       id: Date.now().toString(),
@@ -189,9 +291,7 @@ export function ChatInterface({ matchId, isAIChat = false }: ChatInterfaceProps)
 
   const requestMicrophonePermission = async () => {
     try {
-      // 通过getUserMedia请求麦克风权限
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      // 立即关闭流，我们只需要权限
       stream.getTracks().forEach(track => track.stop())
       setMicPermission('granted')
       return true
@@ -209,11 +309,9 @@ export function ChatInterface({ matchId, isAIChat = false }: ChatInterfaceProps)
     }
 
     if (isRecording) {
-      // 停止录音
       recognitionRef.current.stop()
       setIsRecording(false)
     } else {
-      // 检查权限状态
       if (micPermission === 'denied') {
         alert(language === 'zh' 
           ? '麦克风权限被拒绝，请在浏览器设置中允许麦克风访问' 
@@ -221,7 +319,6 @@ export function ChatInterface({ matchId, isAIChat = false }: ChatInterfaceProps)
         return
       }
 
-      // 如果权限未知或需要申请，先请求权限
       if (micPermission === 'prompt' || micPermission === 'checking') {
         const hasPermission = await requestMicrophonePermission()
         if (!hasPermission) {
@@ -229,7 +326,6 @@ export function ChatInterface({ matchId, isAIChat = false }: ChatInterfaceProps)
         }
       }
 
-      // 开始录音前保存当前输入的文本
       baseTextOnRecord.current = inputText ? inputText + ' ' : ''
       try {
         recognitionRef.current.start()
@@ -238,7 +334,6 @@ export function ChatInterface({ matchId, isAIChat = false }: ChatInterfaceProps)
         console.error('Failed to start speech recognition:', error)
         setIsRecording(false)
         
-        // 如果是权限错误，提示用户
         if (error instanceof Error && error.message.includes('not-allowed')) {
           alert(language === 'zh' 
             ? '需要麦克风权限才能使用语音输入功能' 
@@ -274,12 +369,45 @@ export function ChatInterface({ matchId, isAIChat = false }: ChatInterfaceProps)
               }
             </h3>
             <p className="text-sm text-muted-foreground">
-              {isAIChat 
+              {conversationEnded 
+                ? (language === 'zh' ? '对话已结束' : 'Conversation ended')
+                : isAIChat 
                 ? (language === 'zh' ? '在线 - 准备帮助你' : 'Online - Ready to help')
                 : (language === 'zh' ? '在线' : 'Online')
               }
             </p>
           </div>
+          {/* AI聊天模式下显示提前结束按钮 */}
+          {isAIChat && !conversationEnded && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleEndConversation}
+              disabled={isEndingConversation}
+              className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+            >
+              {isEndingConversation ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-orange-600 border-t-transparent rounded-full animate-spin mr-2" />
+                  {language === 'zh' ? '保存中...' : 'Saving...'}
+                </>
+              ) : (
+                <>
+                  <StopCircle className="h-4 w-4 mr-2" />
+                  {language === 'zh' ? '提前结束' : 'End Early'}
+                </>
+              )}
+            </Button>
+          )}
+          {/* 对话结束后显示完成标识 */}
+          {isAIChat && conversationEnded && (
+            <div className="flex items-center text-green-600">
+              <CheckCircle className="h-4 w-4 mr-2" />
+              <span className="text-sm font-medium">
+                {language === 'zh' ? '已完成' : 'Completed'}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -340,47 +468,54 @@ export function ChatInterface({ matchId, isAIChat = false }: ChatInterfaceProps)
       {/* Input Area */}
       <div className="border-t p-4">
         <div className="flex items-center space-x-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleRecording}
-            disabled={micPermission === 'checking' || !recognitionRef.current}
-            className={`${isRecording ? 'text-red-500' : ''} ${
-              micPermission === 'denied' ? 'text-gray-400' : ''
-            }`}
-            title={
-              micPermission === 'denied' 
-                ? (language === 'zh' ? '麦克风权限被拒绝' : 'Microphone permission denied')
-                : micPermission === 'checking'
-                ? (language === 'zh' ? '检查权限中...' : 'Checking permission...')
-                : isRecording 
-                ? (language === 'zh' ? '停止录音' : 'Stop recording')
-                : (language === 'zh' ? '开始语音输入' : 'Start voice input')
-            }
-          >
-            {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-          </Button>
+          {/* 只在非AI聊天模式下显示麦克风按钮 */}
+          {!isAIChat && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleRecording}
+              disabled={micPermission === 'checking' || !recognitionRef.current}
+              className={`${isRecording ? 'text-red-500' : ''} ${
+                micPermission === 'denied' ? 'text-gray-400' : ''
+              }`}
+              title={
+                micPermission === 'denied' 
+                  ? (language === 'zh' ? '麦克风权限被拒绝' : 'Microphone permission denied')
+                  : micPermission === 'checking'
+                  ? (language === 'zh' ? '检查权限中...' : 'Checking permission...')
+                  : isRecording 
+                  ? (language === 'zh' ? '停止录音' : 'Stop recording')
+                  : (language === 'zh' ? '开始语音输入' : 'Start voice input')
+              }
+            >
+              {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+            </Button>
+          )}
           
           <div className="flex-1 relative">
             <Input
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={handleKeyPress}
-              placeholder={language === 'zh' ? '输入消息...' : 'Type a message...'}
-              disabled={isLoading}
+              placeholder={conversationEnded 
+                ? (language === 'zh' ? '对话已结束' : 'Conversation ended')
+                : (language === 'zh' ? '输入消息...' : 'Type a message...')
+              }
+              disabled={isLoading || conversationEnded}
             />
           </div>
           
           <Button
             variant="ghost"
             size="icon"
+            disabled={conversationEnded}
           >
             <Smile className="h-4 w-4" />
           </Button>
           
           <Button
             onClick={handleSendMessage}
-            disabled={!inputText.trim() || isLoading}
+            disabled={!inputText.trim() || isLoading || conversationEnded}
             size="icon"
           >
             <Send className="h-4 w-4" />

@@ -173,7 +173,7 @@ export default function HomePage() {
                   ? 'bg-pink-100 dark:bg-pink-800 text-pink-800 dark:text-pink-200' 
                   : 'bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200'
               }`}>
-                {language === 'zh' ? '语音对话' : 'Voice Chat'}
+                {language === 'zh' ? '100%AI' : '100%AI'}
               </span>
               <span className={`px-3 py-1 rounded-full text-xs ${
                 themeMode === 'romantic' 
