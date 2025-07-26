@@ -87,8 +87,8 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
-      <div className="container mx-auto max-w-6xl px-4 py-6">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 flex flex-col">
+      <div className="container mx-auto max-w-6xl px-4 py-6 flex-1 flex flex-col">
         {/* Modern Header */}
         <div className="flex items-center justify-between mb-8">
           <Button
@@ -151,9 +151,9 @@ export default function ChatPage() {
         )}
 
         {/* Main Chat Interface */}
-        <Card className="shadow-2xl border-0 bg-card/50 backdrop-blur-sm overflow-hidden">
-          <CardContent className="p-0">
-            <div className="h-[700px] flex flex-col">
+        <Card className="shadow-2xl border-0 bg-card/50 backdrop-blur-sm overflow-hidden flex-1">
+          <CardContent className="p-0 h-full">
+            <div className="h-full flex flex-col">
               <PersonalityAnalysisChat 
                 onStageChange={setAnalysisStage}
                 currentStage={analysisStage}
@@ -161,35 +161,6 @@ export default function ChatPage() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Bottom Status Bar */}
-        <div className="mt-6 flex items-center justify-center">
-          <div className={`flex items-center space-x-4 px-6 py-3 rounded-full ${
-            themeMode === 'romantic' 
-              ? 'bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-pink-200/50' 
-              : 'bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-200/50'
-          } backdrop-blur-sm`}>
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-sm text-muted-foreground">
-                {language === 'zh' ? 'AI 已连接' : 'AI Connected'}
-              </span>
-            </div>
-            <div className="w-px h-4 bg-border" />
-            <div className="flex items-center space-x-2">
-              <Brain className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                {language === 'zh' ? '深度学习模型' : 'Deep Learning Model'}
-              </span>
-            </div>
-            <div className="w-px h-4 bg-border" />
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-muted-foreground">
-                {language === 'zh' ? '端到端加密' : 'End-to-End Encrypted'}
-              </span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   )

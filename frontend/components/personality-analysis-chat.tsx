@@ -788,30 +788,7 @@ Please return a JSON object in the following format:
               <Send className="h-5 w-5" />
             </Button>
           </div>
-          
-          {/* Enhanced Connection Status */}
-          <div className="flex items-center justify-center mt-4">
-            <div className={`flex items-center space-x-3 px-4 py-2 rounded-full border ${
-              isConnected 
-                ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' 
-                : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20'
-            } backdrop-blur-sm`}>
-              <div className={`w-2 h-2 rounded-full ${
-                isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'
-              }`} />
-              <span className={`text-xs font-medium ${
-                isConnected ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'
-              }`}>
-                {isConnected 
-                  ? (language === 'zh' ? 'AI已连接 • 加密对话' : 'AI Connected • Encrypted Chat')
-                  : (language === 'zh' ? 'AI连接中...' : 'Connecting to AI...')
-                }
-              </span>
-              {isConnected && (
-                <Brain className="h-3 w-3 text-green-600" />
-              )}
-            </div>
-          </div>
+
         </div>
       )}
     </div>
