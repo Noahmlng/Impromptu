@@ -7,8 +7,8 @@ import { ChatInterface } from '@/components/chat-interface'
 import { useAppStore } from '@/lib/store'
 import { useRequireAuth } from '@/hooks/useAuth'
 import { matching } from '@/lib/api'
-import { MatchUser } from '@/lib/api'
-import { MessageCircle, Bot, Users, Heart, Search, Star, MapPin, AlertCircle } from 'lucide-react'
+import { MatchUser } from '@/lib/types'
+import { MessageCircle, Bot, Users, Heart, Search, Star, MapPin, AlertCircle, Brain } from 'lucide-react'
 
 export default function ChatPage() {
   // Auth check
@@ -30,6 +30,20 @@ export default function ChatPage() {
   const [searchTags, setSearchTags] = useState<string[]>([])
 
   const chatOptions = [
+    {
+      id: 'personality',
+      title: 'Talk to Linker',
+      description: themeMode === 'romantic' 
+        ? (language === 'zh' 
+            ? '深度人格分析，支持语音对话，优化恋爱匹配效果'
+            : 'Deep personality analysis with voice support to optimize romantic matching')
+        : (language === 'zh' 
+            ? '深度技能分析，支持语音对话，优化团队匹配效果'
+            : 'Deep skills analysis with voice support to optimize team matching'),
+      icon: Brain,
+      color: themeMode === 'romantic' ? 'text-pink-500' : 'text-blue-500',
+      special: true
+    },
     {
       id: 'ai',
       title: language === 'zh' ? 'AI匹配助手' : 'AI Matching Assistant',
@@ -246,7 +260,7 @@ export default function ChatPage() {
                     
                     {/* Tags */}
                     <div className="flex flex-wrap gap-1 mb-3">
-                      {match.user_tags.slice(0, 3).map((tag, index) => (
+                      {match.user_tags.slice(0, 3).map((tag: string, index: number) => (
                         <span
                           key={index}
                           className="px-2 py-1 bg-muted text-muted-foreground rounded text-xs"
@@ -328,22 +342,53 @@ export default function ChatPage() {
       <div className="grid md:grid-cols-2 gap-6">
         {chatOptions.map((option) => {
           const OptionIcon = option.icon
+          const isPersonality = option.id === 'personality'
           return (
             <Card 
               key={option.id}
-              className="cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={() => setActiveChatType(option.id as 'ai' | 'match')}
+              className={`cursor-pointer hover:shadow-lg transition-shadow ${
+                isPersonality 
+                  ? (themeMode === 'romantic' 
+                      ? 'border-pink-200 bg-gradient-to-br from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20' 
+                      : 'border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20') 
+                  : ''
+              }`}
+              onClick={() => {
+                if (isPersonality) {
+                  window.location.href = '/personality-chat'
+                } else {
+                  setActiveChatType(option.id as 'ai' | 'match')
+                }
+              }}
             >
               <CardHeader>
                 <CardTitle className="flex items-center space-x-3">
                   <OptionIcon className={`h-8 w-8 ${option.color}`} />
                   <span>{option.title}</span>
+                  {isPersonality && (
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      themeMode === 'romantic' 
+                        ? 'bg-pink-100 dark:bg-pink-800 text-pink-800 dark:text-pink-200' 
+                        : 'bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200'
+                    }`}>
+                      {language === 'zh' ? '新功能' : 'New'}
+                    </span>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">{option.description}</p>
-                <Button className="w-full">
-                  {language === 'zh' ? '开始对话' : 'Start Chat'}
+                <Button className={`w-full ${
+                  isPersonality 
+                    ? (themeMode === 'romantic' 
+                        ? 'bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700' 
+                        : 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700') 
+                    : ''
+                }`}>
+                  {isPersonality 
+                    ? (language === 'zh' ? '开始分析' : 'Start Analysis')
+                    : (language === 'zh' ? '开始对话' : 'Start Chat')
+                  }
                 </Button>
               </CardContent>
             </Card>

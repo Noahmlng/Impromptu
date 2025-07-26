@@ -25,7 +25,8 @@ module.exports = {
           'Segoe UI Emoji',
           'Segoe UI Symbol',
           'Noto Color Emoji'
-        ]
+        ],
+        montserrat: ['Montserrat', 'sans-serif']
       },
       colors: {
         border: "hsl(var(--border))",
