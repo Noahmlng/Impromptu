@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { useAppStore } from '@/lib/store'
 import { useRequireAuth } from '@/hooks/useAuth'
-import { profile, auth, tags } from '@/lib/api'
+import { profile, auth } from '@/lib/api'
 import { User, UserMetadata, Language } from '@/lib/types'
 import { User as UserIcon, Mail, Phone, MapPin, Calendar, Camera, Save, Edit3, Upload, AlertCircle, CheckCircle, RefreshCw, Plus, ExternalLink, Trash2, Link } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -65,8 +65,6 @@ export default function ProfilePage() {
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([])
   const [newLink, setNewLink] = useState({ platform: '', url: '', label: '' })
   const [isAddingLink, setIsAddingLink] = useState(false)
-  const [userTags, setUserTags] = useState<any[]>([])
-  const [generatedTags, setGeneratedTags] = useState<string[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [profileData, setProfileData] = useState({
     name: '',
@@ -98,7 +96,7 @@ export default function ProfilePage() {
   const [dataLoading, setDataLoading] = useState(false) // 区分数据加载和认证加载
 
   // Load user data function
-  const loadUserData = useCallback(async () => {
+  const loadUserData = async () => {
     if (!authUser) return
     
     console.log('Loading user data for:', authUser.email)
@@ -176,17 +174,13 @@ export default function ProfilePage() {
           setUserMetadata(metadataResponse.data)
           
           // Load additional metadata for preferences and contact info
-          const profileSection = metadataResponse.data.profile || {}
-          const personalInfo = profileSection.personal || {}
-          const contactInfo = profileSection.contact || {}
-          const preferencesInfo = profileSection.preferences || {}
-          const socialLinksInfo = profileSection.social_links || {}
+          const metadataResponse = await profile.getMetadata()
+          const profileSection = metadataResponse.success ? metadataResponse.data.profile || {} : {}
+          const contactData = profileSection.contact?.content || {}
+          const preferencesData = profileSection.preferences?.content || {}
+          const socialLinksData = profileSection.social_links?.content || []
           
-          const personalData = personalInfo.content || {}
-          const contactData = contactInfo.content || {}
-          const preferencesData = preferencesInfo.content || {}
-          const socialLinksData = socialLinksInfo.content || []
-          
+          setUserMetadata(metadataResponse.success ? metadataResponse.data : {})
           setSocialLinks(socialLinksData)
           
           setProfileData({
@@ -209,7 +203,7 @@ export default function ProfilePage() {
         const tagsResponse = await tags.getUserTags()
         if (tagsResponse.success && tagsResponse.data) {
           setUserTags(tagsResponse.data)
-          setGeneratedTags(tagsResponse.data.map((tag: any) => tag.tag_name))
+          setGeneratedTags(tagsResponse.data.map(tag => tag.tag_name))
         }
       }
       
@@ -219,7 +213,7 @@ export default function ProfilePage() {
     } finally {
       setDataLoading(false)
     }
-  }, [authUser, setError, setUserMetadata, setUserTags, setGeneratedTags, setSocialLinks, setProfileData])
+  }
 
   // Load user data on mount
   useEffect(() => {
@@ -227,7 +221,7 @@ export default function ProfilePage() {
     if (authUser && !authLoading) {
       loadUserData()
     }
-  }, [authUser, authLoading, loadUserData])
+  }, [authUser, authLoading])
 
   // 重试加载数据
   const retryLoadData = () => {
@@ -436,10 +430,10 @@ export default function ProfilePage() {
           
           if (tagGenerationResponse.success) {
             setUserTags(tagGenerationResponse.data.generated_tags)
-            setGeneratedTags(tagGenerationResponse.data.generated_tags.map((tag: any) => tag.tag_name))
+            setGeneratedTags(tagGenerationResponse.data.generated_tags.map(tag => tag.tag_name))
             console.log('✅ [ProfilePage.handleSave] Tags generated successfully:', {
               tagsCount: tagGenerationResponse.data.generated_tags.length,
-              tagNames: tagGenerationResponse.data.generated_tags.map((tag: any) => tag.tag_name).slice(0, 5)
+              tagNames: tagGenerationResponse.data.generated_tags.map(tag => tag.tag_name).slice(0, 5)
             })
           } else {
             console.warn('⚠️ [ProfilePage.handleSave] Tag generation failed:', tagGenerationResponse.message)
@@ -558,16 +552,14 @@ export default function ProfilePage() {
       
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
-      
-  } catch (error: any) {
-    console.error('❌ [ProfilePage.handleSave] Avatar upload failed:', error)
-    setError(error.message || 'Failed to upload avatar')
-    setAvatarPreview(null)
-  } finally {
-    setIsUploadingAvatar(false)
+    } catch (error: any) {
+      setError(error.message || 'Failed to upload avatar')
+      setAvatarPreview(null)
+    } finally {
+      setIsUploadingAvatar(false)
+    }
   }
-}
-
+      
   const generateTags = async (requestType: '找队友' | '找对象') => {
     if (!authUser) return
     
@@ -578,14 +570,14 @@ export default function ProfilePage() {
       const response = await tags.generate(requestType)
       if (response.success) {
         setUserTags(response.data.generated_tags)
-        setGeneratedTags(response.data.generated_tags.map((tag: any) => tag.tag_name))
+        setGeneratedTags(response.data.generated_tags.map(tag => tag.tag_name))
         setSaveSuccess(true)
         setTimeout(() => setSaveSuccess(false), 3000)
       }
     } catch (error: any) {
       setError(error.message || '生成标签失败，请稍后重试')
     } finally {
-      setIsLoading(false)
+      setIsGeneratingTags(false)
     }
   }
 
@@ -1110,4 +1102,4 @@ export default function ProfilePage() {
       </div>
     </div>
   )
-} 
+}
