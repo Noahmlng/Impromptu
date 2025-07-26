@@ -26,6 +26,11 @@ export interface AuthResponse {
     email: string
     display_name: string
     avatar_url?: string
+    subscription_type: string
+    created_at: string
+    updated_at: string
+    last_login_at?: string
+    is_active: boolean
     token: string
   }
 }
@@ -564,6 +569,11 @@ export const auth = {
             email: response.data.email,
             display_name: response.data.display_name,
             avatar_url: response.data.avatar_url,
+            subscription_type: response.data.subscription_type,
+            created_at: response.data.created_at,
+            updated_at: response.data.updated_at,
+            last_login_at: response.data.last_login_at,
+            is_active: response.data.is_active,
             token: response.data.token
           }
         }
@@ -614,6 +624,11 @@ export const auth = {
             email: response.data.email,
             display_name: response.data.display_name,
             avatar_url: response.data.avatar_url,
+            subscription_type: response.data.subscription_type,
+            created_at: response.data.created_at,
+            updated_at: response.data.updated_at,
+            last_login_at: response.data.last_login_at,
+            is_active: response.data.is_active,
             token: response.data.token
           }
         }

@@ -26,22 +26,16 @@ export default function LandingPage() {
   const router = useRouter()
   const { isAuthenticated, isLoading } = useOptionalAuth()
 
-  // 添加调试日志
-  useEffect(() => {
-    console.log('Landing page auth state:', { isAuthenticated, isLoading })
-  }, [isAuthenticated, isLoading])
-
   // Redirect to /home if user is authenticated
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      console.log('Redirecting authenticated user to /home')
-      router.push('/home')
+      // 立即跳转，不显示重定向消息
+      router.replace('/home')
     }
   }, [isAuthenticated, isLoading, router])
 
-  // Show loading or redirect if authenticated  
+  // Show loading during auth check
   if (isLoading) {
-    console.log('Showing loading state')
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -54,18 +48,15 @@ export default function LandingPage() {
     )
   }
 
-  // 不要立即返回null，而是让页面继续渲染，但添加一个简单的提示
+  // 如果已认证，显示简单的跳转提示而不是完整页面
   if (isAuthenticated) {
-    console.log('User is authenticated, showing redirect message')
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600 dark:text-gray-300 mb-4">
-            {language === 'zh' ? '正在跳转到主页...' : 'Redirecting to home...'}
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300">
+            {language === 'zh' ? '正在跳转...' : 'Redirecting...'}
           </p>
-          <Button onClick={() => router.push('/home')}>
-            {language === 'zh' ? '点击这里如果没有自动跳转' : 'Click here if not redirected automatically'}
-          </Button>
         </div>
       </div>
     )

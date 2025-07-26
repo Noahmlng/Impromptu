@@ -53,10 +53,11 @@ export default function LoginPage() {
             email: response.data!.email,
             display_name: response.data!.display_name,
             avatar_url: response.data!.avatar_url,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            last_login_at: new Date().toISOString(),
-            is_active: true
+            subscription_type: response.data!.subscription_type || 'free',
+            created_at: response.data!.created_at || new Date().toISOString(),
+            updated_at: response.data!.updated_at || new Date().toISOString(),
+            last_login_at: response.data!.last_login_at || new Date().toISOString(),
+            is_active: response.data!.is_active !== undefined ? response.data!.is_active : true
           })
           
           // Create legacy user object for compatibility
@@ -66,11 +67,13 @@ export default function LoginPage() {
             email: response.data!.email,
             avatar: response.data!.avatar_url,
             credits: 0,
-            subscription: 'free'
+            subscription: response.data!.subscription_type || 'free'
           })
           
-          // Redirect to main app
-          router.push('/')
+          // 等待状态更新完成后再跳转，直接跳转到主页
+          setTimeout(() => {
+            router.push('/home')
+          }, 100)
         } else {
           setError(response.message)
         }
@@ -100,10 +103,11 @@ export default function LoginPage() {
             email: response.data!.email,
             display_name: response.data!.display_name,
             avatar_url: response.data!.avatar_url,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            last_login_at: new Date().toISOString(),
-            is_active: true
+            subscription_type: response.data!.subscription_type || 'free',
+            created_at: response.data!.created_at || new Date().toISOString(),
+            updated_at: response.data!.updated_at || new Date().toISOString(),
+            last_login_at: response.data!.last_login_at || new Date().toISOString(),
+            is_active: response.data!.is_active !== undefined ? response.data!.is_active : true
           })
           
           // Create legacy user object for compatibility
@@ -113,11 +117,13 @@ export default function LoginPage() {
             email: response.data!.email,
             avatar: response.data!.avatar_url,
             credits: 0,
-            subscription: 'free'
+            subscription: response.data!.subscription_type || 'free'
           })
           
-          // Redirect to onboarding for new users
-          router.push('/onboarding')
+          // 等待状态更新完成后再跳转到新手引导页面
+          setTimeout(() => {
+            router.push('/onboarding')
+          }, 100)
         } else {
           setError(response.message)
         }

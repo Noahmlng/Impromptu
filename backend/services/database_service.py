@@ -269,4 +269,10 @@ class UserTagsDB:
             if result:
                 saved_tags.append(result)
         
-        return saved_tags 
+        return saved_tags
+
+# 创建全局实例供其他模块使用
+db_service = DatabaseService()
+user_profile_db = UserProfileDB()
+user_metadata_db = UserMetadataDB()
+user_tags_db = UserTagsDB() 

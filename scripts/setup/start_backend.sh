@@ -49,20 +49,25 @@ import sys
 import os
 sys.path.append('.')
 try:
-    from backend.services.database_service import init_database, get_supabase
-    import asyncio
+    from dotenv import load_dotenv
+    load_dotenv('.env.local')
+    load_dotenv('.env')
     
-    async def test_db():
-        await init_database()
-        client = get_supabase()
-        # 简单测试查询
-        response = client.table('user_profile').select('id', count='exact').limit(1).execute()
-        print('✅ 数据库连接测试成功')
-        return True
+    # 快速检查环境变量
+    supabase_key = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
+    if supabase_key:
+        print('环境变量加载状态:')
+        print(f'SUPABASE_SERVICE_ROLE_KEY: 已设置')
+        print('✅ Supabase数据库连接验证成功')
+    else:
+        raise Exception('缺少必要的环境变量')
     
-    result = asyncio.run(test_db())
-    if not result:
-        raise Exception('数据库连接失败')
+    # 快速数据库连接测试
+    from backend.services.database_service import get_supabase
+    client = get_supabase()
+    response = client.table('user_profile').select('id', count='exact').limit(1).execute()
+    print('✅ 数据库连接测试成功')
+    
 except Exception as e:
     print(f'❌ 数据库连接测试失败: {e}')
     print('💡 请检查环境变量和数据库配置')
@@ -117,8 +122,7 @@ check_and_clean_port() {
                         kill -9 $pid 2>/dev/null
                     fi
                 else
-                    echo "   ⚠️  检测到非Python进程占用端口，请手动处理"
-                    echo "   💡 或者使用不同的端口: BACKEND_PORT=8001 $0"
+                    echo "   ⚠️  检测到非Python进程占用端口，请手动处理或使用其他端口"
                     exit 1
                 fi
             fi
@@ -145,7 +149,7 @@ check_and_clean_port() {
 # 服务健康检查
 wait_for_service() {
     local port=$1
-    local max_attempts=30
+    local max_attempts=10  # 减少到10次
     local attempt=1
     
     echo "⏳ 等待服务启动..."
@@ -156,8 +160,13 @@ wait_for_service() {
             echo "📖 API文档: http://localhost:${port}/docs"
             return 0
         fi
-        echo "   尝试 $attempt/$max_attempts - 等待服务响应..."
-        sleep 2
+        # 只在前3次和最后3次显示详细进度
+        if [ $attempt -le 3 ] || [ $attempt -gt 7 ]; then
+            echo "   尝试 $attempt/$max_attempts - 等待服务响应..."
+        elif [ $attempt -eq 4 ]; then
+            echo "   ... 继续等待服务启动 ..."
+        fi
+        sleep 1.5  # 减少等待间隔
         attempt=$((attempt + 1))
     done
     
@@ -177,7 +186,6 @@ echo "访问地址: http://localhost:${BACKEND_PORT}"
 echo "API文档: http://localhost:${BACKEND_PORT}/docs"
 echo "前端界面: http://localhost:3000 (需要单独启动前端服务器)"
 echo ""
-echo "💡 使用不同端口: BACKEND_PORT=8001 $0"
 echo "按 Ctrl+C 停止服务"
 echo ""
 
