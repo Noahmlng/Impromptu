@@ -11,7 +11,10 @@ import sys
 import dotenv
 from supabase import create_client
 
-dotenv.load_dotenv()
+# 获取项目根目录并加载环境变量
+project_root = os.path.join(os.path.dirname(__file__), '..', '..')
+dotenv.load_dotenv(os.path.join(project_root, '.env.local'))
+dotenv.load_dotenv(os.path.join(project_root, '.env'))
 
 # Supabase配置
 SUPABASE_URL = os.getenv('SUPABASE_URL')

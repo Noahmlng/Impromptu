@@ -17,15 +17,13 @@ try:
     from dotenv import load_dotenv
     import os
     
-    # 尝试从多个位置加载.env.local文件
+    # 加载项目根目录的环境变量文件
     current_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.join(current_dir, '..', '..')
     
-    # 优先加载项目根目录的.env.local
+    # 只从项目根目录加载环境变量文件
     load_dotenv(os.path.join(project_root, '.env.local'))
-    load_dotenv(os.path.join(current_dir, '..', '.env.local'))  # backend目录
-    load_dotenv('.env.local')  # 当前目录
-    load_dotenv()  # 默认.env文件
+    load_dotenv(os.path.join(project_root, '.env'))
     
     print(f"环境变量加载状态:")
     print(f"SUPABASE_SERVICE_ROLE_KEY: {'已设置' if os.getenv('SUPABASE_SERVICE_ROLE_KEY') else '未设置'}")

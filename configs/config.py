@@ -21,8 +21,11 @@ class KimiAPIConfig:
     
     def __post_init__(self):
         if self.api_key is None:
-            load_dotenv('.env.local')
-            load_dotenv('.env')
+            # 获取项目根目录路径
+            project_root = os.path.join(os.path.dirname(__file__), '..')
+            # 加载根目录的环境变量文件
+            load_dotenv(os.path.join(project_root, '.env.local'))
+            load_dotenv(os.path.join(project_root, '.env'))
             self.api_key = os.getenv('KIMI_API_KEY')
     
     @property
