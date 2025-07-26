@@ -14,7 +14,7 @@ sys.path.append(project_root)
 # 直接导入tag_compatibility_analyzer模块
 spec = importlib.util.spec_from_file_location(
     "tag_compatibility_analyzer", 
-    os.path.join(project_root, "src", "algorithms", "tag_compatibility_analyzer.py")
+    os.path.join(project_root, "backend", "algorithms", "tag_compatibility_analyzer.py")
 )
 tag_analyzer_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(tag_analyzer_module)
@@ -56,7 +56,7 @@ def main():
     print()
     
     # 检查noah档案是否存在
-    noah_profile_path = "data/profiles/noah_profile.json"
+    noah_profile_path = "data/raw/profiles/noah_profile.json"
     if not os.path.exists(noah_profile_path):
         print(f"错误：找不到Noah的档案文件 {noah_profile_path}")
         return
@@ -74,7 +74,7 @@ def main():
     print()
     
     # 获取所有其他档案
-    profiles_dir = "data/profiles"
+    profiles_dir = "data/raw/profiles"
     other_profiles = get_all_other_profiles(profiles_dir)
     
     if len(other_profiles) == 0:
