@@ -1,14 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { useAppStore } from '@/lib/store'
 import { useRequireAuth } from '@/hooks/useAuth'
-import { profile, tags } from '@/lib/api'
+import { profile } from '@/lib/api'
 import { User, UserMetadata, Language } from '@/lib/types'
-import { User as UserIcon, Mail, Phone, MapPin, Calendar, Camera, Save, Edit3, Tag, AlertCircle, CheckCircle } from 'lucide-react'
+import { User as UserIcon, Mail, Phone, MapPin, Calendar, Camera, Save, Edit3, Upload, AlertCircle, CheckCircle } from 'lucide-react'
 
 export default function ProfilePage() {
   // Auth check
@@ -19,9 +19,7 @@ export default function ProfilePage() {
     user, 
     backendUser, 
     userMetadata, 
-    userTags,
     setUserMetadata,
-    setUserTags,
     setIsLoading,
     setError,
     error,
@@ -30,6 +28,9 @@ export default function ProfilePage() {
   
   const [isEditing, setIsEditing] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [profileData, setProfileData] = useState({
     name: '',
     email: '',
@@ -44,7 +45,6 @@ export default function ProfilePage() {
       emailNotifications: true
     }
   })
-  const [generatedTags, setGeneratedTags] = useState<string[]>([])
 
   // Load user data on mount
   useEffect(() => {
@@ -80,13 +80,6 @@ export default function ProfilePage() {
               emailNotifications: preferencesData.email_notifications !== false
             }
           })
-        }
-        
-        // Load tags
-        const tagsResponse = await tags.getUserTags()
-        if (tagsResponse.success && tagsResponse.data) {
-          setUserTags(tagsResponse.data)
-          setGeneratedTags(tagsResponse.data.map(tag => tag.tag_name))
         }
         
       } catch (error: any) {
@@ -151,22 +144,54 @@ export default function ProfilePage() {
     }
   }
 
-  const generateTags = async (requestType: '找队友' | '找对象') => {
-    if (!authUser) return
-    
-    setIsLoading(true)
+  const handleAvatarUpload = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // 验证文件类型
+    if (!file.type.startsWith('image/')) {
+      setError(language === 'zh' ? '请选择图片文件' : 'Please select an image file')
+      return
+    }
+
+    // 验证文件大小 (限制为5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError(language === 'zh' ? '图片大小不能超过5MB' : 'Image size cannot exceed 5MB')
+      return
+    }
+
+    setIsUploadingAvatar(true)
+    setError(null)
+
     try {
-      const response = await tags.generate(requestType)
-      if (response.success) {
-        setUserTags(response.data.generated_tags)
-        setGeneratedTags(response.data.generated_tags.map(tag => tag.tag_name))
-        setSaveSuccess(true)
-        setTimeout(() => setSaveSuccess(false), 3000)
+      // 创建预览
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setAvatarPreview(e.target?.result as string)
       }
+      reader.readAsDataURL(file)
+
+      // 这里需要调用实际的上传API
+      // TODO: 实现头像上传API调用
+      // const formData = new FormData()
+      // formData.append('avatar', file)
+      // const response = await profile.uploadAvatar(formData)
+      
+      // 模拟上传延迟
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      setSaveSuccess(true)
+      setTimeout(() => setSaveSuccess(false), 3000)
+      
     } catch (error: any) {
-      setError(error.message || 'Failed to generate tags')
+      setError(error.message || 'Failed to upload avatar')
+      setAvatarPreview(null)
     } finally {
-      setIsLoading(false)
+      setIsUploadingAvatar(false)
     }
   }
 
@@ -237,7 +262,7 @@ export default function ProfilePage() {
           <div className="text-center space-y-4">
             <div className="relative">
               <Avatar className="h-32 w-32 mx-auto">
-                <AvatarImage src={user?.avatar} />
+                <AvatarImage src={avatarPreview || user?.avatar} />
                 <AvatarFallback className="text-2xl">
                   {(profileData.name || backendUser?.display_name || 'U').charAt(0)}
                 </AvatarFallback>
@@ -246,11 +271,53 @@ export default function ProfilePage() {
                 <Button
                   size="icon"
                   className="absolute bottom-0 right-1/2 translate-x-1/2 translate-y-1/2 rounded-full"
+                  onClick={handleAvatarUpload}
+                  disabled={isUploadingAvatar}
                 >
-                  <Camera className="h-4 w-4" />
+                  {isUploadingAvatar ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Camera className="h-4 w-4" />
+                  )}
                 </Button>
               )}
             </div>
+            
+            {/* Upload Button */}
+            <div className="space-y-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleAvatarUpload}
+                disabled={isUploadingAvatar}
+                className="w-full"
+              >
+                {isUploadingAvatar ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
+                    {language === 'zh' ? '上传中...' : 'Uploading...'}
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4 mr-2" />
+                    {language === 'zh' ? '上传头像' : 'Upload Avatar'}
+                  </>
+                )}
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                {language === 'zh' ? '支持 JPG、PNG 格式，最大 5MB' : 'Support JPG, PNG format, max 5MB'}
+              </p>
+            </div>
+
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            
             <div>
               <h2 className="text-2xl font-semibold">{profileData.name || backendUser?.display_name}</h2>
               <p className="text-muted-foreground">{profileData.email || backendUser?.email}</p>
@@ -370,50 +437,6 @@ export default function ProfilePage() {
                 />
               ) : (
                 <p className="px-3 py-2 text-sm leading-relaxed">{profileData.bio}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Tags */}
-          <div className="bg-card rounded-lg p-6 space-y-4">
-            <div className="flex items-center justify-between">
-            <h3 className="text-xl font-semibold">
-                {language === 'zh' ? '个人标签' : 'Tags'}
-            </h3>
-              <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => generateTags('找队友')}
-                  disabled={isLoading}
-                >
-                  <Tag className="h-4 w-4 mr-2" />
-                  {language === 'zh' ? '生成队友标签' : 'Generate Team Tags'}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => generateTags('找对象')}
-                  disabled={isLoading}
-                >
-                  <Tag className="h-4 w-4 mr-2" />
-                  {language === 'zh' ? '生成浪漫标签' : 'Generate Romantic Tags'}
-                </Button>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {generatedTags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
-                >
-                  {tag}
-                </span>
-              ))}
-              {generatedTags.length === 0 && (
-                <p className="text-muted-foreground text-sm">
-                  {language === 'zh' ? '暂无标签，点击按钮生成' : 'No tags yet, click button to generate'}
-                </p>
               )}
             </div>
           </div>
