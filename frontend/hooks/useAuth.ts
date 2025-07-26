@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppStore } from '@/lib/store'
 import { auth } from '@/lib/api'
@@ -7,7 +7,6 @@ import { supabase } from '@/lib/supabase'
 export function useAuth(requireAuth: boolean = true) {
   const router = useRouter()
   const {
-    isAuthenticated,
     authToken,
     backendUser,
     setBackendUser,
@@ -17,20 +16,28 @@ export function useAuth(requireAuth: boolean = true) {
     setError,
     logout
   } = useAppStore()
+  
+  const isInitialized = useRef(false)
 
   useEffect(() => {
     const checkAuth = async () => {
+      // 避免重复初始化
+      if (isInitialized.current) return
+      
       setIsAuthLoading(true)
       
       try {
-        // 优先检查store中是否已有认证信息（来自登录页面设置）
+        // 优先检查store中的持久化状态
         if (authToken && backendUser) {
-          // Store中有完整的用户信息，直接使用
+          console.log('Using persisted auth state:', backendUser.email)
           setIsAuthLoading(false)
+          isInitialized.current = true
           return
         }
 
-        // 如果store中没有信息，检查Supabase session作为备用
+        console.log('No persisted auth state, checking Supabase session...')
+        
+        // 检查Supabase session作为备用
         const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {
@@ -39,15 +46,18 @@ export function useAuth(requireAuth: boolean = true) {
             router.push('/login')
           }
           setIsAuthLoading(false)
+          isInitialized.current = true
           return
         }
         
         if (session?.user) {
+          console.log('Found Supabase session, fetching user profile...')
           // 有有效session但store中没有用户信息，尝试获取用户档案
           try {
             const response = await auth.getCurrentUser()
             
             if (response.success && response.data) {
+              console.log('Successfully fetched user profile:', response.data.email)
               // 更新store state，确保与登录时的逻辑一致
               setAuthToken(session.access_token)
               setBackendUser(response.data)
@@ -60,6 +70,7 @@ export function useAuth(requireAuth: boolean = true) {
                 subscription: response.data.subscription_type || 'free'
               })
             } else {
+              console.error('Failed to fetch user profile:', response.message)
               // 用户档案获取失败，清除session
               await supabase.auth.signOut()
               logout()
@@ -76,6 +87,7 @@ export function useAuth(requireAuth: boolean = true) {
             }
           }
         } else if (requireAuth) {
+          console.log('No session and no stored auth, redirecting to login...')
           // 没有session也没有store中的认证信息，但需要认证
           router.push('/login')
         }
@@ -87,6 +99,7 @@ export function useAuth(requireAuth: boolean = true) {
         }
       } finally {
         setIsAuthLoading(false)
+        isInitialized.current = true
       }
     }
 
@@ -98,6 +111,7 @@ export function useAuth(requireAuth: boolean = true) {
         if (event === 'SIGNED_OUT') {
           // 用户登出，清除所有状态
           logout()
+          isInitialized.current = false
           if (requireAuth) {
             router.push('/login')
           }
@@ -112,7 +126,7 @@ export function useAuth(requireAuth: boolean = true) {
     return () => {
       subscription.unsubscribe()
     }
-  }, [requireAuth, router, setAuthToken, setBackendUser, setUser, setIsAuthLoading, logout, authToken, backendUser])
+  }, [requireAuth]) // 移除authToken和backendUser的依赖，避免循环
 
   const handleLogout = async () => {
     try {
@@ -122,6 +136,7 @@ export function useAuth(requireAuth: boolean = true) {
       console.error('Logout error:', error)
     } finally {
       logout() // 清除store状态
+      isInitialized.current = false
       router.push('/login')
     }
   }

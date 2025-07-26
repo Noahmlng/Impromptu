@@ -49,6 +49,7 @@ export default function ProfilePage() {
     const loadUserData = async () => {
       if (!authUser) return
       
+      console.log('Loading user data for:', authUser.email)
       setIsLoading(true)
       try {
         // Load metadata
@@ -86,6 +87,7 @@ export default function ProfilePage() {
         }
         
       } catch (error: any) {
+        console.error('Failed to load profile data:', error)
         setError(error.message || 'Failed to load profile data')
       } finally {
         setIsLoading(false)
@@ -94,6 +96,33 @@ export default function ProfilePage() {
 
     loadUserData()
   }, [authUser])
+
+  // 显示加载状态，等待认证检查完成
+  if (authLoading || isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">
+            {language === 'zh' ? '加载中...' : 'Loading...'}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // 如果认证检查完成但没有用户信息，显示错误（这种情况下useRequireAuth应该已经重定向了）
+  if (!authUser) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-muted-foreground">
+            {language === 'zh' ? '用户信息加载失败' : 'Failed to load user information'}
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   const handleSave = async () => {
     if (!authUser) return
@@ -166,14 +195,6 @@ export default function ProfilePage() {
     } finally {
       setIsLoading(false)
     }
-  }
-
-  if (authLoading || isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
   }
 
   const handleInputChange = (field: string, value: any) => {
