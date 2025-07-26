@@ -3,7 +3,7 @@ import { supabase } from './supabase'
 import { MatchUser } from './types'
 
 // Base URL for the backend API (only for AI operations like tag generation and matching)
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 // Types based on backend API documentation
 export interface LoginRequest {
@@ -26,6 +26,11 @@ export interface AuthResponse {
     email: string
     display_name: string
     avatar_url?: string
+    subscription_type: string
+    created_at: string
+    updated_at: string
+    last_login_at?: string
+    is_active: boolean
     token: string
   }
 }
@@ -381,95 +386,20 @@ class ApiClient {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
 
-      // 获取用户基本资料
-      const { data: profile, error: profileError } = await supabase
+      // 获取用户的profile_id
+      const { data: profile } = await supabase
         .from('user_profile')
-        .select('*')
+        .select('id')
         .eq('auth_user_id', user.id)
         .single()
 
-      if (profileError) throw profileError
-
-      // 获取关键的个人信息metadata（bio, location, age等）
-      const { data: personalMetadata, error: metadataError } = await supabase
-        .from('user_metadata')
-        .select('*')
-        .eq('auth_user_id', user.id)
-        .eq('section_type', 'profile')
-        .eq('section_key', 'personal')
-        .single()
-
-      // 合并profile和metadata信息
-      let personalInfo: any = {}
-      if (personalMetadata && !metadataError) {
-        try {
-          personalInfo = typeof personalMetadata.content === 'string' 
-            ? JSON.parse(personalMetadata.content) 
-            : personalMetadata.content || {}
-        } catch (e) {
-          console.error('Error parsing personal metadata:', e)
-        }
-      }
-
-      return {
-        success: true,
-        data: {
-          ...profile,
-          bio: personalInfo.bio || '',
-          location: personalInfo.location || '',
-          age: personalInfo.age || '',
-          // 其他个人信息也可以添加到这里
-        }
-      }
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message
-      }
-    }
-  }
-
-  // Update user profile basic info (bio, location, age)
-  async updateUserProfile(profileData: { bio?: string, location?: string, age?: string }): Promise<ApiResponse<any>> {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('User not authenticated')
-
-      // Update personal metadata (bio, location, age)
-      const personalMetadataEntry = {
-        section_type: 'profile',
-        section_key: 'personal',
-        content: {
-          bio: profileData.bio || '',
-          location: profileData.location || '',
-          age: profileData.age || ''
-        }
-      }
-
-      const result = await this.createMetadata(personalMetadataEntry)
-      return result
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message
-      }
-    }
-  }
-
-  // Metadata APIs - 直接使用Supabase
-  async createMetadata(data: MetadataEntry): Promise<ApiResponse<any>> {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('User not authenticated')
-
-      // 直接使用auth_user_id，不需要查询user_profile
-      const authUserId = user.id
+      if (!profile) throw new Error('User profile not found')
 
       // 检查是否已存在相同的metadata
       const { data: existing } = await supabase
         .from('user_metadata')
         .select('id')
-        .eq('auth_user_id', authUserId)
+        .eq('user_id', profile.id)
         .eq('section_type', data.section_type)
         .eq('section_key', data.section_key)
         .single()
@@ -500,7 +430,7 @@ class ApiClient {
         const { data: created, error } = await supabase
           .from('user_metadata')
           .insert({
-            auth_user_id: authUserId,
+            user_id: profile.id,
             section_type: data.section_type,
             section_key: data.section_key,
             content: data.content,
@@ -531,14 +461,23 @@ class ApiClient {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
 
-      // 直接使用auth_user_id
-      const authUserId = user.id
+      // 获取用户的profile_id
+      const { data: profile } = await supabase
+        .from('user_profile')
+        .select('id')
+        .eq('auth_user_id', user.id)
+        .single()
+
+      if (!profile) throw new Error('User profile not found')
 
       // 获取所有metadata
       const { data: metadata, error } = await supabase
         .from('user_metadata')
         .select('*')
-        .eq('auth_user_id', authUserId)
+        .eq('user_id', profile.id)
+        .eq('is_active', true)
+        .order('section_type')
+        .order('display_order')
 
       if (error) throw error
 
@@ -669,14 +608,21 @@ class ApiClient {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
 
-      // 直接使用auth_user_id
-      const authUserId = user.id
+      // 获取用户的profile_id
+      const { data: profile } = await supabase
+        .from('user_profile')
+        .select('id')
+        .eq('auth_user_id', user.id)
+        .single()
+
+      if (!profile) throw new Error('User profile not found')
 
       // 获取用户标签
       const { data: tags, error } = await supabase
         .from('user_tags')
         .select('*')
-        .eq('auth_user_id', authUserId)
+        .eq('user_id', profile.id)
+        .eq('is_active', true)
         .order('confidence_score', { ascending: false })
 
       if (error) throw error
@@ -684,7 +630,7 @@ class ApiClient {
       // 转换为前端需要的格式
       const formattedTags: UserTag[] = (tags || []).map((tag: any) => ({
         id: tag.id,
-        user_id: tag.auth_user_id,
+        user_id: tag.user_id,
         tag_name: tag.tag_name,
         tag_category: tag.tag_category || 'generated',
         confidence_score: parseFloat(tag.confidence_score || 0),
@@ -749,84 +695,57 @@ class ApiClient {
 
 // Create a singleton instance
 export const apiClient = new ApiClient()
-
-// 新的基于Supabase Auth的认证工具函数
+  
+  // 新的基于后端API的认证工具函数
 export const auth = {
   login: async (email: string, password: string) => {
     try {
-      // 添加超时控制
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('登录请求超时，请检查网络连接')), 30000)
+      const response = await apiClient.login({
+        email: email.trim(),
+        password
       })
-
-      const signInPromise = supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      const { data, error } = await Promise.race([signInPromise, timeoutPromise]) as any
       
-      if (error) {
-        let errorMessage = '登录失败';
-        
-        if (error.message.includes('Invalid login credentials')) {
-          errorMessage = '邮箱或密码错误';
-        } else if (error.message.includes('Email not confirmed')) {
-          errorMessage = '请先确认邮箱，检查收件箱并点击确认链接';
-        } else if (error.message.includes('rate limit') || error.message.includes('429')) {
-          errorMessage = '登录请求过于频繁，请稍后再试';
-        } else if (error.message) {
-          errorMessage = error.message;
-        }
-        
-        throw new Error(errorMessage);
-      }
-      
-      if (data.user && data.session) {
-        // 获取用户档案信息
-        try {
-          const { data: profile, error: profileError } = await supabase
-            .from('user_profile')
-            .select('*')
-            .eq('auth_user_id', data.user.id)
-            .single()
-          
-          return {
-            success: true,
-            message: '登录成功',
-            data: {
-              user_id: profile?.auth_user_id || data.user.id,
-              email: data.user.email!,
-              display_name: profile?.display_name || data.user.user_metadata?.display_name,
-              avatar_url: profile?.avatar_url || data.user.user_metadata?.avatar_url,
-              subscription_type: profile?.subscription_type || 'free',
-              token: data.session.access_token
-            }
-          }
-        } catch (profileError: any) {
-          console.error('Error fetching user profile:', profileError)
-          // 即使获取档案失败，也返回基本的登录信息
-          return {
-            success: true,
-            message: '登录成功',
-            data: {
-              user_id: data.user.id,
-              email: data.user.email!,
-              display_name: data.user.user_metadata?.display_name || '用户',
-              avatar_url: data.user.user_metadata?.avatar_url,
-              subscription_type: 'free',
-              token: data.session.access_token
-            }
+      if (response.success && response.data) {
+        return {
+          success: true,
+          message: response.message,
+          data: {
+            user_id: response.data.user_id,
+            email: response.data.email,
+            display_name: response.data.display_name,
+            avatar_url: response.data.avatar_url,
+            subscription_type: response.data.subscription_type,
+            created_at: response.data.created_at,
+            updated_at: response.data.updated_at,
+            last_login_at: response.data.last_login_at,
+            is_active: response.data.is_active,
+            token: response.data.token
           }
         }
       }
       
-      throw new Error('登录失败')
-    } catch (error: any) {
-      console.error('Login error:', error)
       return {
         success: false,
-        message: error.message || '登录失败',
+        message: response.message || '登录失败',
+        data: null
+      }
+    } catch (error: any) {
+      console.error('Login error:', error)
+      
+      let errorMessage = error.message || '登录失败'
+      
+      // 处理网络错误
+      if (error.message && error.message.includes('NetworkError')) {
+        errorMessage = '网络错误，请检查网络连接'
+      } else if (error.message && error.message.includes('timeout')) {
+        errorMessage = '连接超时，请检查网络设置'
+      } else if (error.message && error.message.includes('fetch')) {
+        errorMessage = '无法连接到服务器，请检查后端服务是否启动'
+      }
+      
+      return {
+        success: false,
+        message: errorMessage,
         data: null
       }
     }
@@ -834,117 +753,54 @@ export const auth = {
   
   register: async (email: string, password: string, displayName: string, avatarUrl?: string) => {
     try {
-      // 添加超时控制
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('注册请求超时，请检查网络连接')), 30000)
-      })
-
-      const signUpPromise = supabase.auth.signUp({
-        email,
+      const response = await apiClient.register({
+        email: email.trim(),
         password,
-        options: {
-          data: {
-            display_name: displayName,
-            avatar_url: avatarUrl
-          }
-        }
+        display_name: displayName.trim(),
+        avatar_url: avatarUrl
       })
-
-      const { data, error } = await Promise.race([signUpPromise, timeoutPromise]) as any
       
-      if (error) {
-        // Handle specific error cases with better Chinese messages
-        let errorMessage = '注册失败';
-        
-        if (error.message.includes('rate limit') || error.message.includes('429')) {
-          errorMessage = '注册请求过于频繁，请稍后再试';
-        } else if (error.message.includes('User already registered')) {
-          errorMessage = '该邮箱已被注册，请使用其他邮箱或登录';
-        } else if (error.message.includes('Password should')) {
-          errorMessage = '密码至少需要6个字符';
-        } else if (error.message.includes('Invalid email')) {
-          errorMessage = '邮箱格式不正确';
-        } else if (error.message.includes('confirmation')) {
-          errorMessage = '注册成功！请检查邮箱并点击确认链接完成注册';
-        } else if (error.message.includes('Error sending confirmation email')) {
-          errorMessage = '注册成功！但由于邮件服务暂时不可用，请稍后检查邮箱或联系管理员';
-        } else if (error.message) {
-          errorMessage = error.message;
-        }
-        
-        throw new Error(errorMessage);
-      }
-      
-      if (data.user) {
-        // 创建用户档案记录
-        try {
-          const userId = `user_${Date.now()}`
-          const { data: profile, error: profileError } = await supabase
-            .from('user_profile')
-            .insert({
-              user_id: userId,
-              auth_user_id: data.user.id,
-              email: data.user.email!,
-              display_name: displayName,
-              avatar_url: avatarUrl,
-              status: 'active',
-              subscription_type: 'free'
-            })
-            .select()
-            .single()
-
-          if (profileError) {
-            console.error('Error creating user profile:', profileError)
-            // 不阻塞注册，但记录错误
-          }
-
-          // 检查是否需要邮箱确认
-          const needsConfirmation = !data.user.email_confirmed_at
-          const message = needsConfirmation 
-            ? '注册成功！请检查邮箱并点击确认链接完成注册。如果未收到邮件，请检查垃圾邮件文件夹。'
-            : '注册成功！'
-
-          return {
-            success: true,
-            message: message,
-            data: {
-              user_id: userId,
-              email: data.user.email!,
-              display_name: displayName,
-              avatar_url: avatarUrl,
-              token: data.session?.access_token || null,
-              needs_confirmation: needsConfirmation
-            }
-          }
-        } catch (profileError: any) {
-          console.error('Error creating user profile:', profileError)
-          // 返回基本的注册成功信息，即使profile创建失败
-          const needsConfirmation = !data.user.email_confirmed_at
-          const message = needsConfirmation 
-            ? '注册成功！请检查邮箱并点击确认链接完成注册。如果未收到邮件，请检查垃圾邮件文件夹。'
-            : '注册成功！'
-
-          return {
-            success: true,
-            message: message,
-            data: {
-              user_id: data.user.id,
-              email: data.user.email!,
-              display_name: displayName,
-              avatar_url: avatarUrl,
-              token: data.session?.access_token || null,
-              needs_confirmation: needsConfirmation
-            }
+      if (response.success && response.data) {
+        return {
+          success: true,
+          message: response.message,
+          data: {
+            user_id: response.data.user_id,
+            email: response.data.email,
+            display_name: response.data.display_name,
+            avatar_url: response.data.avatar_url,
+            subscription_type: response.data.subscription_type,
+            created_at: response.data.created_at,
+            updated_at: response.data.updated_at,
+            last_login_at: response.data.last_login_at,
+            is_active: response.data.is_active,
+            token: response.data.token
           }
         }
       }
       
-      throw new Error('注册失败')
-    } catch (error: any) {
-      console.error('Registration error:', error)
       return {
         success: false,
-        message: error.message || '注册失败',
+        message: response.message || '注册失败',
+        data: null
+      }
+    } catch (error: any) {
+      console.error('Registration error:', error)
+      
+      let errorMessage = error.message || '注册失败'
+      
+      // 处理网络错误
+      if (error.message && error.message.includes('NetworkError')) {
+        errorMessage = '网络错误，请检查网络连接'
+      } else if (error.message && error.message.includes('timeout')) {
+        errorMessage = '连接超时，请检查网络设置'
+      } else if (error.message && error.message.includes('fetch')) {
+        errorMessage = '无法连接到服务器，请检查后端服务是否启动'
+      }
+      
+      return {
+        success: false,
+        message: errorMessage,
         data: null
       }
     }
@@ -952,11 +808,8 @@ export const auth = {
   
   logout: async () => {
     try {
-      await supabase.auth.signOut()
       // 清除本地存储的token
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('auth_token')
-      }
+      apiClient.clearToken()
       return { success: true, message: '登出成功' }
     } catch (error: any) {
       return { success: false, message: error.message || '登出失败' }
