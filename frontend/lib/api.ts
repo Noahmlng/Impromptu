@@ -3,7 +3,7 @@ import { supabase } from './supabase'
 import { MatchUser } from './types'
 
 // Base URL for the backend API (only for AI operations like tag generation and matching)
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5003'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 // Types based on backend API documentation
 export interface LoginRequest {

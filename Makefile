@@ -60,22 +60,32 @@ frontend-prod: ## 启动前端生产服务
 # ===================
 # 开发模式命令
 # ===================
-dev-all: ## 开发模式 - 同时启动前端和后端
+dev-all: ## 开发模式 - 同时启动前端和后端 (自动清理端口)
 	@echo "🚀 开发模式启动 - 前端和后端"
+	@echo "🧹 自动清理端口冲突..."
+	@bash scripts/setup/manage_ports.sh clean || true
+	@sleep 1
 	@echo "正在启动后端服务 (后台运行)..."
 	@bash scripts/setup/start_backend.sh &
 	@sleep 5
 	@echo "正在启动前端服务..."
 	@bash scripts/setup/start_frontend.sh
 
-dev: dev-all ## 开发模式（dev-all的别名）
+dev: ## 开发模式（自动清理端口+启动服务）
+	@echo "⚡ 开发模式快速启动（含端口清理）"
+	@make clean-ports
+	@make dev-all
 
-dev-backend: ## 仅开发模式启动后端
-	@echo "🌐 开发模式 - 仅后端..."
+dev-backend: ## 仅开发模式启动后端 (含端口清理)
+	@echo "🌐 开发模式 - 仅后端（含端口清理）..."
+	@bash scripts/setup/manage_ports.sh clean || true
+	@sleep 1
 	@bash scripts/setup/start_backend.sh
 
-dev-frontend: ## 仅开发模式启动前端
-	@echo "💻 开发模式 - 仅前端..."
+dev-frontend: ## 仅开发模式启动前端 (含端口清理)
+	@echo "💻 开发模式 - 仅前端（含端口清理）..."
+	@bash scripts/setup/manage_ports.sh clean || true
+	@sleep 1  
 	@bash scripts/setup/start_frontend.sh
 
 # ===================
@@ -92,6 +102,11 @@ test-api: ## 测试API接口
 # ===================
 # 管理命令
 # ===================
+clean-ports: ## 清理端口冲突（安全方式）
+	@echo "🧹 清理端口冲突..."
+	@bash scripts/setup/manage_ports.sh clean
+	@echo "✅ 端口清理完成"
+
 stop: ## 停止所有服务
 	@echo "🛑 停止所有服务..."
 	@pkill -f "uvicorn.*main_api" || true
@@ -101,12 +116,17 @@ stop: ## 停止所有服务
 	@pkill -f "npm.*run.*dev" || true
 	@echo "✅ 服务已停止"
 
+kill-ports: ## 强制清理所有相关端口（危险操作）
+	@echo "💥 强制清理所有开发端口..."
+	@echo "⚠️  这将终止3000、5000、8000、8001端口的所有进程"
+	@lsof -ti :3000 2>/dev/null | xargs kill -9 2>/dev/null || true
+	@lsof -ti :8000 2>/dev/null | xargs kill -9 2>/dev/null || true  
+	@lsof -ti :8001 2>/dev/null | xargs kill -9 2>/dev/null || true
+	@echo "✅ 强制清理完成"
+
 status: ## 检查服务状态
 	@echo "📊 服务状态检查..."
-	@echo "后端API服务 (端口5000):"
-	@lsof -Pi :5000 -sTCP:LISTEN >/dev/null && echo "  ✅ 运行中" || echo "  ❌ 未运行"
-	@echo "前端服务 (端口3000):"
-	@lsof -Pi :3000 -sTCP:LISTEN >/dev/null && echo "  ✅ 运行中" || echo "  ❌ 未运行"
+	@bash scripts/setup/manage_ports.sh status
 
 logs: ## 查看日志
 	@echo "📋 最近日志:"
@@ -130,16 +150,23 @@ clean: ## 清理临时文件
 # ===================
 # 快速命令
 # ===================
-quick-start: ## 快速启动（检查+安装+开发模式）
+quick-start: ## 快速启动（检查+安装+清理端口+开发模式）
 	@echo "⚡ 快速启动流程..."
 	@make check
 	@make install
+	@make dev
+
+restart: ## 重启所有服务（含端口清理）
+	@echo "🔄 重启所有服务..."
+	@make clean-ports
+	@sleep 2
 	@make dev-all
 
-restart: ## 重启所有服务
-	@echo "🔄 重启所有服务..."
+force-restart: ## 强制重启（清理所有+重新启动）
+	@echo "💪 强制重启所有服务..."
 	@make stop
-	@sleep 2
+	@make clean-ports
+	@sleep 3
 	@make dev-all
 
 .DEFAULT_GOAL := help 

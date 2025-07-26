@@ -43,12 +43,35 @@ if [ ! -d "node_modules" ]; then
     npm install
 fi
 
-# 检查端口3000是否可用
-echo "🔍 检查端口3000是否可用..."
-if lsof -Pi :3000 -sTCP:LISTEN -t >/dev/null ; then
-    echo "⚠️  警告: 端口3000已被占用，尝试终止占用进程..."
-    kill -9 $(lsof -Pi :3000 -sTCP:LISTEN -t) 2>/dev/null || true
-    sleep 2
+# 检查服务是否已经运行
+check_service_running() {
+    if curl -s http://localhost:3000/ >/dev/null 2>&1; then
+        echo "✅ 前端服务已在端口3000运行，无需重复启动"
+        echo "🌐 访问地址: http://localhost:3000"
+        echo ""
+        echo "💡 如需重启服务，请先停止现有服务："
+        echo "   bash scripts/setup/manage_ports.sh clean"
+        echo "   然后重新运行此脚本"
+        exit 0
+    fi
+}
+
+# 检查服务是否已运行
+check_service_running
+
+# 使用智能端口管理工具清理端口（如果有的话）
+if [ -f "../setup/manage_ports.sh" ]; then
+    echo "🧹 使用智能端口管理清理3000端口..."
+    cd .. && bash scripts/setup/manage_ports.sh clean >/dev/null 2>&1 || true
+    cd frontend
+else
+    # 备用简单清理方法
+    echo "🔍 检查端口3000是否可用..."
+    if lsof -Pi :3000 -sTCP:LISTEN -t >/dev/null ; then
+        echo "⚠️  警告: 端口3000已被占用，尝试终止占用进程..."
+        kill -9 $(lsof -Pi :3000 -sTCP:LISTEN -t) 2>/dev/null || true
+        sleep 2
+    fi
 fi
 
 echo "🚀 启动Next.js开发服务器 (端口 3000)..."

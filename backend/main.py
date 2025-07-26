@@ -19,14 +19,31 @@ sys.path.append(str(project_root))
 def start_comprehensive_api(port=8000):
     """启动完整的API服务（包含认证、匹配等完整功能）"""
     print(f"🚀 启动完整API服务 - 端口 {port}")
-    from backend.services.comprehensive_api import app
-    app.run(host='0.0.0.0', port=port, debug=True)
+    import uvicorn
+    uvicorn.run(
+        "backend.services.main_api:app", 
+        host='0.0.0.0', 
+        port=port, 
+        reload=True,
+        log_level="info"
+    )
 
 def start_simple_api(port=5000):
     """启动简单的API服务（基础匹配和训练功能）"""
     print(f"🔧 启动简单API服务 - 端口 {port}")
-    from backend.services.api_server import app
-    app.run(host='0.0.0.0', port=port, debug=True)
+    try:
+        from backend.services.api_server import app
+        app.run(host='0.0.0.0', port=port, debug=True)
+    except ImportError:
+        print("⚠️ api_server模块不存在，使用main_api替代")
+        import uvicorn
+        uvicorn.run(
+            "backend.services.main_api:app", 
+            host='0.0.0.0', 
+            port=port, 
+            reload=True,
+            log_level="info"
+        )
 
 def main():
     parser = argparse.ArgumentParser(description='Impromptu 后端服务')
