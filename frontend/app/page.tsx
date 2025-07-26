@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { useAppStore } from '@/lib/store'
 import { useOptionalAuth } from '@/hooks/useAuth'
+import { ScrollNavbar } from '@/components/scroll-navbar'
 import { 
   Heart, 
   Users, 
@@ -26,6 +27,19 @@ export default function LandingPage() {
   const { language } = useAppStore()
   const router = useRouter()
   const { isAuthenticated, isLoading } = useOptionalAuth()
+
+  // 设置全局语言变量供嵌入的HTML使用
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      ;(window as any).chatLanguage = language
+      // 如果聊天动画已经初始化，重新启动以应用新语言
+      setTimeout(() => {
+        if (typeof window !== 'undefined' && (window as any).restartChatAnimation) {
+          (window as any).restartChatAnimation()
+        }
+      }, 100)
+    }
+  }, [language])
 
   // Redirect to /home if user is authenticated
   useEffect(() => {
@@ -120,8 +134,11 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen">
+      {/* 滚动导航 */}
+      <ScrollNavbar />
+      
       {/* Hero Section */}
-      <section className="relative overflow-hidden" style={{ minHeight: '1200px' }}>
+      <section id="hero" className="relative overflow-hidden" style={{ minHeight: '1200px' }}>
         {/* Background Image - 放在最上边 */}
         <div 
           className="absolute inset-0 bg-contain bg-no-repeat"
@@ -178,7 +195,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-white dark:bg-gray-950">
+      <section id="features" className="py-20 bg-white dark:bg-gray-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -427,26 +444,26 @@ export default function LandingPage() {
                         <div class="chat-animation-container">
                           <div class="chat-animation-header">
                             <i class="ri-message-3-line"></i>
-                            What's your identity?
-                          </div>
+                            ${language === 'zh' ? '你的身份是什么？' : "What's your identity?"}
+                    </div>
                           <div class="chat-animation-body">
                             <!-- Frame 1 -->
                             <div class="chat-animation-frame" id="chat-frame1">
                               <div class="chat-animation-message chat-animation-bot visible">
                                 <div class="chat-animation-avatar chat-animation-bot-avatar">
-                                </div>
+                  </div>
                                 <div class="chat-animation-message-content">
                                   <span class="chat-animation-text-animation" id="chat-bot-text-1"></span>
                                   <span class="chat-animation-cursor"></span>
-                                </div>
-                              </div>
+                    </div>
+                    </div>
                               <div class="chat-animation-message chat-animation-user">
                                 <div class="chat-animation-avatar chat-animation-user-avatar">
-                                </div>
+                  </div>
                                 <div class="chat-animation-message-content">
                                   <span class="chat-animation-text-animation" id="chat-user-text-1"></span>
                                   <span class="chat-animation-cursor"></span>
-                                </div>
+                  </div>
                               </div>
                             </div>
                             
@@ -456,14 +473,14 @@ export default function LandingPage() {
                                 <div class="chat-animation-avatar chat-animation-bot-avatar">
                                 </div>
                                 <div class="chat-animation-message-content">
-                                  <span>Hi! I'd like to know you better.</span>
+                                  <span>${language === 'zh' ? '你好！我想更好地了解你。' : "Hi! I'd like to know you better."}</span>
                                 </div>
                               </div>
                               <div class="chat-animation-message chat-animation-user visible">
                                 <div class="chat-animation-avatar chat-animation-user-avatar">
                                 </div>
                                 <div class="chat-animation-message-content">
-                                  <span>Hi! Sure.</span>
+                                  <span>${language === 'zh' ? '你好！当然可以。' : "Hi! Sure."}</span>
                                 </div>
                               </div>
                               <div class="chat-animation-message chat-animation-bot visible">
@@ -490,28 +507,28 @@ export default function LandingPage() {
                                 <div class="chat-animation-avatar chat-animation-bot-avatar">
                                 </div>
                                 <div class="chat-animation-message-content">
-                                  <span>Hi! I'd like to know you better.</span>
+                                  <span>${language === 'zh' ? '你好！我想更好地了解你。' : "Hi! I'd like to know you better."}</span>
                                 </div>
                               </div>
                               <div class="chat-animation-message chat-animation-user visible">
                                 <div class="chat-animation-avatar chat-animation-user-avatar">
                                 </div>
                                 <div class="chat-animation-message-content">
-                                  <span>Hi! Sure.</span>
+                                  <span>${language === 'zh' ? '你好！当然可以。' : "Hi! Sure."}</span>
                                 </div>
                               </div>
                               <div class="chat-animation-message chat-animation-bot visible">
                                 <div class="chat-animation-avatar chat-animation-bot-avatar">
                                 </div>
                                 <div class="chat-animation-message-content">
-                                  <span>What would constitute a "perfect" day for you?</span>
+                                  <span>${language === 'zh' ? '对你来说，什么是完美的一天？' : 'What would constitute a "perfect" day for you?'}</span>
                                 </div>
                               </div>
                               <div class="chat-animation-message chat-animation-user visible">
                                 <div class="chat-animation-avatar chat-animation-user-avatar">
                                 </div>
                                 <div class="chat-animation-message-content">
-                                  <span>A day with friends, good food, and music.</span>
+                                  <span>${language === 'zh' ? '和朋友在一起，享受美食和音乐的一天。' : "A day with friends, good food, and music."}</span>
                                 </div>
                               </div>
                               <div class="chat-animation-message chat-animation-bot visible">
@@ -538,42 +555,42 @@ export default function LandingPage() {
                                 <div class="chat-animation-avatar chat-animation-bot-avatar">
                                 </div>
                                 <div class="chat-animation-message-content">
-                                  <span>Hi! I'd like to know you better.</span>
+                                  <span>${language === 'zh' ? '你好！我想更好地了解你。' : "Hi! I'd like to know you better."}</span>
                                 </div>
                               </div>
                               <div class="chat-animation-message chat-animation-user visible">
                                 <div class="chat-animation-avatar chat-animation-user-avatar">
                                 </div>
                                 <div class="chat-animation-message-content">
-                                  <span>Hi! Sure.</span>
+                                  <span>${language === 'zh' ? '你好！当然可以。' : "Hi! Sure."}</span>
                                 </div>
                               </div>
                               <div class="chat-animation-message chat-animation-bot visible">
                                 <div class="chat-animation-avatar chat-animation-bot-avatar">
                                 </div>
                                 <div class="chat-animation-message-content">
-                                  <span>What would constitute a "perfect" day for you?</span>
+                                  <span>${language === 'zh' ? '对你来说，什么是完美的一天？' : 'What would constitute a "perfect" day for you?'}</span>
                                 </div>
                               </div>
                               <div class="chat-animation-message chat-animation-user visible">
                                 <div class="chat-animation-avatar chat-animation-user-avatar">
                                 </div>
                                 <div class="chat-animation-message-content">
-                                  <span>A day with friends, good food, and music.</span>
+                                  <span>${language === 'zh' ? '和朋友在一起，享受美食和音乐的一天。' : "A day with friends, good food, and music."}</span>
                                 </div>
                               </div>
                               <div class="chat-animation-message chat-animation-bot visible">
                                 <div class="chat-animation-avatar chat-animation-bot-avatar">
                                 </div>
                                 <div class="chat-animation-message-content">
-                                  <span>If you could wake up tomorrow having gained any one quality or ability, what would it be?</span>
+                                  <span>${language === 'zh' ? '如果你明天醒来能获得任何一种品质或能力，你希望是什么？' : "If you could wake up tomorrow having gained any one quality or ability, what would it be?"}</span>
                                 </div>
                               </div>
                               <div class="chat-animation-message chat-animation-user visible">
                                 <div class="chat-animation-avatar chat-animation-user-avatar">
                                 </div>
                                 <div class="chat-animation-message-content">
-                                  <span>The ability to speak every language.</span>
+                                  <span>${language === 'zh' ? '能够说所有语言的能力。' : "The ability to speak every language."}</span>
                                 </div>
                               </div>
                               <div class="chat-animation-message chat-animation-bot visible">
@@ -600,56 +617,56 @@ export default function LandingPage() {
                                 <div class="chat-animation-avatar chat-animation-bot-avatar">
                                 </div>
                                 <div class="chat-animation-message-content">
-                                  <span>Hi! I'd like to know you better.</span>
+                                  <span>${language === 'zh' ? '你好！我想更好地了解你。' : "Hi! I'd like to know you better."}</span>
                                 </div>
                               </div>
                               <div class="chat-animation-message chat-animation-user visible">
                                 <div class="chat-animation-avatar chat-animation-user-avatar">
                                 </div>
                                 <div class="chat-animation-message-content">
-                                  <span>Hi! Sure.</span>
+                                  <span>${language === 'zh' ? '你好！当然可以。' : "Hi! Sure."}</span>
                                 </div>
                               </div>
                               <div class="chat-animation-message chat-animation-bot visible">
                                 <div class="chat-animation-avatar chat-animation-bot-avatar">
                                 </div>
                                 <div class="chat-animation-message-content">
-                                  <span>What would constitute a "perfect" day for you?</span>
+                                  <span>${language === 'zh' ? '对你来说，什么是完美的一天？' : 'What would constitute a "perfect" day for you?'}</span>
                                 </div>
                               </div>
                               <div class="chat-animation-message chat-animation-user visible">
                                 <div class="chat-animation-avatar chat-animation-user-avatar">
                                 </div>
                                 <div class="chat-animation-message-content">
-                                  <span>A day with friends, good food, and music.</span>
+                                  <span>${language === 'zh' ? '和朋友在一起，享受美食和音乐的一天。' : "A day with friends, good food, and music."}</span>
                                 </div>
                               </div>
                               <div class="chat-animation-message chat-animation-bot visible">
                                 <div class="chat-animation-avatar chat-animation-bot-avatar">
                                 </div>
                                 <div class="chat-animation-message-content">
-                                  <span>If you could wake up tomorrow having gained any one quality or ability, what would it be?</span>
+                                  <span>${language === 'zh' ? '如果你明天醒来能获得任何一种品质或能力，你希望是什么？' : "If you could wake up tomorrow having gained any one quality or ability, what would it be?"}</span>
                                 </div>
                               </div>
                               <div class="chat-animation-message chat-animation-user visible">
                                 <div class="chat-animation-avatar chat-animation-user-avatar">
                                 </div>
                                 <div class="chat-animation-message-content">
-                                  <span>The ability to speak every language.</span>
+                                  <span>${language === 'zh' ? '能够说所有语言的能力。' : "The ability to speak every language."}</span>
                                 </div>
                               </div>
                               <div class="chat-animation-message chat-animation-bot visible">
                                 <div class="chat-animation-avatar chat-animation-bot-avatar">
                                 </div>
                                 <div class="chat-animation-message-content">
-                                  <span>What do you value most in a friendship?</span>
+                                  <span>${language === 'zh' ? '在友谊中你最看重什么？' : "What do you value most in a friendship?"}</span>
                                 </div>
                               </div>
                               <div class="chat-animation-message chat-animation-user visible">
                                 <div class="chat-animation-avatar chat-animation-user-avatar">
                                 </div>
                                 <div class="chat-animation-message-content">
-                                  <span>Trust and honesty.</span>
+                                  <span>${language === 'zh' ? '信任和诚实。' : "Trust and honesty."}</span>
                                 </div>
                               </div>
                               <div class="chat-animation-message chat-animation-bot visible">
@@ -673,28 +690,37 @@ export default function LandingPage() {
                         </div>
                         
                         <script>
-                          // Text content for each frame
-                          const chatFrameTexts = {
-                            frame1: {
-                              bot: "Hi! I'd like to know you better.",
-                              user: "Hi! Sure."
-                            },
-                            frame2: {
-                              bot: "What would constitute a \\"perfect\\" day for you?",
-                              user: "A day with friends, good food, and music."
-                            },
-                            frame3: {
-                              bot: "If you could wake up tomorrow having gained any one quality or ability, what would it be?",
-                              user: "The ability to speak every language."
-                            },
-                            frame4: {
-                              bot: "What do you value most in a friendship?",
-                              user: "Trust and honesty."
-                            },
-                            frame5: {
-                              bot: "Thanks! I'm learning a lot about you.",
-                              user: "😊"
-                            }
+                          // Get current language from parent component
+                          const getCurrentLanguage = () => {
+                            // Try to get language from parent React component
+                            return window.chatLanguage || '${language}';
+                          };
+                          
+                          // Text content for each frame - function to get current texts
+                          const getChatFrameTexts = () => {
+                            const lang = getCurrentLanguage();
+                            return {
+                              frame1: {
+                                bot: lang === 'zh' ? "你好！我想更好地了解你。" : "Hi! I'd like to know you better.",
+                                user: lang === 'zh' ? "你好！当然可以。" : "Hi! Sure."
+                              },
+                              frame2: {
+                                bot: lang === 'zh' ? "对你来说，什么是完美的一天？" : 'What would constitute a "perfect" day for you?',
+                                user: lang === 'zh' ? "和朋友在一起，享受美食和音乐的一天。" : "A day with friends, good food, and music."
+                              },
+                              frame3: {
+                                bot: lang === 'zh' ? "如果你明天醒来能获得任何一种品质或能力，你希望是什么？" : "If you could wake up tomorrow having gained any one quality or ability, what would it be?",
+                                user: lang === 'zh' ? "能够说所有语言的能力。" : "The ability to speak every language."
+                              },
+                              frame4: {
+                                bot: lang === 'zh' ? "在友谊中你最看重什么？" : "What do you value most in a friendship?",
+                                user: lang === 'zh' ? "信任和诚实。" : "Trust and honesty."
+                              },
+                              frame5: {
+                                bot: lang === 'zh' ? "谢谢！我对你了解了很多。" : "Thanks! I'm learning a lot about you.",
+                                user: "😊"
+                              }
+                            };
                           };
 
                           // Animation variables
@@ -707,6 +733,23 @@ export default function LandingPage() {
                             showChatFrame(chatCurrentFrame);
                             startChatAutoPlay();
                           }
+                          
+                          // Restart chat animation (for language changes)
+                          function restartChatAnimation() {
+                            // Clear existing interval
+                            if (chatAnimationInterval) {
+                              clearInterval(chatAnimationInterval);
+                            }
+                            // Update static texts first
+                            updateStaticTexts();
+                            // Reset to first frame
+                            chatCurrentFrame = 1;
+                            // Restart animation
+                            initChatAnimation();
+                          }
+                          
+                          // Make restart function globally available
+                          window.restartChatAnimation = restartChatAnimation;
                           
                           // Show specific frame
                           function showChatFrame(frameNumber) {
@@ -767,6 +810,7 @@ export default function LandingPage() {
                           // Start animations for a frame
                           function startChatFrameAnimations(frameNumber) {
                             const frameKey = \`frame\${frameNumber}\`;
+                            const chatFrameTexts = getChatFrameTexts();
                             const botText = chatFrameTexts[frameKey].bot;
                             const userText = chatFrameTexts[frameKey].user;
                             
@@ -836,13 +880,55 @@ export default function LandingPage() {
                             }, 6000); // Time for each frame (typing + reading)
                           }
                           
+                          // Update static text content based on current language
+                          function updateStaticTexts() {
+                            const lang = getCurrentLanguage();
+                            const headerElement = document.querySelector('.chat-animation-header');
+                            if (headerElement) {
+                              headerElement.textContent = lang === 'zh' ? '你的身份是什么？' : "What's your identity?";
+                            }
+                            
+                            // Update all static message texts
+                            const staticMessages = document.querySelectorAll('.chat-animation-message span:not(.chat-animation-text-animation)');
+                            const chatFrameTexts = getChatFrameTexts();
+                            
+                            staticMessages.forEach((span, index) => {
+                              const text = span.textContent;
+                              // Update based on known text patterns
+                              if (text === '你好！我想更好地了解你。' || text === "Hi! I'd like to know you better.") {
+                                span.textContent = chatFrameTexts.frame1.bot;
+                              } else if (text === '你好！当然可以。' || text === "Hi! Sure.") {
+                                span.textContent = chatFrameTexts.frame1.user;
+                              } else if (text === '对你来说，什么是完美的一天？' || text === 'What would constitute a "perfect" day for you?') {
+                                span.textContent = chatFrameTexts.frame2.bot;
+                              } else if (text === '和朋友在一起，享受美食和音乐的一天。' || text === "A day with friends, good food, and music.") {
+                                span.textContent = chatFrameTexts.frame2.user;
+                              } else if (text === '如果你明天醒来能获得任何一种品质或能力，你希望是什么？' || text === "If you could wake up tomorrow having gained any one quality or ability, what would it be?") {
+                                span.textContent = chatFrameTexts.frame3.bot;
+                              } else if (text === '能够说所有语言的能力。' || text === "The ability to speak every language.") {
+                                span.textContent = chatFrameTexts.frame3.user;
+                              } else if (text === '在友谊中你最看重什么？' || text === "What do you value most in a friendship?") {
+                                span.textContent = chatFrameTexts.frame4.bot;
+                              } else if (text === '信任和诚实。' || text === "Trust and honesty.") {
+                                span.textContent = chatFrameTexts.frame4.user;
+                              }
+                            });
+                          }
+                          
                           // Initialize when DOM is loaded
-                          document.addEventListener('DOMContentLoaded', initChatAnimation);
+                          document.addEventListener('DOMContentLoaded', () => {
+                            updateStaticTexts();
+                            initChatAnimation();
+                          });
                           
                           // Also initialize immediately if DOM is already loaded
                           if (document.readyState === 'loading') {
-                            document.addEventListener('DOMContentLoaded', initChatAnimation);
+                            document.addEventListener('DOMContentLoaded', () => {
+                              updateStaticTexts();
+                              initChatAnimation();
+                            });
                           } else {
+                            updateStaticTexts();
                             initChatAnimation();
                           }
                         </script>
@@ -1019,7 +1105,7 @@ export default function LandingPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+      <section id="stats" className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center text-white">
             <div>
@@ -1045,7 +1131,7 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 bg-gray-50 dark:bg-gray-900">
+      <section id="testimonials" className="py-20 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -1079,7 +1165,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-white dark:bg-gray-950">
+      <section id="cta" className="py-20 bg-white dark:bg-gray-950">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">
             {language === 'zh' ? '准备好开始了吗？' : 'Ready to Get Started?'}
