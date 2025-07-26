@@ -8,7 +8,7 @@ import os
 from dotenv import load_dotenv
 import logging
 
-from backend.prompts.prompts import get_system_prompt, get_analysis_prompt
+from backend.prompts.prompts import get_system_prompt, get_analysis_prompt, get_initial_prompts
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -22,11 +22,15 @@ router = APIRouter()
 # Configure OpenAI client
 openai_api_key = os.getenv("OPENAI_API_KEY")
 openai_base_url = os.getenv("OPENAI_BASE_URL")
+moonshot_api_key = os.getenv("MOONSHOT_API_KEY")
+moonshot_base_url = os.getenv("MOONSHOT_BASE_URL")
+
 if not openai_api_key:
     logger.error("OPENAI_API_KEY environment variable not set!")
     raise ValueError("OPENAI_API_KEY environment variable not set.")
 
-client = OpenAI(api_key=openai_api_key, base_url=openai_base_url)
+# client = OpenAI(api_key=openai_api_key, base_url=openai_base_url)
+client = OpenAI(api_key=moonshot_api_key, base_url=moonshot_base_url)
 logger.info("OpenAI client initialized successfully")
 
 class ChatRequest(BaseModel):
@@ -45,6 +49,12 @@ async def handle_chat(request: ChatRequest):
         logger.info(f"Received chat request: themeMode={request.themeMode}, language={request.language}, isAnalysis={request.isAnalysis}")
         logger.info(f"History length: {len(request.history)}")
         
+        # 初始对话引导
+        initial_prompts = []
+        if len(request.history) == 0 and not request.isAnalysis:
+            logger.info("This is a new conversation. Adding initial prompts.")
+            initial_prompts = get_initial_prompts(request.themeMode, request.language)
+
         if request.isAnalysis:
             logger.info("Processing analysis request")
             system_prompt = get_analysis_prompt(request.themeMode, request.language)
@@ -55,7 +65,7 @@ async def handle_chat(request: ChatRequest):
             logger.info("Processing regular chat request")
             system_prompt = get_system_prompt(request.themeMode, request.language, len(request.history))
             user_messages = request.history
-            messages = [{"role": "system", "content": system_prompt}] + user_messages
+            messages = [{"role": "system", "content": system_prompt}] + initial_prompts + user_messages
             if request.message:
                 messages.append({"role": "user", "content": request.message})
         
@@ -63,10 +73,12 @@ async def handle_chat(request: ChatRequest):
         logger.debug(f"System prompt: {system_prompt[:100]}...")
         
         completion = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            # model="gpt-4.1-mini",
+            model = "kimi-k2-0711-preview",
             messages=messages,
             max_tokens=1500 if request.isAnalysis else 1000,
-            temperature=0.7,
+            # temperature=0.7,
+            temperature=0.6,
             response_format={"type": "json_object"} if request.isAnalysis else None,
         )
 
@@ -86,7 +98,8 @@ async def health_check():
     try:
         # Test OpenAI connection
         test_response = client.chat.completions.create(
-            model="gpt-4.1-mini",
+            # model="gpt-4.1-mini",
+            model = "kimi-k2-0711-preview",
             messages=[{"role": "user", "content": "Hello"}],
             max_tokens=5
         )
