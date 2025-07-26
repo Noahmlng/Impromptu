@@ -253,33 +253,38 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Getting Started */}
-      {(!userTags || userTags.length === 0) && (
-        <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg p-8 border border-primary/20">
-          <div className="text-center space-y-4">
-            <Sparkles className="h-12 w-12 text-primary mx-auto" />
-            <h3 className="text-xl font-semibold">
-              {language === 'zh' ? '开始您的匹配旅程' : 'Start Your Matching Journey'}
-            </h3>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              {language === 'zh' 
-                ? '完善您的个人资料并生成标签，让我们为您找到最合适的伙伴。'
-                : 'Complete your profile and generate tags to help us find the perfect match for you.'
-              }
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-              <Button onClick={() => window.location.href = '/profile'}>
-                <Settings className="h-4 w-4 mr-2" />
-                {language === 'zh' ? '完善资料' : 'Complete Profile'}
-              </Button>
-              <Button variant="outline" onClick={() => window.location.href = '/onboarding'}>
-                <ArrowRight className="h-4 w-4 mr-2" />
-                {language === 'zh' ? '引导教程' : 'Onboarding Guide'}
-              </Button>
-            </div>
+      {/* Getting Started - Always Show */}
+      <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg p-8 border border-primary/20">
+        <div className="text-center space-y-4">
+          <Sparkles className="h-12 w-12 text-primary mx-auto" />
+          <h3 className="text-xl font-semibold">
+            {userTags && userTags.length > 0 
+              ? (language === 'zh' ? '继续完善您的资料' : 'Continue Improving Your Profile')
+              : (language === 'zh' ? '开始您的匹配旅程' : 'Start Your Matching Journey')
+            }
+          </h3>
+          <p className="text-muted-foreground max-w-md mx-auto">
+            {userTags && userTags.length > 0 
+              ? (language === 'zh' 
+                  ? '更新您的个人资料和偏好设置，获得更精准的匹配结果。'
+                  : 'Update your profile and preferences to get more accurate matching results.')
+              : (language === 'zh' 
+                  ? '完善您的个人资料并生成标签，让我们为您找到最合适的伙伴。'
+                  : 'Complete your profile and generate tags to help us find the perfect match for you.')
+            }
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+            <Button onClick={() => window.location.href = '/profile'}>
+              <Settings className="h-4 w-4 mr-2" />
+              {language === 'zh' ? '完善资料' : 'Complete Profile'}
+            </Button>
+            <Button variant="outline" onClick={() => window.location.href = '/onboarding'}>
+              <ArrowRight className="h-4 w-4 mr-2" />
+              {language === 'zh' ? '引导教程' : 'Onboarding Guide'}
+            </Button>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Match Search Modal */}
       <MatchSearch 
