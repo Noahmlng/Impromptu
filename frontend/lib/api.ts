@@ -146,14 +146,18 @@ export interface ApiResponse<T> {
   error?: string
 }
 
-class ApiClient {
-  private baseUrl: string
+export class ApiClient {
+  private baseURL: string
   private token: string | null = null
   private defaultTimeout = 10000 // 10秒超时
 
-  constructor(baseUrl: string = API_BASE_URL) {
-    this.baseUrl = baseUrl
-    console.log('🚀 [ApiClient] Initialized with base URL:', this.baseUrl)
+  constructor() {
+    // 根据环境设置API基础URL
+    this.baseURL = process.env.NODE_ENV === 'production' 
+      ? (process.env.NEXT_PUBLIC_API_URL || 'https://your-backend-domain.com')
+      : 'http://localhost:8000'
+    
+    console.log('🚀 [ApiClient] Initialized with base URL:', this.baseURL)
     // Try to get token from localStorage on initialization
     if (typeof window !== 'undefined') {
       this.token = localStorage.getItem('auth_token')
@@ -298,7 +302,7 @@ class ApiClient {
 
   // Authentication APIs
   async register(data: RegisterRequest): Promise<AuthResponse> {
-    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/auth/register`, {
+    const response = await this.fetchWithTimeout(`${this.baseURL}/api/auth/register`, {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify(data),
@@ -313,7 +317,7 @@ class ApiClient {
 
   async login(data: LoginRequest): Promise<AuthResponse> {
     console.log('🔐 [ApiClient.login] Attempting login for:', data.email)
-    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/auth/login`, {
+    const response = await this.fetchWithTimeout(`${this.baseURL}/api/auth/login`, {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify(data),
@@ -351,10 +355,10 @@ class ApiClient {
 
   async getCurrentUser(): Promise<ApiResponse<UserInfo>> {
     console.log('🔗 [ApiClient.getCurrentUser] Starting HTTP request...')
-    console.log('🔗 [ApiClient.getCurrentUser] URL:', `${this.baseUrl}/api/auth/user`)
+    console.log('🔗 [ApiClient.getCurrentUser] URL:', `${this.baseURL}/api/auth/user`)
     console.log('🔗 [ApiClient.getCurrentUser] Headers:', this.getHeaders())
     
-    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/auth/user`, {
+    const response = await this.fetchWithTimeout(`${this.baseURL}/api/auth/user`, {
       method: 'GET',
       headers: this.getHeaders(),
     })
@@ -371,7 +375,7 @@ class ApiClient {
   async verifyTokenFast(): Promise<{ valid: boolean; user_id?: string; email?: string }> {
     console.log('⚡ [ApiClient.verifyTokenFast] Starting fast token verification...')
     
-    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/auth/verify-fast`, {
+    const response = await this.fetchWithTimeout(`${this.baseURL}/api/auth/verify-fast`, {
       method: 'GET',
       headers: this.getHeaders(),
     })
@@ -518,7 +522,7 @@ class ApiClient {
     console.log('📝 [ApiClient.batchUpdateMetadata] Entries count:', data.metadata_entries.length)
     
     const headers = await this.getSupabaseHeaders()
-    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/metadata/batch`, {
+    const response = await this.fetchWithTimeout(`${this.baseURL}/api/metadata/batch`, {
       method: 'POST',
       headers: headers,
       body: JSON.stringify(data),
@@ -537,7 +541,7 @@ class ApiClient {
     const headers = await this.getSupabaseHeaders()
     console.log('📋 [ApiClient.updateProfile] Request headers:', headers)
     
-    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/users/me/profile`, {
+    const response = await this.fetchWithTimeout(`${this.baseURL}/api/users/me/profile`, {
       method: 'PUT',
       headers: headers,
       body: JSON.stringify(profileData),
@@ -550,7 +554,7 @@ class ApiClient {
   }
 
   async getBackendUserMetadata(): Promise<MetadataResponse> {
-    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/users/me/profile`, {
+    const response = await this.fetchWithTimeout(`${this.baseURL}/api/users/me/profile`, {
       method: 'GET',
       headers: await this.getSupabaseHeaders(),
     })
@@ -571,9 +575,9 @@ class ApiClient {
       contentType: headerObj['Content-Type']
     })
     
-    console.log('🌐 [ApiClient.generateTags] Making request to:', `${this.baseUrl}/api/tags/generate`)
+    console.log('🌐 [ApiClient.generateTags] Making request to:', `${this.baseURL}/api/tags/generate`)
     
-    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/tags/generate`, {
+    const response = await this.fetchWithTimeout(`${this.baseURL}/api/tags/generate`, {
       method: 'POST',
       headers: headers,
       body: JSON.stringify(data),
@@ -594,7 +598,7 @@ class ApiClient {
   }
 
   async addManualTags(data: ManualTagsRequest): Promise<ApiResponse<UserTag[]>> {
-    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/tags/manual`, {
+    const response = await this.fetchWithTimeout(`${this.baseURL}/api/tags/manual`, {
       method: 'POST',
       headers: await this.getSupabaseHeaders(),
       body: JSON.stringify(data),
@@ -654,7 +658,7 @@ class ApiClient {
 
   // Matching APIs - 使用后端API进行AI匹配
   async searchMatches(data: MatchSearchRequest): Promise<MatchSearchResponse> {
-    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/match/search`, {
+    const response = await this.fetchWithTimeout(`${this.baseURL}/api/match/search`, {
       method: 'POST',
       headers: await this.getSupabaseHeaders(),
       body: JSON.stringify(data),
@@ -664,7 +668,7 @@ class ApiClient {
   }
 
   async analyzeCompatibility(data: CompatibilityAnalysisRequest): Promise<CompatibilityAnalysisResponse> {
-    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/match/analyze`, {
+    const response = await this.fetchWithTimeout(`${this.baseURL}/api/match/analyze`, {
       method: 'POST',
       headers: await this.getSupabaseHeaders(),
       body: JSON.stringify(data),
@@ -675,7 +679,7 @@ class ApiClient {
 
   // System APIs
   async healthCheck(): Promise<any> {
-    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/system/health`, {
+    const response = await this.fetchWithTimeout(`${this.baseURL}/api/system/health`, {
       method: 'GET',
       headers: this.getHeaders(),
     })
@@ -684,7 +688,7 @@ class ApiClient {
   }
 
   async getSystemStats(): Promise<ApiResponse<any>> {
-    const response = await this.fetchWithTimeout(`${this.baseUrl}/api/system/stats`, {
+    const response = await this.fetchWithTimeout(`${this.baseURL}/api/system/stats`, {
       method: 'GET',
       headers: await this.getSupabaseHeaders(),
     })
