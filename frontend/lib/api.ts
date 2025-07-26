@@ -2,8 +2,10 @@
 import { supabase } from './supabase'
 import { MatchUser } from './types'
 
-// Base URL for the backend API (only for AI operations like tag generation and matching)
+// Base URL for the backend API
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+
+console.log('🚀 [ApiClient] Initialized with base URL:', API_BASE_URL)
 
 // Types based on backend API documentation
 export interface LoginRequest {
@@ -159,10 +161,8 @@ export class ApiClient {
   private defaultTimeout = 30000 // 30秒超时，适应复杂匹配分析
 
   constructor() {
-    // 根据环境设置API基础URL
-    this.baseURL = process.env.NODE_ENV === 'production' 
-      ? (process.env.NEXT_PUBLIC_API_URL || 'https://your-backend-domain.com')
-      : 'http://localhost:8000'
+    // 统一使用定义好的API_BASE_URL
+    this.baseURL = API_BASE_URL
     
     console.log('🚀 [ApiClient] Initialized with base URL:', this.baseURL)
     // Try to get token from localStorage on initialization

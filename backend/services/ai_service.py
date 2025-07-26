@@ -14,11 +14,14 @@ load_dotenv()
 
 router = APIRouter()
 
-# Configure OpenAI client
+# Configure OpenAI client - 让API Key变为可选
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-if not openai.api_key:
-    raise ValueError("OPENAI_API_KEY environment variable not set.")
+# 检查API Key状态但不阻止应用启动
+OPENAI_AVAILABLE = bool(openai.api_key)
+if not OPENAI_AVAILABLE:
+    print("⚠️ OPENAI_API_KEY 未设置，AI聊天功能将不可用")
+    print("💡 如需使用AI功能，请设置环境变量: OPENAI_API_KEY=your_key")
 
 class ChatRequest(BaseModel):
     message: Optional[str]
@@ -32,6 +35,17 @@ async def handle_chat(request: ChatRequest):
     """
     Handles AI chat requests by proxying them to OpenAI.
     """
+    # 检查API Key是否可用
+    if not OPENAI_AVAILABLE:
+        raise HTTPException(
+            status_code=503, 
+            detail={
+                "error": "AI服务不可用",
+                "message": "OPENAI_API_KEY 环境变量未设置",
+                "solution": "请设置 OPENAI_API_KEY 环境变量后重启应用"
+            }
+        )
+    
     try:
         if request.isAnalysis:
             system_prompt = get_analysis_prompt(request.themeMode, request.language)
@@ -59,4 +73,14 @@ async def handle_chat(request: ChatRequest):
     except openai.APIError as e:
         raise HTTPException(status_code=500, detail=f"OpenAI API error: {e}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}") 
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+
+# 添加AI服务状态检查路由
+@router.get("/status")
+async def ai_service_status():
+    """检查AI服务状态"""
+    return {
+        "openai_available": OPENAI_AVAILABLE,
+        "status": "ready" if OPENAI_AVAILABLE else "unavailable",
+        "message": "AI服务正常" if OPENAI_AVAILABLE else "需要设置 OPENAI_API_KEY"
+    } 

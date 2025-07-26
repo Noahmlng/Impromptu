@@ -45,51 +45,39 @@ def build_frontend():
     frontend_dir = Path("frontend")
     out_dir = frontend_dir / "out"
     
-    print("🔨 开始构建前端应用...")
+    print("🔨 检查前端构建状态...")
     
     # 检查是否已经构建过
     if out_dir.exists() and len(list(out_dir.glob("*"))) > 0:
-        print("✅ 发现已构建的前端文件")
+        print("✅ 发现已构建的前端文件，跳过构建")
         return True
     
     if not frontend_dir.exists():
         print("❌ frontend 目录不存在")
         return False
     
-    try:
-        # 安装依赖
-        print("📦 安装前端依赖...")
-        subprocess.run(["npm", "install"], cwd=frontend_dir, check=True, capture_output=True)
-        
-        # 构建应用
-        print("🏗️ 构建前端应用...")
-        subprocess.run(["npm", "run", "build"], cwd=frontend_dir, check=True, capture_output=True)
-        
-        print("✅ 前端构建完成")
-        return True
-        
-    except subprocess.CalledProcessError as e:
-        print(f"❌ 前端构建失败: {e}")
-        return False
-    except FileNotFoundError:
-        print("❌ npm 未安装，请先安装 Node.js")
-        return False
+    print("⚠️ 前端未构建，将在后台构建...")
+    print("💡 如需立即使用，请手动运行: cd frontend && npm run build")
+    
+    # 不在启动时构建，让用户手动构建或后台处理
+    return False
 
-# 构建前端
-frontend_built = build_frontend()
+# 检查前端状态（不阻塞启动）
+frontend_status = build_frontend()
 
-if frontend_built:
-    # 挂载静态文件
-    frontend_out = Path("frontend/out")
-    if frontend_out.exists():
-        # 挂载 _next 静态资源
-        next_static = frontend_out / "_next"
-        if next_static.exists():
-            app.mount("/_next", StaticFiles(directory=str(next_static)), name="next_static")
-        
-        # 挂载其他静态资源
-        app.mount("/static", StaticFiles(directory=str(frontend_out)), name="static")
-        print("✅ 前端静态文件已挂载")
+# 配置静态文件服务（如果前端已构建）
+frontend_out = Path("frontend/out")
+if frontend_out.exists() and len(list(frontend_out.glob("*"))) > 0:
+    # 挂载 _next 静态资源
+    next_static = frontend_out / "_next"
+    if next_static.exists():
+        app.mount("/_next", StaticFiles(directory=str(next_static)), name="next_static")
+    
+    # 挂载其他静态资源
+    app.mount("/static", StaticFiles(directory=str(frontend_out)), name="static")
+    print("✅ 前端静态文件已挂载")
+else:
+    print("⚠️ 前端未构建，将显示构建指引页面")
 
 # 将后端API挂载到 /api 路径
 app.mount("/api", backend_app)
@@ -242,9 +230,12 @@ if __name__ == "__main__":
     print(f"📖 API文档: http://0.0.0.0:{port}/api/docs")
     print(f"🔍 健康检查: http://0.0.0.0:{port}/health")
     
-    if frontend_built:
+    frontend_ready = Path("frontend/out/index.html").exists()
+    if frontend_ready:
         print("✅ 前端已构建，可直接访问")
     else:
-        print("⚠️  前端未构建，将显示构建指引")
+        print("⚠️ 前端未构建，将显示构建指引")
+        print("💡 构建命令: cd frontend && npm run build")
     
+    print("=" * 50)
     uvicorn.run(app, host="0.0.0.0", port=port) 
