@@ -5,6 +5,7 @@
 - Focus on core functionality, minimal dependencies
 - Provide clean backend communication interface
 - No unnecessary tests, docs, or debug prints
+- Don't create any explanation markdown files if not ordered.
 
 ## Code Structure
 - `config.py`: All configuration classes and functions

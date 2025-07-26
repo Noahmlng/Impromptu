@@ -63,10 +63,10 @@ def check_project_structure():
     print("\n📁 检查项目结构...")
     
     required_dirs = [
-        'src',
-        'src/algorithms',
-        'src/models',
-        'src/services',
+        'backend',
+        'backend/algorithms',
+        'backend/models',
+        'backend/services',
         'data',
         'data/raw',
         'data/processed',
@@ -130,7 +130,7 @@ def check_imports():
         
         # 测试导入
         from backend.models import CompatibilityResult, UserRequest
-        print("✅ src.models 导入成功")
+        print("✅ backend.models 导入成功")
         
         from configs.config import ConfigManager
         print("✅ configs.config 导入成功")

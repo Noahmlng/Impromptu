@@ -91,7 +91,7 @@ def start_server():
         print("=" * 50)
         
         # 启动服务器
-        api_server_path = project_root / 'src' / 'services' / 'comprehensive_api.py'
+        api_server_path = project_root / 'backend' / 'services' / 'comprehensive_api.py'
         
         if platform.system() == 'Windows':
             # Windows

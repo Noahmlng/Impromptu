@@ -257,10 +257,10 @@ class ApiClient {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
 
-      // 获取用户的user_id
+      // 获取用户的profile_id
       const { data: profile } = await supabase
         .from('user_profile')
-        .select('user_id')
+        .select('id')
         .eq('auth_user_id', user.id)
         .single()
 
@@ -270,7 +270,7 @@ class ApiClient {
       const { data: existing } = await supabase
         .from('user_metadata')
         .select('id')
-        .eq('user_id', profile.user_id)
+        .eq('user_id', profile.id)
         .eq('section_type', data.section_type)
         .eq('section_key', data.section_key)
         .single()
@@ -301,7 +301,7 @@ class ApiClient {
         const { data: created, error } = await supabase
           .from('user_metadata')
           .insert({
-            user_id: profile.user_id,
+            user_id: profile.id,
             section_type: data.section_type,
             section_key: data.section_key,
             content: data.content,
@@ -332,10 +332,10 @@ class ApiClient {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
 
-      // 获取用户的user_id
+      // 获取用户的profile_id
       const { data: profile } = await supabase
         .from('user_profile')
-        .select('user_id')
+        .select('id')
         .eq('auth_user_id', user.id)
         .single()
 
@@ -345,7 +345,7 @@ class ApiClient {
       const { data: metadata, error } = await supabase
         .from('user_metadata')
         .select('*')
-        .eq('user_id', profile.user_id)
+        .eq('user_id', profile.id)
         .eq('is_active', true)
         .order('section_type')
         .order('display_order')
@@ -389,10 +389,10 @@ class ApiClient {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
 
-      // 获取用户的user_id
+      // 获取用户的profile_id
       const { data: profile } = await supabase
         .from('user_profile')
-        .select('user_id')
+        .select('id')
         .eq('auth_user_id', user.id)
         .single()
 
@@ -458,10 +458,10 @@ class ApiClient {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
 
-      // 获取用户的user_id
+      // 获取用户的profile_id
       const { data: profile } = await supabase
         .from('user_profile')
-        .select('user_id')
+        .select('id')
         .eq('auth_user_id', user.id)
         .single()
 
@@ -471,7 +471,7 @@ class ApiClient {
       const { data: tags, error } = await supabase
         .from('user_tags')
         .select('*')
-        .eq('user_id', profile.user_id)
+        .eq('user_id', profile.id)
         .eq('is_active', true)
         .order('confidence_score', { ascending: false })
 
@@ -674,11 +674,9 @@ export const auth = {
       if (data.user) {
         // 创建用户档案记录
         try {
-          const userId = `user_${Date.now()}`
           const { data: profile, error: profileError } = await supabase
             .from('user_profile')
             .insert({
-              user_id: userId,
               auth_user_id: data.user.id,
               email: data.user.email!,
               display_name: displayName,
@@ -704,7 +702,7 @@ export const auth = {
             success: true,
             message: message,
             data: {
-              user_id: userId,
+              user_id: profile?.id || data.user.id,  // 使用数据库生成的UUID作为用户ID
               email: data.user.email!,
               display_name: displayName,
               avatar_url: avatarUrl,
@@ -778,7 +776,7 @@ export const auth = {
       return {
         success: true,
         data: {
-          user_id: profile.user_id,
+          user_id: profile.id,
           email: user.email!,
           display_name: profile.display_name,
           avatar_url: profile.avatar_url,
