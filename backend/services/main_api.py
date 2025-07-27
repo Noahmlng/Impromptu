@@ -25,6 +25,7 @@ from backend.services.tag_service import router as tag_router
 from backend.services.matching_service import router as matching_router
 from backend.services.metadata_service import router as metadata_router
 from backend.services.ai_service import router as ai_router
+from backend.services.unlock_api import router as unlock_router
 from backend.services.database_service import init_database, close_database
 
 @asynccontextmanager
@@ -99,6 +100,7 @@ app.include_router(tag_router, prefix="/api/tags", tags=["标签"])
 app.include_router(matching_router, prefix="/api/match", tags=["匹配"])
 app.include_router(metadata_router, prefix="/api/metadata", tags=["元数据"])
 app.include_router(ai_router, prefix="/api/ai", tags=["AI服务"])
+app.include_router(unlock_router, prefix="/api/unlock", tags=["解锁"])
 
 # 全局异常处理
 @app.exception_handler(Exception)

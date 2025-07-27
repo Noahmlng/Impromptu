@@ -6,6 +6,7 @@ import { useAppStore } from '@/lib/store'
 import { matching, tags } from '@/lib/api'
 import { MatchUser, UserTag } from '@/lib/types'
 import MatchingLoadingModal from './matching-loading-modal'
+import UnlockModal from './unlock-modal'
 import { 
   Search, 
   Heart, 
@@ -16,7 +17,9 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle,
-  X
+  X,
+  Lock,
+  Unlock
 } from 'lucide-react'
 import ReactDOM from 'react-dom'
 
@@ -26,7 +29,7 @@ interface MatchSearchProps {
 }
 
 export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
-  const { language, userTags } = useAppStore()
+  const { language, userTags, user, backendUser } = useAppStore()
   
   const [searchDescription, setSearchDescription] = useState('')
   const [selectedMatchType, setSelectedMatchType] = useState<'找队友' | '找对象'>('找队友')
@@ -36,6 +39,9 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
   const [isMatchingLoading, setIsMatchingLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState('')
+  const [showUnlockModal, setShowUnlockModal] = useState(false)
+  const [selectedUnlockUser, setSelectedUnlockUser] = useState<MatchUser | null>(null)
+  const [unlockedUsers, setUnlockedUsers] = useState<Set<string>>(new Set())
 
   // 监控搜索结果状态变化
   useEffect(() => {
@@ -279,6 +285,28 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
     setSearchResults([])
     setError(null)
     setSuccessMessage('')
+  }
+
+  // 解锁相关函数
+  const handleUnlockUser = (user: MatchUser) => {
+    setSelectedUnlockUser(user)
+    setShowUnlockModal(true)
+  }
+
+  const handleUnlockSuccess = () => {
+    if (selectedUnlockUser) {
+      setUnlockedUsers(prev => new Set(Array.from(prev).concat(selectedUnlockUser.user_id)))
+      setShowUnlockModal(false)
+      setSelectedUnlockUser(null)
+    }
+  }
+
+  const isLowMatchScore = (score: number) => {
+    return score < 0.5 // 匹配度低于50%视为低匹配度
+  }
+
+  const isUserUnlocked = (userId: string) => {
+    return unlockedUsers.has(userId)
   }
 
   if (!isOpen) return null
@@ -534,24 +562,44 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
                     
                     {/* Contact Button */}
                     <div className="mt-3 pt-3 border-t">
-                      <div className="flex space-x-2">
-                        <Button size="sm" variant="outline" className="flex-1">
-                          {language === 'zh' ? '查看详情' : 'View Details'}
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          className={`flex-1 ${
-                            selectedMatchType === '找队友' 
-                              ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                              : 'bg-pink-600 hover:bg-pink-700 text-white'
-                          }`}
-                        >
-                          {selectedMatchType === '找队友' 
-                            ? (language === 'zh' ? '发起合作' : 'Start Collaboration')
-                            : (language === 'zh' ? '开始聊天' : 'Start Chat')
-                          }
-                        </Button>
-                      </div>
+                      {isLowMatchScore(match.match_score) && !isUserUnlocked(match.user_id) ? (
+                        // 低匹配度未解锁用户：显示解锁按钮
+                        <div className="flex space-x-2">
+                          <div className="flex-1 flex items-center space-x-2 text-sm text-muted-foreground">
+                            <Lock className="h-4 w-4" />
+                            <span>{language === 'zh' ? '低匹配度用户' : 'Low match score'}</span>
+                          </div>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="text-orange-600 border-orange-600 hover:bg-orange-50"
+                            onClick={() => handleUnlockUser(match)}
+                          >
+                            <Unlock className="h-4 w-4 mr-1" />
+                            {language === 'zh' ? '解锁' : 'Unlock'}
+                          </Button>
+                        </div>
+                      ) : (
+                        // 正常用户或已解锁用户：显示正常按钮
+                        <div className="flex space-x-2">
+                          <Button size="sm" variant="outline" className="flex-1">
+                            {language === 'zh' ? '查看详情' : 'View Details'}
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            className={`flex-1 ${
+                              selectedMatchType === '找队友' 
+                                ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                                : 'bg-pink-600 hover:bg-pink-700 text-white'
+                            }`}
+                          >
+                            {selectedMatchType === '找队友' 
+                              ? (language === 'zh' ? '发起合作' : 'Start Collaboration')
+                              : (language === 'zh' ? '开始聊天' : 'Start Chat')
+                            }
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -596,6 +644,22 @@ export default function MatchSearch({ isOpen, onClose }: MatchSearchProps) {
         matchType={selectedMatchType}
         onComplete={() => setIsMatchingLoading(false)}
       />
+      
+      {/* Unlock Modal */}
+      {selectedUnlockUser && (
+        <UnlockModal
+          isOpen={showUnlockModal}
+          onClose={() => setShowUnlockModal(false)}
+          targetUser={{
+            id: selectedUnlockUser.user_id,
+            display_name: selectedUnlockUser.display_name,
+            email: selectedUnlockUser.email,
+            match_score: selectedUnlockUser.match_score
+          }}
+          userCredits={user?.credits || 0}
+          onUnlockSuccess={handleUnlockSuccess}
+        />
+      )}
     </div>
   )
 
