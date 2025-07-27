@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/lib/store'
@@ -19,6 +19,8 @@ export default function LoginPage() {
     error
   } = useAppStore()
   
+  // Hydration protection
+  const [isClient, setIsClient] = useState(false)
   const [isLogin, setIsLogin] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -28,6 +30,11 @@ export default function LoginPage() {
     name: '',
     confirmPassword: ''
   })
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -80,12 +87,12 @@ export default function LoginPage() {
       } else {
         // Register
         if (formData.password !== formData.confirmPassword) {
-          setError(language === 'zh' ? '密码不匹配' : 'Passwords do not match')
+          setError(isClient && language === 'zh' ? '密码不匹配' : 'Passwords do not match')
           return
         }
         
         if (formData.password.length < 6) {
-          setError(language === 'zh' ? '密码至少需要6个字符' : 'Password must be at least 6 characters')
+          setError(isClient && language === 'zh' ? '密码至少需要6个字符' : 'Password must be at least 6 characters')
           return
         }
         
@@ -130,7 +137,7 @@ export default function LoginPage() {
       }
     } catch (error: any) {
       console.error('Login/Register error:', error)
-      setError(error.message || (language === 'zh' ? '操作失败，请重试' : 'Operation failed, please try again'))
+      setError(error.message || (isClient && language === 'zh' ? '操作失败，请重试' : 'Operation failed, please try again'))
     } finally {
       setIsSubmitting(false)
     }
@@ -138,6 +145,15 @@ export default function LoginPage() {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  // Show loading during hydration
+  if (!isClient) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/50 px-4">
+        <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
   }
 
   return (
@@ -194,7 +210,7 @@ export default function LoginPage() {
         <div className="bg-card p-8 rounded-lg shadow-lg border">
           {/* Error Display */}
           {error && (
-            <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center space-x-2" suppressHydrationWarning>
+            <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center space-x-2">
               <AlertCircle className="h-4 w-4 text-destructive" />
               <span className="text-sm text-destructive">{error}</span>
             </div>
